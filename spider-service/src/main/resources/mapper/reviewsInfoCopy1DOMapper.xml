@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spider.amazon.mapper.reviewsInfoCopy1DOMapper">
+  <resultMap id="BaseResultMap" type="com.spider.amazon.model.reviewsInfoCopy1DO">
+    <result column="asin" jdbcType="VARCHAR" property="asin" />
+    <result column="reviewsId" jdbcType="VARCHAR" property="reviewsid" />
+    <result column="star" jdbcType="VARCHAR" property="star" />
+    <result column="date" jdbcType="DATE" property="date" />
+    <result column="customerName" jdbcType="VARCHAR" property="customername" />
+    <result column="property" jdbcType="VARCHAR" property="property" />
+    <result column="verifiedPurchase" jdbcType="VARCHAR" property="verifiedpurchase" />
+    <result column="helpefulNum" jdbcType="VARCHAR" property="helpefulnum" />
+    <result column="notHelpfulNum" jdbcType="VARCHAR" property="nothelpfulnum" />
+    <result column="reviewContent" jdbcType="VARCHAR" property="reviewcontent" />
+    <result column="commentNum" jdbcType="VARCHAR" property="commentnum" />
+    <result column="reviewTitle" jdbcType="VARCHAR" property="reviewtitle" />
+    <result column="reviewImageUrl" jdbcType="VARCHAR" property="reviewimageurl" />
+    <result column="customerUrl" jdbcType="VARCHAR" property="customerurl" />
+    <result column="insertTime" jdbcType="TIMESTAMP" property="inserttime" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    asin, reviewsId, star, date, customerName, property, verifiedPurchase, helpefulNum, 
+    notHelpfulNum, reviewContent, commentNum, reviewTitle, reviewImageUrl, customerUrl, 
+    insertTime
+  </sql>
+  <insert id="insert" parameterType="com.spider.amazon.model.reviewsInfoCopy1DO">
+    insert into reviewsInfo_copy1 (asin, reviewsId, star, 
+      date, customerName, property, 
+      verifiedPurchase, helpefulNum, notHelpfulNum, 
+      reviewContent, commentNum, reviewTitle, 
+      reviewImageUrl, customerUrl, insertTime
+      )
+    values (#{asin,jdbcType=VARCHAR}, #{reviewsid,jdbcType=VARCHAR}, #{star,jdbcType=VARCHAR}, 
+      #{date,jdbcType=DATE}, #{customername,jdbcType=VARCHAR}, #{property,jdbcType=VARCHAR}, 
+      #{verifiedpurchase,jdbcType=VARCHAR}, #{helpefulnum,jdbcType=VARCHAR}, #{nothelpfulnum,jdbcType=VARCHAR}, 
+      #{reviewcontent,jdbcType=VARCHAR}, #{commentnum,jdbcType=VARCHAR}, #{reviewtitle,jdbcType=VARCHAR}, 
+      #{reviewimageurl,jdbcType=VARCHAR}, #{customerurl,jdbcType=VARCHAR}, #{inserttime,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.spider.amazon.model.reviewsInfoCopy1DO">
+    insert into reviewsInfo_copy1
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="asin != null">
+        asin,
+      </if>
+      <if test="reviewsid != null">
+        reviewsId,
+      </if>
+      <if test="star != null">
+        star,
+      </if>
+      <if test="date != null">
+        date,
+      </if>
+      <if test="customername != null">
+        customerName,
+      </if>
+      <if test="property != null">
+        property,
+      </if>
+      <if test="verifiedpurchase != null">
+        verifiedPurchase,
+      </if>
+      <if test="helpefulnum != null">
+        helpefulNum,
+      </if>
+      <if test="nothelpfulnum != null">
+        notHelpfulNum,
+      </if>
+      <if test="reviewcontent != null">
+        reviewContent,
+      </if>
+      <if test="commentnum != null">
+        commentNum,
+      </if>
+      <if test="reviewtitle != null">
+        reviewTitle,
+      </if>
+      <if test="reviewimageurl != null">
+        reviewImageUrl,
+      </if>
+      <if test="customerurl != null">
+        customerUrl,
+      </if>
+      <if test="inserttime != null">
+        insertTime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="asin != null">
+        #{asin,jdbcType=VARCHAR},
+      </if>
+      <if test="reviewsid != null">
+        #{reviewsid,jdbcType=VARCHAR},
+      </if>
+      <if test="star != null">
+        #{star,jdbcType=VARCHAR},
+      </if>
+      <if test="date != null">
+        #{date,jdbcType=DATE},
+      </if>
+      <if test="customername != null">
+        #{customername,jdbcType=VARCHAR},
+      </if>
+      <if test="property != null">
+        #{property,jdbcType=VARCHAR},
+      </if>
+      <if test="verifiedpurchase != null">
+        #{verifiedpurchase,jdbcType=VARCHAR},
+      </if>
+      <if test="helpefulnum != null">
+        #{helpefulnum,jdbcType=VARCHAR},
+      </if>
+      <if test="nothelpfulnum != null">
+        #{nothelpfulnum,jdbcType=VARCHAR},
+      </if>
+      <if test="reviewcontent != null">
+        #{reviewcontent,jdbcType=VARCHAR},
+      </if>
+      <if test="commentnum != null">
+        #{commentnum,jdbcType=VARCHAR},
+      </if>
+      <if test="reviewtitle != null">
+        #{reviewtitle,jdbcType=VARCHAR},
+      </if>
+      <if test="reviewimageurl != null">
+        #{reviewimageurl,jdbcType=VARCHAR},
+      </if>
+      <if test="customerurl != null">
+        #{customerurl,jdbcType=VARCHAR},
+      </if>
+      <if test="inserttime != null">
+        #{inserttime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <!-- 批量插入 -->
+  <insert id="insertBatch" parameterType="java.util.List">
+    insert into reviewsInfo_copy1 (<include refid="Base_Column_List" />)
+    values
+    <foreach collection="list" item="item" index="index"  separator=",">
+      (#{item.asin,jdbcType=VARCHAR}, #{item.reviewsid,jdbcType=VARCHAR}, #{item.star,jdbcType=VARCHAR},
+      #{item.date,jdbcType=DATE}, #{item.customername,jdbcType=VARCHAR}, #{item.property,jdbcType=VARCHAR},
+      #{item.verifiedpurchase,jdbcType=VARCHAR}, #{item.helpefulnum,jdbcType=VARCHAR}, #{item.nothelpfulnum,jdbcType=VARCHAR},
+      #{item.reviewcontent,jdbcType=VARCHAR}, #{item.commentnum,jdbcType=VARCHAR}, #{item.reviewtitle,jdbcType=VARCHAR},
+      #{item.reviewimageurl,jdbcType=VARCHAR}, #{item.customerurl,jdbcType=VARCHAR}, #{item.inserttime,jdbcType=TIMESTAMP}
+      )
+    </foreach>
+  </insert>
+</mapper>

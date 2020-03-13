@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spider.amazon.mapper.FbaPoInfoDOMapper">
+  <resultMap id="BaseResultMap" type="com.spider.amazon.model.FbaPoInfoDO">
+    <result column="ItemNum" jdbcType="VARCHAR" property="itemnum" />
+    <result column="asin" jdbcType="VARCHAR" property="asin" />
+    <result column="EstRcvDate" jdbcType="TIMESTAMP" property="estrcvdate" />
+    <result column="EstSendDate" jdbcType="TIMESTAMP" property="estsenddate" />
+    <result column="PendingQty" jdbcType="VARCHAR" property="pendingqty" />
+    <result column="RcvDate" jdbcType="TIMESTAMP" property="rcvdate" />
+    <result column="RcvWareHouse" jdbcType="VARCHAR" property="rcvwarehouse" />
+    <result column="ReceiveQty" jdbcType="VARCHAR" property="receiveqty" />
+    <result column="SendDate" jdbcType="TIMESTAMP" property="senddate" />
+    <result column="SendWareHouse" jdbcType="VARCHAR" property="sendwarehouse" />
+    <result column="SentQty" jdbcType="VARCHAR" property="sentqty" />
+    <result column="Status" jdbcType="VARCHAR" property="status" />
+    <result column="Warehouse" jdbcType="VARCHAR" property="warehouse" />
+    <result column="insert_time" jdbcType="TIMESTAMP" property="insertTime" />
+    <result column="WTRefNum" jdbcType="VARCHAR" property="wtrefnum" />
+    <result column="BI_PO_Ref" jdbcType="VARCHAR" property="biPoRef" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    ItemNum, asin, EstRcvDate, EstSendDate, PendingQty, RcvDate, RcvWareHouse, ReceiveQty,
+    SendDate, SendWareHouse, SentQty, Status, Warehouse, insert_time, WTRefNum, BI_PO_Ref
+  </sql>
+  <insert id="insert" parameterType="com.spider.amazon.model.FbaPoInfoDO">
+    insert into FBA_PO_Info (ItemNum, asin, EstRcvDate, 
+      EstSendDate, PendingQty, RcvDate, 
+      RcvWareHouse, ReceiveQty, SendDate, 
+      SendWareHouse, SentQty, Status, 
+      Warehouse, insert_time, WTRefNum, 
+      BI_PO_Ref)
+    values (#{itemnum,jdbcType=VARCHAR}, #{asin,jdbcType=VARCHAR}, #{estrcvdate,jdbcType=TIMESTAMP}, 
+      #{estsenddate,jdbcType=TIMESTAMP}, #{pendingqty,jdbcType=VARCHAR}, #{rcvdate,jdbcType=TIMESTAMP}, 
+      #{rcvwarehouse,jdbcType=VARCHAR}, #{receiveqty,jdbcType=VARCHAR}, #{senddate,jdbcType=TIMESTAMP}, 
+      #{sendwarehouse,jdbcType=VARCHAR}, #{sentqty,jdbcType=VARCHAR}, #{status,jdbcType=VARCHAR}, 
+      #{warehouse,jdbcType=VARCHAR}, #{insertTime,jdbcType=TIMESTAMP}, #{wtrefnum,jdbcType=VARCHAR}, 
+      #{biPoRef,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.spider.amazon.model.FbaPoInfoDO">
+    insert into FBA_PO_Info
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="itemnum != null">
+        ItemNum,
+      </if>
+      <if test="asin != null">
+        asin,
+      </if>
+      <if test="estrcvdate != null">
+        EstRcvDate,
+      </if>
+      <if test="estsenddate != null">
+        EstSendDate,
+      </if>
+      <if test="pendingqty != null">
+        PendingQty,
+      </if>
+      <if test="rcvdate != null">
+        RcvDate,
+      </if>
+      <if test="rcvwarehouse != null">
+        RcvWareHouse,
+      </if>
+      <if test="receiveqty != null">
+        ReceiveQty,
+      </if>
+      <if test="senddate != null">
+        SendDate,
+      </if>
+      <if test="sendwarehouse != null">
+        SendWareHouse,
+      </if>
+      <if test="sentqty != null">
+        SentQty,
+      </if>
+      <if test="status != null">
+        Status,
+      </if>
+      <if test="warehouse != null">
+        Warehouse,
+      </if>
+      <if test="insertTime != null">
+        insert_time,
+      </if>
+      <if test="wtrefnum != null">
+        WTRefNum,
+      </if>
+      <if test="biPoRef != null">
+        BI_PO_Ref,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="itemnum != null">
+        #{itemnum,jdbcType=VARCHAR},
+      </if>
+      <if test="asin != null">
+        #{asin,jdbcType=VARCHAR},
+      </if>
+      <if test="estrcvdate != null">
+        #{estrcvdate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="estsenddate != null">
+        #{estsenddate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="pendingqty != null">
+        #{pendingqty,jdbcType=VARCHAR},
+      </if>
+      <if test="rcvdate != null">
+        #{rcvdate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="rcvwarehouse != null">
+        #{rcvwarehouse,jdbcType=VARCHAR},
+      </if>
+      <if test="receiveqty != null">
+        #{receiveqty,jdbcType=VARCHAR},
+      </if>
+      <if test="senddate != null">
+        #{senddate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="sendwarehouse != null">
+        #{sendwarehouse,jdbcType=VARCHAR},
+      </if>
+      <if test="sentqty != null">
+        #{sentqty,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null">
+        #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="warehouse != null">
+        #{warehouse,jdbcType=VARCHAR},
+      </if>
+      <if test="insertTime != null">
+        #{insertTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="wtrefnum != null">
+        #{wtrefnum,jdbcType=VARCHAR},
+      </if>
+      <if test="biPoRef != null">
+        #{biPoRef,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <!-- 批量插入 -->
+  <insert id="insertBatch" parameterType="java.util.List">
+    insert into FBA_PO_Info (<include refid="Base_Column_List" />)
+    values
+    <foreach collection="list" item="item" index="index"  separator=",">
+      (#{item.itemnum,jdbcType=NVARCHAR}, #{item.asin,jdbcType=NVARCHAR}, #{item.estrcvdate,jdbcType=TIMESTAMP},
+      #{item.estsenddate,jdbcType=TIMESTAMP}, #{item.pendingqty,jdbcType=NVARCHAR}, #{item.rcvdate,jdbcType=TIMESTAMP},
+      #{item.rcvwarehouse,jdbcType=NVARCHAR}, #{item.receiveqty,jdbcType=NVARCHAR}, #{item.senddate,jdbcType=TIMESTAMP},
+      #{item.sendwarehouse,jdbcType=NVARCHAR}, #{item.sentqty,jdbcType=NVARCHAR}, #{item.status,jdbcType=NVARCHAR},
+      #{item.warehouse,jdbcType=NVARCHAR}, #{item.insertTime,jdbcType=TIMESTAMP}, #{item.wtrefnum,jdbcType=NVARCHAR},
+      #{item.biPoRef,jdbcType=NVARCHAR}
+      )
+    </foreach>
+  </insert>
+  <!-- 全部删除 -->
+  <delete id="deleteAll" >
+    delete from FBA_PO_Info
+  </delete>
+</mapper>

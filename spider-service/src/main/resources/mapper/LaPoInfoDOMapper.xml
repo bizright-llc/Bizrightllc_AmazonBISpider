@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spider.amazon.mapper.LaPoInfoDOMapper">
+  <resultMap id="BaseResultMap" type="com.spider.amazon.model.LaPoInfoDO">
+    <result column="PONum" jdbcType="VARCHAR" property="ponum" />
+    <result column="VendorName" jdbcType="VARCHAR" property="vendorname" />
+    <result column="VendorCompany" jdbcType="VARCHAR" property="vendorcompany" />
+    <result column="ASIN" jdbcType="VARCHAR" property="asin" />
+    <result column="ItemNum" jdbcType="VARCHAR" property="itemnum" />
+    <result column="Status" jdbcType="VARCHAR" property="status" />
+    <result column="UnitPrice" jdbcType="VARCHAR" property="unitprice" />
+    <result column="POQty" jdbcType="VARCHAR" property="poqty" />
+    <result column="PODate" jdbcType="TIMESTAMP" property="podate" />
+    <result column="EstimateReceiveDate" jdbcType="TIMESTAMP" property="estimatereceivedate" />
+    <result column="insert_time" jdbcType="TIMESTAMP" property="insertTime" />
+    <result column="BI_PO_Ref" jdbcType="VARCHAR" property="biPoRef" />
+    <result column="Warehouse" jdbcType="VARCHAR" property="warehouse" />
+    <result column="PORefNum" jdbcType="VARCHAR" property="porefnum" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    PONum, VendorName, VendorCompany, ASIN, ItemNum, Status, UnitPrice, POQty, PODate,
+    EstimateReceiveDate, insert_time, BI_PO_Ref, Warehouse, PORefNum
+  </sql>
+  <insert id="insert" parameterType="com.spider.amazon.model.LaPoInfoDO">
+    insert into LA_PO_Info (PONum, VendorName, VendorCompany, 
+      ASIN, ItemNum, Status, 
+      UnitPrice, POQty, PODate, 
+      EstimateReceiveDate, insert_time, BI_PO_Ref, 
+      Warehouse, PORefNum)
+    values (#{ponum,jdbcType=VARCHAR}, #{vendorname,jdbcType=VARCHAR}, #{vendorcompany,jdbcType=VARCHAR}, 
+      #{asin,jdbcType=VARCHAR}, #{itemnum,jdbcType=VARCHAR}, #{status,jdbcType=VARCHAR}, 
+      #{unitprice,jdbcType=VARCHAR}, #{poqty,jdbcType=VARCHAR}, #{podate,jdbcType=TIMESTAMP}, 
+      #{estimatereceivedate,jdbcType=TIMESTAMP}, #{insertTime,jdbcType=TIMESTAMP}, #{biPoRef,jdbcType=VARCHAR}, 
+      #{warehouse,jdbcType=VARCHAR}, #{porefnum,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.spider.amazon.model.LaPoInfoDO">
+    insert into LA_PO_Info
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="ponum != null">
+        PONum,
+      </if>
+      <if test="vendorname != null">
+        VendorName,
+      </if>
+      <if test="vendorcompany != null">
+        VendorCompany,
+      </if>
+      <if test="asin != null">
+        ASIN,
+      </if>
+      <if test="itemnum != null">
+        ItemNum,
+      </if>
+      <if test="status != null">
+        Status,
+      </if>
+      <if test="unitprice != null">
+        UnitPrice,
+      </if>
+      <if test="poqty != null">
+        POQty,
+      </if>
+      <if test="podate != null">
+        PODate,
+      </if>
+      <if test="estimatereceivedate != null">
+        EstimateReceiveDate,
+      </if>
+      <if test="insertTime != null">
+        insert_time,
+      </if>
+      <if test="biPoRef != null">
+        BI_PO_Ref,
+      </if>
+      <if test="warehouse != null">
+        Warehouse,
+      </if>
+      <if test="porefnum != null">
+        PORefNum,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="ponum != null">
+        #{ponum,jdbcType=VARCHAR},
+      </if>
+      <if test="vendorname != null">
+        #{vendorname,jdbcType=VARCHAR},
+      </if>
+      <if test="vendorcompany != null">
+        #{vendorcompany,jdbcType=VARCHAR},
+      </if>
+      <if test="asin != null">
+        #{asin,jdbcType=VARCHAR},
+      </if>
+      <if test="itemnum != null">
+        #{itemnum,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null">
+        #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="unitprice != null">
+        #{unitprice,jdbcType=VARCHAR},
+      </if>
+      <if test="poqty != null">
+        #{poqty,jdbcType=VARCHAR},
+      </if>
+      <if test="podate != null">
+        #{podate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="estimatereceivedate != null">
+        #{estimatereceivedate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="insertTime != null">
+        #{insertTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="biPoRef != null">
+        #{biPoRef,jdbcType=VARCHAR},
+      </if>
+      <if test="warehouse != null">
+        #{warehouse,jdbcType=VARCHAR},
+      </if>
+      <if test="porefnum != null">
+        #{porefnum,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <!-- 批量插入 -->
+  <insert id="insertBatch" parameterType="java.util.List">
+    insert into LA_PO_Info (<include refid="Base_Column_List" />)
+    values
+    <foreach collection="list" item="item" index="index"  separator=",">
+      (#{item.ponum,jdbcType=VARCHAR}, #{item.vendorname,jdbcType=VARCHAR}, #{item.vendorcompany,jdbcType=VARCHAR},
+      #{item.asin,jdbcType=VARCHAR}, #{item.itemnum,jdbcType=VARCHAR}, #{item.status,jdbcType=VARCHAR},
+      #{item.unitprice,jdbcType=VARCHAR}, #{item.poqty,jdbcType=VARCHAR}, #{item.podate,jdbcType=TIMESTAMP},
+      #{item.estimatereceivedate,jdbcType=TIMESTAMP}, #{item.insertTime,jdbcType=TIMESTAMP}, #{item.biPoRef,jdbcType=VARCHAR},
+      #{item.warehouse,jdbcType=VARCHAR}, #{item.porefnum,jdbcType=VARCHAR})
+    </foreach>
+  </insert>
+</mapper>

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spider.amazon.mapper.LaInventoryInfoDOMapper">
+  <resultMap id="BaseResultMap" type="com.spider.amazon.model.LaInventoryInfoDO">
+    <result column="AVCInOpenOrderQty" jdbcType="VARCHAR" property="avcinopenorderqty" />
+    <result column="EnterDate" jdbcType="TIMESTAMP" property="enterdate" />
+    <result column="InOpenOrderQty" jdbcType="VARCHAR" property="inopenorderqty" />
+    <result column="InStockQty" jdbcType="VARCHAR" property="instockqty" />
+    <result column="ItemNum" jdbcType="VARCHAR" property="itemnum" />
+    <result column="LastUpdate" jdbcType="TIMESTAMP" property="lastupdate" />
+    <result column="SnapShotDate" jdbcType="TIMESTAMP" property="snapshotdate" />
+    <result column="Status" jdbcType="VARCHAR" property="status" />
+    <result column="Warehouse" jdbcType="VARCHAR" property="warehouse" />
+    <result column="WootInOpenOrderQty" jdbcType="VARCHAR" property="wootinopenorderqty" />
+    <result column="insert_time" jdbcType="TIMESTAMP" property="insertTime" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    AVCInOpenOrderQty, EnterDate, InOpenOrderQty, InStockQty, ItemNum, LastUpdate, SnapShotDate,
+    Status, Warehouse, WootInOpenOrderQty, insert_time
+  </sql>
+  <insert id="insert" parameterType="com.spider.amazon.model.LaInventoryInfoDO">
+    insert into LA_Inventory_Info (AVCInOpenOrderQty, EnterDate, InOpenOrderQty, 
+      InStockQty, ItemNum, LastUpdate, 
+      SnapShotDate, Status, Warehouse, 
+      WootInOpenOrderQty, insert_time)
+    values (#{avcinopenorderqty,jdbcType=VARCHAR}, #{enterdate,jdbcType=TIMESTAMP}, #{inopenorderqty,jdbcType=VARCHAR}, 
+      #{instockqty,jdbcType=VARCHAR}, #{itemnum,jdbcType=VARCHAR}, #{lastupdate,jdbcType=TIMESTAMP}, 
+      #{snapshotdate,jdbcType=TIMESTAMP}, #{status,jdbcType=VARCHAR}, #{warehouse,jdbcType=VARCHAR}, 
+      #{wootinopenorderqty,jdbcType=VARCHAR}, #{insertTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.spider.amazon.model.LaInventoryInfoDO">
+    insert into LA_Inventory_Info
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="avcinopenorderqty != null">
+        AVCInOpenOrderQty,
+      </if>
+      <if test="enterdate != null">
+        EnterDate,
+      </if>
+      <if test="inopenorderqty != null">
+        InOpenOrderQty,
+      </if>
+      <if test="instockqty != null">
+        InStockQty,
+      </if>
+      <if test="itemnum != null">
+        ItemNum,
+      </if>
+      <if test="lastupdate != null">
+        LastUpdate,
+      </if>
+      <if test="snapshotdate != null">
+        SnapShotDate,
+      </if>
+      <if test="status != null">
+        Status,
+      </if>
+      <if test="warehouse != null">
+        Warehouse,
+      </if>
+      <if test="wootinopenorderqty != null">
+        WootInOpenOrderQty,
+      </if>
+      <if test="insertTime != null">
+        insert_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="avcinopenorderqty != null">
+        #{avcinopenorderqty,jdbcType=VARCHAR},
+      </if>
+      <if test="enterdate != null">
+        #{enterdate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="inopenorderqty != null">
+        #{inopenorderqty,jdbcType=VARCHAR},
+      </if>
+      <if test="instockqty != null">
+        #{instockqty,jdbcType=VARCHAR},
+      </if>
+      <if test="itemnum != null">
+        #{itemnum,jdbcType=VARCHAR},
+      </if>
+      <if test="lastupdate != null">
+        #{lastupdate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="snapshotdate != null">
+        #{snapshotdate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="status != null">
+        #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="warehouse != null">
+        #{warehouse,jdbcType=VARCHAR},
+      </if>
+      <if test="wootinopenorderqty != null">
+        #{wootinopenorderqty,jdbcType=VARCHAR},
+      </if>
+      <if test="insertTime != null">
+        #{insertTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <!-- 批量插入 -->
+  <insert id="insertBatch" parameterType="java.util.List">
+    insert into LA_Inventory_Info (<include refid="Base_Column_List" />)
+    values
+    <foreach collection="list" item="item" index="index"  separator=",">
+      (#{item.avcinopenorderqty,jdbcType=VARCHAR}, #{item.enterdate,jdbcType=TIMESTAMP}, #{item.inopenorderqty,jdbcType=VARCHAR},
+      #{item.instockqty,jdbcType=VARCHAR}, #{item.itemnum,jdbcType=VARCHAR}, #{item.lastupdate,jdbcType=TIMESTAMP},
+      #{item.snapshotdate,jdbcType=TIMESTAMP}, #{item.status,jdbcType=VARCHAR}, #{item.warehouse,jdbcType=VARCHAR},
+      #{item.wootinopenorderqty,jdbcType=VARCHAR}, #{item.insertTime,jdbcType=TIMESTAMP})
+    </foreach>
+  </insert>
+</mapper>

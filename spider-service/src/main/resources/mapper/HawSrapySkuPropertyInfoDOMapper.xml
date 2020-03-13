@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spider.amazon.mapper.HawSrapySkuPropertyInfoDOMapper">
+  <resultMap id="BaseResultMap" type="com.spider.amazon.model.HawSrapySkuPropertyInfoDO">
+    <result column="task_id" jdbcType="VARCHAR" property="taskId" />
+    <result column="product_id" jdbcType="VARCHAR" property="productId" />
+    <result column="product_simple_id" jdbcType="VARCHAR" property="productSimpleId" />
+    <result column="property_name" jdbcType="VARCHAR" property="propertyName" />
+    <result column="property_value" jdbcType="VARCHAR" property="propertyValue" />
+    <result column="insert_time" jdbcType="TIMESTAMP" property="insertTime" />
+    <result column="vendor_sku" jdbcType="VARCHAR" property="vendorSku" />
+    <result column="merchant_suggested_asin" jdbcType="VARCHAR" property="merchantSuggestedAsin" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    task_id, product_id, product_simple_id, property_name, property_value, insert_time ,vendor_sku,merchant_suggested_asin
+  </sql>
+  <insert id="insert" parameterType="com.spider.amazon.model.HawSrapySkuPropertyInfoDO">
+    insert into HawSrapySkuPropertyInfo (task_id, product_id, product_simple_id, 
+      property_name, property_value, insert_time, vendor_sku,merchant_suggested_asin
+      )
+    values (#{taskId,jdbcType=VARCHAR}, #{productId,jdbcType=VARCHAR}, #{productSimpleId,jdbcType=VARCHAR}, 
+      #{propertyName,jdbcType=VARCHAR}, #{propertyValue,jdbcType=VARCHAR}, #{insertTime,jdbcType=TIMESTAMP},
+      #{vendorSku,jdbcType=VARCHAR},#{merchantSuggestedAsin,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.spider.amazon.model.HawSrapySkuPropertyInfoDO">
+    insert into HawSrapySkuPropertyInfo
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="taskId != null">
+        task_id,
+      </if>
+      <if test="productId != null">
+        product_id,
+      </if>
+      <if test="productSimpleId != null">
+        product_simple_id,
+      </if>
+      <if test="propertyName != null">
+        property_name,
+      </if>
+      <if test="propertyValue != null">
+        property_value,
+      </if>
+      <if test="insertTime != null">
+        insert_time,
+      </if>
+      <if test="vendorSku != null">
+        vendor_sku,
+      </if>
+      <if test="merchantSuggestedAsin != null">
+        merchant_suggested_asin,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="taskId != null">
+        #{taskId,jdbcType=VARCHAR},
+      </if>
+      <if test="productId != null">
+        #{productId,jdbcType=VARCHAR},
+      </if>
+      <if test="productSimpleId != null">
+        #{productSimpleId,jdbcType=VARCHAR},
+      </if>
+      <if test="propertyName != null">
+        #{propertyName,jdbcType=VARCHAR},
+      </if>
+      <if test="propertyValue != null">
+        #{propertyValue,jdbcType=VARCHAR},
+      </if>
+      <if test="insertTime != null">
+        #{insertTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="vendorSku != null">
+        #{vendorSku,jdbcType=VARCHAR},
+      </if>
+      <if test="merchantSuggestedAsin != null">
+        #{merchantSuggestedAsin,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <!-- 批量插入 -->
+  <insert id="insertBatch" parameterType="java.util.List">
+    insert into HawSrapySkuPropertyInfo (<include refid="Base_Column_List" />)
+    values
+    <foreach collection="list" item="item" index="index"  separator=",">
+      (#{item.taskId,jdbcType=VARCHAR}, #{item.productId,jdbcType=VARCHAR}, #{item.productSimpleId,jdbcType=VARCHAR},
+      #{item.propertyName,jdbcType=VARCHAR}, #{item.propertyValue,jdbcType=VARCHAR}, #{item.insertTime,jdbcType=TIMESTAMP},
+      #{item.vendorSku,jdbcType=VARCHAR}, #{item.merchantSuggestedAsin,jdbcType=VARCHAR}
+      )
+    </foreach>
+  </insert>
+  <select id="queryItemListByTaskId" parameterType="map" resultMap="BaseResultMap" >
+    select
+    <include refid="Base_Column_List"/>
+    from HawSrapySkuPropertyInfo with(nolock)
+    where task_id=#{taskId}
+  </select>
+</mapper>

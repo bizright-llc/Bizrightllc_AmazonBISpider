@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spider.amazon.mapper.HawSrapySkuInfoDOMapper">
+  <resultMap id="BaseResultMap" type="com.spider.amazon.model.HawSrapySkuInfoDO">
+    <result column="task_id" jdbcType="VARCHAR" property="taskId" />
+    <result column="product_id" jdbcType="VARCHAR" property="productId" />
+    <result column="product_simple_id" jdbcType="VARCHAR" property="productSimpleId" />
+    <result column="product_title" jdbcType="VARCHAR" property="productTitle" />
+    <result column="product_title_else" jdbcType="VARCHAR" property="productTitleElse" />
+    <result column="product_price" jdbcType="VARCHAR" property="productPrice" />
+    <result column="img_url" jdbcType="VARCHAR" property="imgUrl" />
+    <result column="product_introduce" jdbcType="VARCHAR" property="productIntroduce" />
+    <result column="page_url" jdbcType="VARCHAR" property="pageUrl" />
+    <result column="insert_time" jdbcType="TIMESTAMP" property="insertTime" />
+    <result column="vendor_sku" jdbcType="VARCHAR" property="vendorSku" />
+    <result column="merchant_suggested_asin" jdbcType="VARCHAR" property="merchantSuggestedAsin" />
+    <result column="product_brands" jdbcType="VARCHAR" property="productBrands" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    task_id, product_id, product_simple_id, product_title, product_title_else, product_price, 
+    img_url, product_introduce, page_url, insert_time , vendor_sku,merchant_suggested_asin,product_brands
+  </sql>
+  <insert id="insert" parameterType="com.spider.amazon.model.HawSrapySkuInfoDO">
+    insert into HawSrapySkuInfo (task_id, product_id, product_simple_id, 
+      product_title, product_title_else, product_price, 
+      img_url, product_introduce, page_url, 
+      insert_time,vendor_sku,merchant_suggested_asin,
+      product_brands)
+    values (#{taskId,jdbcType=VARCHAR}, #{productId,jdbcType=VARCHAR}, #{productSimpleId,jdbcType=VARCHAR}, 
+      #{productTitle,jdbcType=VARCHAR}, #{productTitleElse,jdbcType=VARCHAR}, #{productPrice,jdbcType=VARCHAR}, 
+      #{imgUrl,jdbcType=VARCHAR}, #{productIntroduce,jdbcType=VARCHAR}, #{pageUrl,jdbcType=VARCHAR}, 
+      #{insertTime,jdbcType=TIMESTAMP},#{vendorSku,jdbcType=VARCHAR},#{merchantSuggestedAsin,jdbcType=VARCHAR},
+      #{productBrands,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.spider.amazon.model.HawSrapySkuInfoDO">
+    insert into HawSrapySkuInfo
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="taskId != null">
+        task_id,
+      </if>
+      <if test="productId != null">
+        product_id,
+      </if>
+      <if test="productSimpleId != null">
+        product_simple_id,
+      </if>
+      <if test="productTitle != null">
+        product_title,
+      </if>
+      <if test="productTitleElse != null">
+        product_title_else,
+      </if>
+      <if test="productPrice != null">
+        product_price,
+      </if>
+      <if test="imgUrl != null">
+        img_url,
+      </if>
+      <if test="productIntroduce != null">
+        product_introduce,
+      </if>
+      <if test="pageUrl != null">
+        page_url,
+      </if>
+      <if test="insertTime != null">
+        insert_time,
+      </if>
+      <if test="vendorSku != null">
+        vendor_sku,
+      </if>
+      <if test="merchantSuggestedAsin != null">
+        merchant_suggested_asin,
+      </if>
+      <if test="productBrands != null">
+        product_brands,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="taskId != null">
+        #{taskId,jdbcType=VARCHAR},
+      </if>
+      <if test="productId != null">
+        #{productId,jdbcType=VARCHAR},
+      </if>
+      <if test="productSimpleId != null">
+        #{productSimpleId,jdbcType=VARCHAR},
+      </if>
+      <if test="productTitle != null">
+        #{productTitle,jdbcType=VARCHAR},
+      </if>
+      <if test="productTitleElse != null">
+        #{productTitleElse,jdbcType=VARCHAR},
+      </if>
+      <if test="productPrice != null">
+        #{productPrice,jdbcType=VARCHAR},
+      </if>
+      <if test="imgUrl != null">
+        #{imgUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="productIntroduce != null">
+        #{productIntroduce,jdbcType=VARCHAR},
+      </if>
+      <if test="pageUrl != null">
+        #{pageUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="insertTime != null">
+        #{insertTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="vendorSku != null">
+        #{vendorSku,jdbcType=VARCHAR},
+      </if>
+      <if test="merchantSuggestedAsin != null">
+        #{merchantSuggestedAsin,jdbcType=VARCHAR},
+      </if>
+      <if test="productBrands != null">
+        #{productBrands,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <!-- 批量插入 -->
+  <insert id="insertBatch" parameterType="java.util.List">
+    insert into HawSrapySkuInfo (<include refid="Base_Column_List" />)
+    values
+    <foreach collection="list" item="item" index="index"  separator=",">
+      (#{item.taskId,jdbcType=VARCHAR}, #{item.productId,jdbcType=VARCHAR}, #{item.productSimpleId,jdbcType=VARCHAR},
+      #{item.productTitle,jdbcType=VARCHAR}, #{item.productTitleElse,jdbcType=VARCHAR}, #{item.productPrice,jdbcType=VARCHAR},
+      #{item.imgUrl,jdbcType=VARCHAR}, #{item.productIntroduce,jdbcType=VARCHAR}, #{item.pageUrl,jdbcType=VARCHAR},
+      #{item.insertTime,jdbcType=TIMESTAMP},#{item.vendorSku,jdbcType=VARCHAR},#{item.merchantSuggestedAsin,jdbcType=VARCHAR},
+      #{item.productBrands,jdbcType=VARCHAR})
+    </foreach>
+  </insert>
+  <select id="queryInfoByTaskId" parameterType="map" resultMap="BaseResultMap" >
+    select
+    <include refid="Base_Column_List"/>
+    from HawSrapySkuInfo with(nolock)
+    where task_id=#{taskId}
+  </select>
+</mapper>

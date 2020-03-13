@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spider.amazon.mapper.SkuCommonInfoDOMapper">
+  <resultMap id="BaseResultMap" type="com.spider.amazon.model.SkuCommonInfoDO">
+    <result column="asin" jdbcType="VARCHAR" property="asin" />
+    <result column="sku_productTitle" jdbcType="VARCHAR" property="skuProducttitle" />
+    <result column="sku_property" jdbcType="VARCHAR" property="skuProperty" />
+    <result column="main_avaStar" jdbcType="VARCHAR" property="mainAvastar" />
+    <result column="main_oneStarNum" jdbcType="VARCHAR" property="mainOnestarnum" />
+    <result column="main_twoStarNum" jdbcType="VARCHAR" property="mainTwostarnum" />
+    <result column="main_threeStarNum" jdbcType="VARCHAR" property="mainThreestarnum" />
+    <result column="main_fourStarNum" jdbcType="VARCHAR" property="mainFourstarnum" />
+    <result column="main_fiveStarNum" jdbcType="VARCHAR" property="mainFivestarnum" />
+    <result column="sku_price" jdbcType="VARCHAR" property="skuPrice" />
+    <result column="reviewUrl" jdbcType="VARCHAR" property="reviewurl" />
+    <result column="sku_imageUrl" jdbcType="VARCHAR" property="skuImageurl" />
+    <result column="main_rwNum" jdbcType="VARCHAR" property="mainRwnum" />
+    <result column="main_awNum" jdbcType="VARCHAR" property="mainAwnum" />
+    <result column="sku_increasedRwNum" jdbcType="VARCHAR" property="skuIncreasedrwnum" />
+    <result column="sku_availability" jdbcType="VARCHAR" property="skuAvailability" />
+    <result column="sku_oneStarNum" jdbcType="VARCHAR" property="skuOnestarnum" />
+    <result column="sku_twoStarNum" jdbcType="VARCHAR" property="skuTwostarnum" />
+    <result column="sku_threeStarNum" jdbcType="VARCHAR" property="skuThreestarnum" />
+    <result column="sku_fourStarNum" jdbcType="VARCHAR" property="skuFourstarnum" />
+    <result column="sku_fiveStarNum" jdbcType="VARCHAR" property="skuFivestarnum" />
+    <result column="sku_rwNum" jdbcType="INTEGER" property="skuRwnum" />
+    <result column="insertTime" jdbcType="TIMESTAMP" property="inserttime" />
+    <result column="sku_soldBy" jdbcType="NVARCHAR" property="skuSoldby" />
+    <result column="sku_shipsFrom" jdbcType="NVARCHAR" property="skuShipsfrom" />
+    <result column="sku_isPrime" jdbcType="VARCHAR" property="skuIsprime" />
+    <result column="sku_offersNum" jdbcType="VARCHAR" property="skuOffersnum" />
+    <result column="cityCode" jdbcType="VARCHAR" property="citycode" />
+    <result column="cityName" jdbcType="VARCHAR" property="cityname" />
+    <result column="brand" jdbcType="NVARCHAR" property="brand" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    asin, sku_productTitle, sku_property, main_avaStar, main_oneStarNum, main_twoStarNum, 
+    main_threeStarNum, main_fourStarNum, main_fiveStarNum, sku_price, reviewUrl, sku_imageUrl, 
+    main_rwNum, main_awNum, sku_increasedRwNum, sku_availability, sku_oneStarNum, sku_twoStarNum, 
+    sku_threeStarNum, sku_fourStarNum, sku_fiveStarNum, sku_rwNum, insertTime, sku_soldBy, 
+    sku_shipsFrom, sku_isPrime, sku_offersNum, cityCode, cityName, brand
+  </sql>
+  <insert id="insert" parameterType="com.spider.amazon.model.SkuCommonInfoDO">
+    insert into skuCommonInfo (asin, sku_productTitle, sku_property, 
+      main_avaStar, main_oneStarNum, main_twoStarNum, 
+      main_threeStarNum, main_fourStarNum, main_fiveStarNum, 
+      sku_price, reviewUrl, sku_imageUrl, 
+      main_rwNum, main_awNum, sku_increasedRwNum, 
+      sku_availability, sku_oneStarNum, sku_twoStarNum, 
+      sku_threeStarNum, sku_fourStarNum, sku_fiveStarNum, 
+      sku_rwNum, insertTime, sku_soldBy, 
+      sku_shipsFrom, sku_isPrime, sku_offersNum, 
+      cityCode, cityName, brand
+      )
+    values (#{asin,jdbcType=VARCHAR}, #{skuProducttitle,jdbcType=VARCHAR}, #{skuProperty,jdbcType=VARCHAR}, 
+      #{mainAvastar,jdbcType=VARCHAR}, #{mainOnestarnum,jdbcType=VARCHAR}, #{mainTwostarnum,jdbcType=VARCHAR}, 
+      #{mainThreestarnum,jdbcType=VARCHAR}, #{mainFourstarnum,jdbcType=VARCHAR}, #{mainFivestarnum,jdbcType=VARCHAR}, 
+      #{skuPrice,jdbcType=VARCHAR}, #{reviewurl,jdbcType=VARCHAR}, #{skuImageurl,jdbcType=VARCHAR}, 
+      #{mainRwnum,jdbcType=VARCHAR}, #{mainAwnum,jdbcType=VARCHAR}, #{skuIncreasedrwnum,jdbcType=VARCHAR}, 
+      #{skuAvailability,jdbcType=VARCHAR}, #{skuOnestarnum,jdbcType=VARCHAR}, #{skuTwostarnum,jdbcType=VARCHAR}, 
+      #{skuThreestarnum,jdbcType=VARCHAR}, #{skuFourstarnum,jdbcType=VARCHAR}, #{skuFivestarnum,jdbcType=VARCHAR}, 
+      #{skuRwnum,jdbcType=INTEGER}, #{inserttime,jdbcType=TIMESTAMP}, #{skuSoldby,jdbcType=NVARCHAR}, 
+      #{skuShipsfrom,jdbcType=NVARCHAR}, #{skuIsprime,jdbcType=VARCHAR}, #{skuOffersnum,jdbcType=VARCHAR}, 
+      #{citycode,jdbcType=VARCHAR}, #{cityname,jdbcType=VARCHAR}, #{brand,jdbcType=NVARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.spider.amazon.model.SkuCommonInfoDO">
+    insert into skuCommonInfo
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="asin != null">
+        asin,
+      </if>
+      <if test="skuProducttitle != null">
+        sku_productTitle,
+      </if>
+      <if test="skuProperty != null">
+        sku_property,
+      </if>
+      <if test="mainAvastar != null">
+        main_avaStar,
+      </if>
+      <if test="mainOnestarnum != null">
+        main_oneStarNum,
+      </if>
+      <if test="mainTwostarnum != null">
+        main_twoStarNum,
+      </if>
+      <if test="mainThreestarnum != null">
+        main_threeStarNum,
+      </if>
+      <if test="mainFourstarnum != null">
+        main_fourStarNum,
+      </if>
+      <if test="mainFivestarnum != null">
+        main_fiveStarNum,
+      </if>
+      <if test="skuPrice != null">
+        sku_price,
+      </if>
+      <if test="reviewurl != null">
+        reviewUrl,
+      </if>
+      <if test="skuImageurl != null">
+        sku_imageUrl,
+      </if>
+      <if test="mainRwnum != null">
+        main_rwNum,
+      </if>
+      <if test="mainAwnum != null">
+        main_awNum,
+      </if>
+      <if test="skuIncreasedrwnum != null">
+        sku_increasedRwNum,
+      </if>
+      <if test="skuAvailability != null">
+        sku_availability,
+      </if>
+      <if test="skuOnestarnum != null">
+        sku_oneStarNum,
+      </if>
+      <if test="skuTwostarnum != null">
+        sku_twoStarNum,
+      </if>
+      <if test="skuThreestarnum != null">
+        sku_threeStarNum,
+      </if>
+      <if test="skuFourstarnum != null">
+        sku_fourStarNum,
+      </if>
+      <if test="skuFivestarnum != null">
+        sku_fiveStarNum,
+      </if>
+      <if test="skuRwnum != null">
+        sku_rwNum,
+      </if>
+      <if test="inserttime != null">
+        insertTime,
+      </if>
+      <if test="skuSoldby != null">
+        sku_soldBy,
+      </if>
+      <if test="skuShipsfrom != null">
+        sku_shipsFrom,
+      </if>
+      <if test="skuIsprime != null">
+        sku_isPrime,
+      </if>
+      <if test="skuOffersnum != null">
+        sku_offersNum,
+      </if>
+      <if test="citycode != null">
+        cityCode,
+      </if>
+      <if test="cityname != null">
+        cityName,
+      </if>
+      <if test="brand != null">
+        brand,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="asin != null">
+        #{asin,jdbcType=VARCHAR},
+      </if>
+      <if test="skuProducttitle != null">
+        #{skuProducttitle,jdbcType=VARCHAR},
+      </if>
+      <if test="skuProperty != null">
+        #{skuProperty,jdbcType=VARCHAR},
+      </if>
+      <if test="mainAvastar != null">
+        #{mainAvastar,jdbcType=VARCHAR},
+      </if>
+      <if test="mainOnestarnum != null">
+        #{mainOnestarnum,jdbcType=VARCHAR},
+      </if>
+      <if test="mainTwostarnum != null">
+        #{mainTwostarnum,jdbcType=VARCHAR},
+      </if>
+      <if test="mainThreestarnum != null">
+        #{mainThreestarnum,jdbcType=VARCHAR},
+      </if>
+      <if test="mainFourstarnum != null">
+        #{mainFourstarnum,jdbcType=VARCHAR},
+      </if>
+      <if test="mainFivestarnum != null">
+        #{mainFivestarnum,jdbcType=VARCHAR},
+      </if>
+      <if test="skuPrice != null">
+        #{skuPrice,jdbcType=VARCHAR},
+      </if>
+      <if test="reviewurl != null">
+        #{reviewurl,jdbcType=VARCHAR},
+      </if>
+      <if test="skuImageurl != null">
+        #{skuImageurl,jdbcType=VARCHAR},
+      </if>
+      <if test="mainRwnum != null">
+        #{mainRwnum,jdbcType=VARCHAR},
+      </if>
+      <if test="mainAwnum != null">
+        #{mainAwnum,jdbcType=VARCHAR},
+      </if>
+      <if test="skuIncreasedrwnum != null">
+        #{skuIncreasedrwnum,jdbcType=VARCHAR},
+      </if>
+      <if test="skuAvailability != null">
+        #{skuAvailability,jdbcType=VARCHAR},
+      </if>
+      <if test="skuOnestarnum != null">
+        #{skuOnestarnum,jdbcType=VARCHAR},
+      </if>
+      <if test="skuTwostarnum != null">
+        #{skuTwostarnum,jdbcType=VARCHAR},
+      </if>
+      <if test="skuThreestarnum != null">
+        #{skuThreestarnum,jdbcType=VARCHAR},
+      </if>
+      <if test="skuFourstarnum != null">
+        #{skuFourstarnum,jdbcType=VARCHAR},
+      </if>
+      <if test="skuFivestarnum != null">
+        #{skuFivestarnum,jdbcType=VARCHAR},
+      </if>
+      <if test="skuRwnum != null">
+        #{skuRwnum,jdbcType=INTEGER},
+      </if>
+      <if test="inserttime != null">
+        #{inserttime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="skuSoldby != null">
+        #{skuSoldby,jdbcType=NVARCHAR},
+      </if>
+      <if test="skuShipsfrom != null">
+        #{skuShipsfrom,jdbcType=NVARCHAR},
+      </if>
+      <if test="skuIsprime != null">
+        #{skuIsprime,jdbcType=VARCHAR},
+      </if>
+      <if test="skuOffersnum != null">
+        #{skuOffersnum,jdbcType=VARCHAR},
+      </if>
+      <if test="citycode != null">
+        #{citycode,jdbcType=VARCHAR},
+      </if>
+      <if test="cityname != null">
+        #{cityname,jdbcType=VARCHAR},
+      </if>
+      <if test="brand != null">
+        #{brand,jdbcType=NVARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <insert id="insertByCopyTableIntoFlg" parameterType="String">
+    insert into skuCommonInfo (asin, sku_productTitle, sku_property,
+    main_avaStar, main_oneStarNum, main_twoStarNum,
+    main_threeStarNum, main_fourStarNum, main_fiveStarNum,
+    sku_price, reviewUrl, sku_imageUrl,
+    main_rwNum, main_awNum, sku_increasedRwNum,
+    sku_availability, sku_oneStarNum, sku_twoStarNum,
+    sku_threeStarNum, sku_fourStarNum, sku_fiveStarNum,
+    sku_rwNum, insertTime, sku_soldBy,
+    sku_shipsFrom, sku_isPrime, sku_offersNum,
+    cityCode, cityName, brand
+    )
+    select asin, sku_productTitle, sku_property,
+    main_avaStar, main_oneStarNum, main_twoStarNum,
+    main_threeStarNum, main_fourStarNum, main_fiveStarNum,
+    replace(sku_price,'$',''), reviewUrl, sku_imageUrl,
+    main_rwNum, main_awNum, sku_increasedRwNum,
+    sku_availability, sku_oneStarNum, sku_twoStarNum,
+    sku_threeStarNum, sku_fourStarNum, sku_fiveStarNum,
+    sku_rwNum, insertTime, sku_soldBy,
+    sku_shipsFrom, sku_isPrime, sku_offersNum,
+    cityCode, cityName, brand
+    from skuCommonInfo_copy1 where intoFlg=#{intoFlg}
+  </insert>
+</mapper>

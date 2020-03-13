@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spider.amazon.mapper.VendorPODetailInfoDOMapper">
+    <sql id="Base_Column_List">
+        PO, vendor, ship_to_location, model_number, asin, sku, title, status, ship_window_start,
+        ship_window_end, delivery_window_start, delivery_window_end, backorder, expected_ship_date,
+        quantity_submitted, accepted_quantity, quantity_received, quantity_outstanding, unit_cost,
+        total_cost, insertTime
+    </sql>
+    <resultMap id="BaseResultMap" type="com.spider.amazon.model.VendorPODetailInfoDO">
+        <result column="PO" jdbcType="NVARCHAR" property="po"/>
+        <result column="vendor" jdbcType="NVARCHAR" property="vendor"/>
+        <result column="ship_to_location" jdbcType="NVARCHAR" property="shipToLocation"/>
+        <result column="model_number" jdbcType="NVARCHAR" property="modelNumber"/>
+        <result column="asin" jdbcType="NVARCHAR" property="asin"/>
+        <result column="sku" jdbcType="NVARCHAR" property="sku"/>
+        <result column="title" jdbcType="NVARCHAR" property="title"/>
+        <result column="status" jdbcType="NVARCHAR" property="status"/>
+        <result column="ship_window_start" jdbcType="NVARCHAR" property="shipWindowStart"/>
+        <result column="ship_window_end" jdbcType="NVARCHAR" property="shipWindowEnd"/>
+        <result column="delivery_window_start" jdbcType="NVARCHAR" property="deliveryWindowStart"/>
+        <result column="delivery_window_end" jdbcType="NVARCHAR" property="deliveryWindowEnd"/>
+        <result column="backorder" jdbcType="NVARCHAR" property="backorder"/>
+        <result column="expected_ship_date" jdbcType="NVARCHAR" property="expectedShipDate"/>
+        <result column="quantity_submitted" jdbcType="NVARCHAR" property="quantitySubmitted"/>
+        <result column="accepted_quantity" jdbcType="NVARCHAR" property="acceptedQuantity"/>
+        <result column="quantity_received" jdbcType="NVARCHAR" property="quantityReceived"/>
+        <result column="quantity_outstanding" jdbcType="NVARCHAR" property="quantityOutstanding"/>
+        <result column="unit_cost" jdbcType="NVARCHAR" property="unitCost"/>
+        <result column="total_cost" jdbcType="NVARCHAR" property="totalCost"/>
+        <result column="insertTime" jdbcType="TIMESTAMP" property="inserttime"/>
+    </resultMap>
+    <insert id="insert" parameterType="com.spider.amazon.model.VendorPODetailInfoDO">
+    insert into vendorPODetailInfo (PO, vendor, ship_to_location, 
+      model_number, asin, sku, 
+      title, status, ship_window_start, 
+      ship_window_end, delivery_window_start, delivery_window_end, 
+      backorder, expected_ship_date, quantity_submitted, 
+      accepted_quantity, quantity_received, quantity_outstanding, 
+      unit_cost, total_cost, insertTime
+      )
+    values (#{po,jdbcType=NVARCHAR}, #{vendor,jdbcType=NVARCHAR}, #{shipToLocation,jdbcType=NVARCHAR}, 
+      #{modelNumber,jdbcType=NVARCHAR}, #{asin,jdbcType=NVARCHAR}, #{sku,jdbcType=NVARCHAR}, 
+      #{title,jdbcType=NVARCHAR}, #{status,jdbcType=NVARCHAR}, #{shipWindowStart,jdbcType=NVARCHAR}, 
+      #{shipWindowEnd,jdbcType=NVARCHAR}, #{deliveryWindowStart,jdbcType=NVARCHAR}, #{deliveryWindowEnd,jdbcType=NVARCHAR}, 
+      #{backorder,jdbcType=NVARCHAR}, #{expectedShipDate,jdbcType=NVARCHAR}, #{quantitySubmitted,jdbcType=NVARCHAR}, 
+      #{acceptedQuantity,jdbcType=NVARCHAR}, #{quantityReceived,jdbcType=NVARCHAR}, #{quantityOutstanding,jdbcType=NVARCHAR}, 
+      #{unitCost,jdbcType=NVARCHAR}, #{totalCost,jdbcType=NVARCHAR}, #{inserttime,jdbcType=TIMESTAMP}
+      )
+  </insert>
+    <insert id="insertSelective" parameterType="com.spider.amazon.model.VendorPODetailInfoDO">
+        insert into vendorPODetailInfo
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="po != null">
+                PO,
+            </if>
+            <if test="vendor != null">
+                vendor,
+            </if>
+            <if test="shipToLocation != null">
+                ship_to_location,
+            </if>
+            <if test="modelNumber != null">
+                model_number,
+            </if>
+            <if test="asin != null">
+                asin,
+            </if>
+            <if test="sku != null">
+                sku,
+            </if>
+            <if test="title != null">
+                title,
+            </if>
+            <if test="status != null">
+                status,
+            </if>
+            <if test="shipWindowStart != null">
+                ship_window_start,
+            </if>
+            <if test="shipWindowEnd != null">
+                ship_window_end,
+            </if>
+            <if test="deliveryWindowStart != null">
+                delivery_window_start,
+            </if>
+            <if test="deliveryWindowEnd != null">
+                delivery_window_end,
+            </if>
+            <if test="backorder != null">
+                backorder,
+            </if>
+            <if test="expectedShipDate != null">
+                expected_ship_date,
+            </if>
+            <if test="quantitySubmitted != null">
+                quantity_submitted,
+            </if>
+            <if test="acceptedQuantity != null">
+                accepted_quantity,
+            </if>
+            <if test="quantityReceived != null">
+                quantity_received,
+            </if>
+            <if test="quantityOutstanding != null">
+                quantity_outstanding,
+            </if>
+            <if test="unitCost != null">
+                unit_cost,
+            </if>
+            <if test="totalCost != null">
+                total_cost,
+            </if>
+            <if test="inserttime != null">
+                insertTime,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="po != null">
+                #{po,jdbcType=NVARCHAR},
+            </if>
+            <if test="vendor != null">
+                #{vendor,jdbcType=NVARCHAR},
+            </if>
+            <if test="shipToLocation != null">
+                #{shipToLocation,jdbcType=NVARCHAR},
+            </if>
+            <if test="modelNumber != null">
+                #{modelNumber,jdbcType=NVARCHAR},
+            </if>
+            <if test="asin != null">
+                #{asin,jdbcType=NVARCHAR},
+            </if>
+            <if test="sku != null">
+                #{sku,jdbcType=NVARCHAR},
+            </if>
+            <if test="title != null">
+                #{title,jdbcType=NVARCHAR},
+            </if>
+            <if test="status != null">
+                #{status,jdbcType=NVARCHAR},
+            </if>
+            <if test="shipWindowStart != null">
+                #{shipWindowStart,jdbcType=NVARCHAR},
+            </if>
+            <if test="shipWindowEnd != null">
+                #{shipWindowEnd,jdbcType=NVARCHAR},
+            </if>
+            <if test="deliveryWindowStart != null">
+                #{deliveryWindowStart,jdbcType=NVARCHAR},
+            </if>
+            <if test="deliveryWindowEnd != null">
+                #{deliveryWindowEnd,jdbcType=NVARCHAR},
+            </if>
+            <if test="backorder != null">
+                #{backorder,jdbcType=NVARCHAR},
+            </if>
+            <if test="expectedShipDate != null">
+                #{expectedShipDate,jdbcType=NVARCHAR},
+            </if>
+            <if test="quantitySubmitted != null">
+                #{quantitySubmitted,jdbcType=NVARCHAR},
+            </if>
+            <if test="acceptedQuantity != null">
+                #{acceptedQuantity,jdbcType=NVARCHAR},
+            </if>
+            <if test="quantityReceived != null">
+                #{quantityReceived,jdbcType=NVARCHAR},
+            </if>
+            <if test="quantityOutstanding != null">
+                #{quantityOutstanding,jdbcType=NVARCHAR},
+            </if>
+            <if test="unitCost != null">
+                #{unitCost,jdbcType=NVARCHAR},
+            </if>
+            <if test="totalCost != null">
+                #{totalCost,jdbcType=NVARCHAR},
+            </if>
+            <if test="inserttime != null">
+                #{inserttime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    <!-- 批量插入 -->
+    <insert id="insertBatch" parameterType="java.util.List">
+        insert into vendorPODetailInfo (<include refid="Base_Column_List" />)
+        values
+        <foreach collection="list" item="item" index="index"  separator=",">
+            (#{item.po,jdbcType=NVARCHAR}, #{item.vendor,jdbcType=NVARCHAR}, #{item.shipToLocation,jdbcType=NVARCHAR},
+            #{item.modelNumber,jdbcType=NVARCHAR}, #{item.asin,jdbcType=NVARCHAR}, #{item.sku,jdbcType=NVARCHAR},
+            #{item.title,jdbcType=NVARCHAR}, #{item.status,jdbcType=NVARCHAR}, #{item.shipWindowStart,jdbcType=NVARCHAR},
+            #{item.shipWindowEnd,jdbcType=NVARCHAR}, #{item.deliveryWindowStart,jdbcType=NVARCHAR}, #{item.deliveryWindowEnd,jdbcType=NVARCHAR},
+            #{item.backorder,jdbcType=NVARCHAR}, #{item.expectedShipDate,jdbcType=NVARCHAR}, #{item.quantitySubmitted,jdbcType=NVARCHAR},
+            #{item.acceptedQuantity,jdbcType=NVARCHAR}, #{item.quantityReceived,jdbcType=NVARCHAR}, #{item.quantityOutstanding,jdbcType=NVARCHAR},
+            #{item.unitCost,jdbcType=NVARCHAR}, #{item.totalCost,jdbcType=NVARCHAR}, #{item.inserttime,jdbcType=TIMESTAMP}
+            )
+        </foreach>
+    </insert>
+</mapper>

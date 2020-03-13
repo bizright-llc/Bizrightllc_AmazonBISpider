@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spider.amazon.mapper.SkuInfoNewDOMapper">
+    <resultMap id="BaseResultMap" type="com.spider.amazon.model.SkuInfoNewDO">
+        <id column="asin" jdbcType="VARCHAR" property="asin"/>
+        <id column="userId" jdbcType="BIGINT" property="userid"/>
+        <result column="ourCode" jdbcType="VARCHAR" property="ourcode"/>
+        <result column="RootCategory" jdbcType="VARCHAR" property="rootcategory"/>
+        <result column="insertTime" jdbcType="TIMESTAMP" property="inserttime"/>
+        <result column="groupLeadSku" jdbcType="VARCHAR" property="groupleadsku"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="productManager" jdbcType="VARCHAR" property="productmanager"/>
+        <result column="productManager_id" jdbcType="INTEGER" property="productmanagerId"/>
+        <result column="SubCategory" jdbcType="VARCHAR" property="subcategory"/>
+        <result column="ownbrand" jdbcType="VARCHAR" property="ownbrand"/>
+        <result column="ProductLine" jdbcType="VARCHAR" property="productline"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+    asin, userId, ourCode, RootCategory, insertTime, groupLeadSku, name, productManager,
+    productManager_id, SubCategory, ownbrand, ProductLine
+  </sql>
+    <select id="selectByPrimaryKey" parameterType="com.spider.amazon.model.SkuInfoNewDOKey" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from skuInfo_new with(nolock)
+        where asin = #{asin,jdbcType=VARCHAR}
+        and userId = #{userid,jdbcType=BIGINT}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="com.spider.amazon.model.SkuInfoNewDOKey">
+    delete from skuInfo_new
+    where asin = #{asin,jdbcType=VARCHAR}
+      and userId = #{userid,jdbcType=BIGINT}
+  </delete>
+    <insert id="insert" parameterType="com.spider.amazon.model.SkuInfoNewDO">
+    insert into skuInfo_new (asin, userId, ourCode,
+      RootCategory, insertTime, groupLeadSku,
+      name, productManager, productManager_id,
+      SubCategory, ownbrand, ProductLine
+      )
+    values (#{asin,jdbcType=VARCHAR}, #{userid,jdbcType=BIGINT}, #{ourcode,jdbcType=VARCHAR},
+      #{rootcategory,jdbcType=VARCHAR}, #{inserttime,jdbcType=TIMESTAMP}, #{groupleadsku,jdbcType=VARCHAR},
+      #{name,jdbcType=VARCHAR}, #{productmanager,jdbcType=VARCHAR}, #{productmanagerId,jdbcType=INTEGER},
+      #{subcategory,jdbcType=VARCHAR}, #{ownbrand,jdbcType=VARCHAR}, #{productline,jdbcType=VARCHAR}
+      )
+  </insert>
+    <insert id="insertSelective" parameterType="com.spider.amazon.model.SkuInfoNewDO">
+        insert into skuInfo_new
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="asin != null">
+                asin,
+            </if>
+            <if test="userid != null">
+                userId,
+            </if>
+            <if test="ourcode != null">
+                ourCode,
+            </if>
+            <if test="rootcategory != null">
+                RootCategory,
+            </if>
+            <if test="inserttime != null">
+                insertTime,
+            </if>
+            <if test="groupleadsku != null">
+                groupLeadSku,
+            </if>
+            <if test="name != null">
+                name,
+            </if>
+            <if test="productmanager != null">
+                productManager,
+            </if>
+            <if test="productmanagerId != null">
+                productManager_id,
+            </if>
+            <if test="subcategory != null">
+                SubCategory,
+            </if>
+            <if test="ownbrand != null">
+                ownbrand,
+            </if>
+            <if test="productline != null">
+                ProductLine,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="asin != null">
+                #{asin,jdbcType=VARCHAR},
+            </if>
+            <if test="userid != null">
+                #{userid,jdbcType=BIGINT},
+            </if>
+            <if test="ourcode != null">
+                #{ourcode,jdbcType=VARCHAR},
+            </if>
+            <if test="rootcategory != null">
+                #{rootcategory,jdbcType=VARCHAR},
+            </if>
+            <if test="inserttime != null">
+                #{inserttime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="groupleadsku != null">
+                #{groupleadsku,jdbcType=VARCHAR},
+            </if>
+            <if test="name != null">
+                #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="productmanager != null">
+                #{productmanager,jdbcType=VARCHAR},
+            </if>
+            <if test="productmanagerId != null">
+                #{productmanagerId,jdbcType=INTEGER},
+            </if>
+            <if test="subcategory != null">
+                #{subcategory,jdbcType=VARCHAR},
+            </if>
+            <if test="ownbrand != null">
+                #{ownbrand,jdbcType=VARCHAR},
+            </if>
+            <if test="productline != null">
+                #{productline,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.spider.amazon.model.SkuInfoNewDO">
+        update skuInfo_new
+        <set>
+            <if test="ourcode != null">
+                ourCode = #{ourcode,jdbcType=VARCHAR},
+            </if>
+            <if test="rootcategory != null">
+                RootCategory = #{rootcategory,jdbcType=VARCHAR},
+            </if>
+            <if test="inserttime != null">
+                insertTime = #{inserttime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="groupleadsku != null">
+                groupLeadSku = #{groupleadsku,jdbcType=VARCHAR},
+            </if>
+            <if test="name != null">
+                name = #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="productmanager != null">
+                productManager = #{productmanager,jdbcType=VARCHAR},
+            </if>
+            <if test="productmanagerId != null">
+                productManager_id = #{productmanagerId,jdbcType=INTEGER},
+            </if>
+            <if test="subcategory != null">
+                SubCategory = #{subcategory,jdbcType=VARCHAR},
+            </if>
+            <if test="ownbrand != null">
+                ownbrand = #{ownbrand,jdbcType=VARCHAR},
+            </if>
+            <if test="productline != null">
+                ProductLine = #{productline,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where asin = #{asin,jdbcType=VARCHAR}
+        and userId = #{userid,jdbcType=BIGINT}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.spider.amazon.model.SkuInfoNewDO">
+    update skuInfo_new
+    set ourCode = #{ourcode,jdbcType=VARCHAR},
+      RootCategory = #{rootcategory,jdbcType=VARCHAR},
+      insertTime = #{inserttime,jdbcType=TIMESTAMP},
+      groupLeadSku = #{groupleadsku,jdbcType=VARCHAR},
+      name = #{name,jdbcType=VARCHAR},
+      productManager = #{productmanager,jdbcType=VARCHAR},
+      productManager_id = #{productmanagerId,jdbcType=INTEGER},
+      SubCategory = #{subcategory,jdbcType=VARCHAR},
+      ownbrand = #{ownbrand,jdbcType=VARCHAR},
+      ProductLine = #{productline,jdbcType=VARCHAR}
+    where asin = #{asin,jdbcType=VARCHAR}
+      and userId = #{userid,jdbcType=BIGINT}
+  </update>
+    <select id="getAllSkuList" resultType="com.spider.amazon.model.SkuInfoNewDO" >
+        select
+        <include refid="Base_Column_List"/>
+        from skuInfo_new with(nolock)
+    </select>
+</mapper>

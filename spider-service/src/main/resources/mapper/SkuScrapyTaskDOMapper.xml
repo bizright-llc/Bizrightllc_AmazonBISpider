@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spider.amazon.mapper.SkuScrapyTaskDOMapper">
+  <resultMap id="BaseResultMap" type="com.spider.amazon.model.SkuScrapyTaskDO">
+    <result column="task_id" jdbcType="VARCHAR" property="taskId" />
+    <result column="task_name" jdbcType="VARCHAR" property="taskName" />
+    <result column="upload_file_path" jdbcType="VARCHAR" property="uploadFilePath" />
+    <result column="upload_file_name" jdbcType="VARCHAR" property="uploadFileName" />
+    <result column="download_file_path" jdbcType="VARCHAR" property="downloadFilePath" />
+    <result column="download_file_name" jdbcType="VARCHAR" property="downloadFileName" />
+    <result column="task_sts" jdbcType="VARCHAR" property="taskSts" />
+    <result column="insert_time" jdbcType="TIMESTAMP" property="insertTime" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    task_id, task_name, upload_file_path, upload_file_name, download_file_path, download_file_name, 
+    task_sts, insert_time
+  </sql>
+  <insert id="insert" parameterType="com.spider.amazon.model.SkuScrapyTaskDO">
+    insert into SkuScrapyTask (task_id, task_name, upload_file_path, 
+      upload_file_name, download_file_path, download_file_name, 
+      task_sts, insert_time)
+    values (#{taskId,jdbcType=VARCHAR}, #{taskName,jdbcType=VARCHAR}, #{uploadFilePath,jdbcType=VARCHAR}, 
+      #{uploadFileName,jdbcType=VARCHAR}, #{downloadFilePath,jdbcType=VARCHAR}, #{downloadFileName,jdbcType=VARCHAR}, 
+      #{taskSts,jdbcType=VARCHAR}, #{insertTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.spider.amazon.model.SkuScrapyTaskDO">
+    insert into SkuScrapyTask
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="taskId != null">
+        task_id,
+      </if>
+      <if test="taskName != null">
+        task_name,
+      </if>
+      <if test="uploadFilePath != null">
+        upload_file_path,
+      </if>
+      <if test="uploadFileName != null">
+        upload_file_name,
+      </if>
+      <if test="downloadFilePath != null">
+        download_file_path,
+      </if>
+      <if test="downloadFileName != null">
+        download_file_name,
+      </if>
+      <if test="taskSts != null">
+        task_sts,
+      </if>
+      <if test="insertTime != null">
+        insert_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="taskId != null">
+        #{taskId,jdbcType=VARCHAR},
+      </if>
+      <if test="taskName != null">
+        #{taskName,jdbcType=VARCHAR},
+      </if>
+      <if test="uploadFilePath != null">
+        #{uploadFilePath,jdbcType=VARCHAR},
+      </if>
+      <if test="uploadFileName != null">
+        #{uploadFileName,jdbcType=VARCHAR},
+      </if>
+      <if test="downloadFilePath != null">
+        #{downloadFilePath,jdbcType=VARCHAR},
+      </if>
+      <if test="downloadFileName != null">
+        #{downloadFileName,jdbcType=VARCHAR},
+      </if>
+      <if test="taskSts != null">
+        #{taskSts,jdbcType=VARCHAR},
+      </if>
+      <if test="insertTime != null">
+        #{insertTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <!-- 通过任务状态查询任务列表 -->
+  <select id="selectTaskListByTaskSts" resultMap="BaseResultMap" parameterType="Map">
+    select * from SkuScrapyTask  with(nolock) where task_sts =  #{taskSts,jdbcType=VARCHAR}
+  </select>
+  <!-- 通过任务id及任务状态更新任务状态 -->
+  <update id="updateByTaskStsAndTaskId" parameterType="map">
+    update SkuScrapyTask
+    <set>
+      <if test="taskId != null">
+        task_id = #{taskId,jdbcType=VARCHAR},
+      </if>
+      <if test="taskName != null">
+        task_name = #{taskName,jdbcType=VARCHAR},
+      </if>
+      <if test="uploadFilePath != null">
+        upload_file_path = #{uploadFilePath,jdbcType=VARCHAR},
+      </if>
+      <if test="uploadFileName != null">
+        upload_file_name = #{uploadFileName,jdbcType=VARCHAR},
+      </if>
+      <if test="downloadFilePath != null">
+        download_file_path = #{downloadFilePath,jdbcType=VARCHAR},
+      </if>
+      <if test="downloadFileName != null">
+        download_file_name = #{downloadFileName,jdbcType=VARCHAR},
+      </if>
+      <if test="taskSts != null">
+        task_sts = #{taskSts,jdbcType=VARCHAR},
+      </if>
+      <if test="insertTime != null">
+        insert_time = #{insertTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where task_sts = #{oldTaskSts,jdbcType=VARCHAR}
+    and task_id = #{taskId,jdbcType=VARCHAR}
+  </update>
+  <!-- 通过任务id查询任务信息 -->
+  <select id="selectByTaskId" resultType="Map" parameterType="Map">
+    select distinct stvl.vendor_sku,vpm.product_id,stvl.merchant_suggested_asin from SkuScrapyTaskVSkuList as stvl with(nolock)
+    inner join VskuToPidMap as vpm with(nolock)  on stvl.vendor_sku=vpm.vendor_sku and vpm.eff_flg='Y'
+    where stvl.task_id =  #{taskId,jdbcType=VARCHAR}
+  </select>
+  <select id="queryItemInfoByTaskId" resultMap="BaseResultMap" parameterType="Map">
+    select <include refid="Base_Column_List"/>
+    from  SkuScrapyTask with(nolock)
+    where task_id =  #{taskId,jdbcType=VARCHAR}
+  </select>
+</mapper>

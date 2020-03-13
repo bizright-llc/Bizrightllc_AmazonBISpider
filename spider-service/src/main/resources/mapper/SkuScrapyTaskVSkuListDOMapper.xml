@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spider.amazon.mapper.SkuScrapyTaskVSkuListDOMapper">
+  <resultMap id="BaseResultMap" type="com.spider.amazon.model.SkuScrapyTaskVSkuListDO">
+    <result column="task_id" jdbcType="VARCHAR" property="taskId" />
+    <result column="vendor_sku" jdbcType="VARCHAR" property="vendorSku" />
+    <result column="insert_time" jdbcType="TIMESTAMP" property="insertTime" />
+    <result column="merchant_suggested_asin" jdbcType="VARCHAR" property="merchantSuggestedAsin" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    task_id, vendor_sku, insert_time,merchant_suggested_asin
+  </sql>
+  <insert id="insert" parameterType="com.spider.amazon.model.SkuScrapyTaskVSkuListDO">
+    insert into SkuScrapyTaskVSkuList (task_id, vendor_sku, insert_time,merchant_suggested_asin
+      )
+    values (#{taskId,jdbcType=VARCHAR}, #{vendorSku,jdbcType=VARCHAR}, #{insertTime,jdbcType=TIMESTAMP},
+    #{merchantSuggestedAsin,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.spider.amazon.model.SkuScrapyTaskVSkuListDO">
+    insert into SkuScrapyTaskVSkuList
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="taskId != null">
+        task_id,
+      </if>
+      <if test="vendorSku != null">
+        vendor_sku,
+      </if>
+      <if test="insertTime != null">
+        insert_time,
+      </if>
+      <if test="merchantSuggestedAsin != null">
+        merchant_suggested_asin,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="taskId != null">
+        #{taskId,jdbcType=VARCHAR},
+      </if>
+      <if test="vendorSku != null">
+        #{vendorSku,jdbcType=VARCHAR},
+      </if>
+      <if test="insertTime != null">
+        #{insertTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="merchantSuggestedAsin != null">
+        #{merchantSuggestedAsin,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <!-- 批量插入 -->
+  <insert id="insertBatch" parameterType="java.util.List">
+    insert into SkuScrapyTaskVSkuList (<include refid="Base_Column_List" />)
+    values
+    <foreach collection="list" item="item" index="index"  separator=",">
+      (#{item.taskId,jdbcType=VARCHAR}, #{item.vendorSku,jdbcType=VARCHAR}, #{item.insertTime,jdbcType=TIMESTAMP},
+      #{item.merchantSuggestedAsin,jdbcType=VARCHAR}
+      )
+    </foreach>
+  </insert>
+  <!-- 更新VendorSku -->
+  <update id="updateVendorSkuByTaskId" parameterType="Map">
+    update stl set stl.vendor_sku=mtv.vendor_sku
+    from SkuScrapyTaskVSkuList as stl
+    inner join MAsinToVskuMap as mtv on stl.merchant_suggested_asin=mtv.merchant_suggested_asin
+  </update>
+</mapper>

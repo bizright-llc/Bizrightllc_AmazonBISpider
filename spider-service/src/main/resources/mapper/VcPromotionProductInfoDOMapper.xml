@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spider.amazon.mapper.VcPromotionProductInfoDOMapper">
+  <resultMap id="BaseResultMap" type="com.spider.amazon.model.VcPromotionProductInfoDO">
+    <result column="craw_id" jdbcType="VARCHAR" property="crawId" />
+    <result column="promotion_id" jdbcType="VARCHAR" property="promotionId" />
+    <result column="pname" jdbcType="VARCHAR" property="pname" />
+    <result column="upc" jdbcType="VARCHAR" property="upc" />
+    <result column="amazon_price" jdbcType="VARCHAR" property="amazonPrice" />
+    <result column="website_price" jdbcType="VARCHAR" property="websitePrice" />
+    <result column="funding" jdbcType="VARCHAR" property="funding" />
+    <result column="likely_price" jdbcType="VARCHAR" property="likelyPrice" />
+    <result column="units_sold" jdbcType="VARCHAR" property="unitsSold" />
+    <result column="amount_spent" jdbcType="VARCHAR" property="amountSpent" />
+    <result column="revenue" jdbcType="VARCHAR" property="revenue" />
+    <result column="craw_flg" jdbcType="VARCHAR" property="crawFlg" />
+    <result column="asin" jdbcType="VARCHAR" property="asin" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    craw_id, promotion_id, pname, upc, amazon_price, website_price, funding, likely_price, 
+    units_sold, amount_spent, revenue, craw_flg, asin
+  </sql>
+  <insert id="insert" parameterType="com.spider.amazon.model.VcPromotionProductInfoDO">
+    insert into VcPromotionProductInfo (craw_id, promotion_id, pname, 
+      upc, amazon_price, website_price, 
+      funding, likely_price, units_sold, 
+      amount_spent, revenue, craw_flg,
+      asin
+      )
+    values (#{crawId,jdbcType=VARCHAR}, #{promotionId,jdbcType=VARCHAR}, #{pname,jdbcType=VARCHAR}, 
+      #{upc,jdbcType=VARCHAR}, #{amazonPrice,jdbcType=VARCHAR}, #{websitePrice,jdbcType=VARCHAR}, 
+      #{funding,jdbcType=VARCHAR}, #{likelyPrice,jdbcType=VARCHAR}, #{unitsSold,jdbcType=VARCHAR}, 
+      #{amountSpent,jdbcType=VARCHAR}, #{revenue,jdbcType=VARCHAR}, #{crawFlg,jdbcType=VARCHAR},
+      #{asin,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.spider.amazon.model.VcPromotionProductInfoDO">
+    insert into VcPromotionProductInfo
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="crawId != null">
+        craw_id,
+      </if>
+      <if test="promotionId != null">
+        promotion_id,
+      </if>
+      <if test="pname != null">
+        pname,
+      </if>
+      <if test="upc != null">
+        upc,
+      </if>
+      <if test="amazonPrice != null">
+        amazon_price,
+      </if>
+      <if test="websitePrice != null">
+        website_price,
+      </if>
+      <if test="funding != null">
+        funding,
+      </if>
+      <if test="likelyPrice != null">
+        likely_price,
+      </if>
+      <if test="unitsSold != null">
+        units_sold,
+      </if>
+      <if test="amountSpent != null">
+        amount_spent,
+      </if>
+      <if test="revenue != null">
+        revenue,
+      </if>
+      <if test="crawFlg != null">
+        craw_flg,
+      </if>
+      <if test="asin != null">
+        asin,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="crawId != null">
+        #{crawId,jdbcType=VARCHAR},
+      </if>
+      <if test="promotionId != null">
+        #{promotionId,jdbcType=VARCHAR},
+      </if>
+      <if test="pname != null">
+        #{pname,jdbcType=VARCHAR},
+      </if>
+      <if test="upc != null">
+        #{upc,jdbcType=VARCHAR},
+      </if>
+      <if test="amazonPrice != null">
+        #{amazonPrice,jdbcType=VARCHAR},
+      </if>
+      <if test="websitePrice != null">
+        #{websitePrice,jdbcType=VARCHAR},
+      </if>
+      <if test="funding != null">
+        #{funding,jdbcType=VARCHAR},
+      </if>
+      <if test="likelyPrice != null">
+        #{likelyPrice,jdbcType=VARCHAR},
+      </if>
+      <if test="unitsSold != null">
+        #{unitsSold,jdbcType=VARCHAR},
+      </if>
+      <if test="amountSpent != null">
+        #{amountSpent,jdbcType=VARCHAR},
+      </if>
+      <if test="revenue != null">
+        #{revenue,jdbcType=VARCHAR},
+      </if>
+      <if test="crawFlg != null">
+        #{crawFlg,jdbcType=VARCHAR},
+      </if>
+      <if test="asin != null">
+        #{asin,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <!-- 批量插入 -->
+  <insert id="insertBatch" parameterType="java.util.List">
+    insert into VcPromotionProductInfo (<include refid="Base_Column_List" />)
+    values
+    <foreach collection="list" item="item" index="index"  separator=",">
+      (#{item.crawId,jdbcType=VARCHAR}, #{item.promotionId,jdbcType=VARCHAR}, #{item.pname,jdbcType=VARCHAR},
+      #{item.upc,jdbcType=VARCHAR}, #{item.amazonPrice,jdbcType=VARCHAR}, #{item.websitePrice,jdbcType=VARCHAR},
+      #{item.funding,jdbcType=VARCHAR}, #{item.likelyPrice,jdbcType=VARCHAR}, #{item.unitsSold,jdbcType=VARCHAR},
+      #{item.amountSpent,jdbcType=VARCHAR}, #{item.revenue,jdbcType=VARCHAR}, #{item.crawFlg,jdbcType=VARCHAR},
+      #{item.asin,jdbcType=VARCHAR}
+      )
+    </foreach>
+  </insert>
+</mapper>

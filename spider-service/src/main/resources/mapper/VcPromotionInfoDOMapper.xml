@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spider.amazon.mapper.VcPromotionInfoDOMapper">
+  <resultMap id="BaseResultMap" type="com.spider.amazon.model.VcPromotionInfoDO">
+    <result column="craw_id" jdbcType="VARCHAR" property="crawId" />
+    <result column="created_on" jdbcType="VARCHAR" property="createdOn" />
+    <result column="promotion_id" jdbcType="VARCHAR" property="promotionId" />
+    <result column="status" jdbcType="VARCHAR" property="status" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="start_date" jdbcType="VARCHAR" property="startDate" />
+    <result column="end_date" jdbcType="VARCHAR" property="endDate" />
+    <result column="type" jdbcType="VARCHAR" property="type" />
+    <result column="hero_product" jdbcType="VARCHAR" property="heroProduct" />
+    <result column="vendor_code" jdbcType="VARCHAR" property="vendorCode" />
+    <result column="market_place" jdbcType="VARCHAR" property="marketPlace" />
+    <result column="billing_contact" jdbcType="VARCHAR" property="billingContact" />
+    <result column="funding_agreement" jdbcType="VARCHAR" property="fundingAgreement" />
+    <result column="merchandising_fee" jdbcType="VARCHAR" property="merchandisingFee" />
+    <result column="craw_flg" jdbcType="VARCHAR" property="crawFlg" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    craw_id, created_on, promotion_id, status, name, start_date, end_date, type, hero_product, 
+    vendor_code, market_place, billing_contact, funding_agreement, merchandising_fee, 
+    craw_flg
+  </sql>
+  <insert id="insert" parameterType="com.spider.amazon.model.VcPromotionInfoDO">
+    insert into VcPromotionInfo (craw_id, created_on, promotion_id, 
+      status, name, start_date, 
+      end_date, type, hero_product, 
+      vendor_code, market_place, billing_contact, 
+      funding_agreement, merchandising_fee, craw_flg
+      )
+    values (#{crawId,jdbcType=VARCHAR}, #{createdOn,jdbcType=VARCHAR}, #{promotionId,jdbcType=VARCHAR}, 
+      #{status,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, #{startDate,jdbcType=VARCHAR}, 
+      #{endDate,jdbcType=VARCHAR}, #{type,jdbcType=VARCHAR}, #{heroProduct,jdbcType=VARCHAR}, 
+      #{vendorCode,jdbcType=VARCHAR}, #{marketPlace,jdbcType=VARCHAR}, #{billingContact,jdbcType=VARCHAR}, 
+      #{fundingAgreement,jdbcType=VARCHAR}, #{merchandisingFee,jdbcType=VARCHAR}, #{crawFlg,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.spider.amazon.model.VcPromotionInfoDO">
+    insert into VcPromotionInfo
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="crawId != null">
+        craw_id,
+      </if>
+      <if test="createdOn != null">
+        created_on,
+      </if>
+      <if test="promotionId != null">
+        promotion_id,
+      </if>
+      <if test="status != null">
+        status,
+      </if>
+      <if test="name != null">
+        name,
+      </if>
+      <if test="startDate != null">
+        start_date,
+      </if>
+      <if test="endDate != null">
+        end_date,
+      </if>
+      <if test="type != null">
+        type,
+      </if>
+      <if test="heroProduct != null">
+        hero_product,
+      </if>
+      <if test="vendorCode != null">
+        vendor_code,
+      </if>
+      <if test="marketPlace != null">
+        market_place,
+      </if>
+      <if test="billingContact != null">
+        billing_contact,
+      </if>
+      <if test="fundingAgreement != null">
+        funding_agreement,
+      </if>
+      <if test="merchandisingFee != null">
+        merchandising_fee,
+      </if>
+      <if test="crawFlg != null">
+        craw_flg,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="crawId != null">
+        #{crawId,jdbcType=VARCHAR},
+      </if>
+      <if test="createdOn != null">
+        #{createdOn,jdbcType=VARCHAR},
+      </if>
+      <if test="promotionId != null">
+        #{promotionId,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null">
+        #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="startDate != null">
+        #{startDate,jdbcType=VARCHAR},
+      </if>
+      <if test="endDate != null">
+        #{endDate,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null">
+        #{type,jdbcType=VARCHAR},
+      </if>
+      <if test="heroProduct != null">
+        #{heroProduct,jdbcType=VARCHAR},
+      </if>
+      <if test="vendorCode != null">
+        #{vendorCode,jdbcType=VARCHAR},
+      </if>
+      <if test="marketPlace != null">
+        #{marketPlace,jdbcType=VARCHAR},
+      </if>
+      <if test="billingContact != null">
+        #{billingContact,jdbcType=VARCHAR},
+      </if>
+      <if test="fundingAgreement != null">
+        #{fundingAgreement,jdbcType=VARCHAR},
+      </if>
+      <if test="merchandisingFee != null">
+        #{merchandisingFee,jdbcType=VARCHAR},
+      </if>
+      <if test="crawFlg != null">
+        #{crawFlg,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <!-- 批量插入 -->
+  <insert id="insertBatch" parameterType="java.util.List">
+    insert into VcPromotionInfo (<include refid="Base_Column_List" />)
+    values
+    <foreach collection="list" item="item" index="index"  separator=",">
+      (#{item.crawId,jdbcType=VARCHAR}, #{item.createdOn,jdbcType=VARCHAR}, #{item.promotionId,jdbcType=VARCHAR},
+      #{item.status,jdbcType=VARCHAR}, #{item.name,jdbcType=VARCHAR}, #{item.startDate,jdbcType=VARCHAR},
+      #{item.endDate,jdbcType=VARCHAR}, #{item.type,jdbcType=VARCHAR}, #{item.heroProduct,jdbcType=VARCHAR},
+      #{item.vendorCode,jdbcType=VARCHAR}, #{item.marketPlace,jdbcType=VARCHAR}, #{item.billingContact,jdbcType=VARCHAR},
+      #{item.fundingAgreement,jdbcType=VARCHAR}, #{item.merchandisingFee,jdbcType=VARCHAR}, #{item.crawFlg,jdbcType=VARCHAR}
+      )
+    </foreach>
+  </insert>
+</mapper>

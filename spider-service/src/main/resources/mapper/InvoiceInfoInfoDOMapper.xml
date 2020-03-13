@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spider.amazon.mapper.InvoiceInfoInfoDOMapper">
+  <resultMap id="BaseResultMap" type="com.spider.amazon.model.InvoiceInfoInfoDO">
+    <result column="invoiceNum" jdbcType="VARCHAR" property="invoicenum" />
+    <result column="itemNum" jdbcType="VARCHAR" property="itemnum" />
+    <result column="asin" jdbcType="VARCHAR" property="asin" />
+    <result column="orderQty" jdbcType="VARCHAR" property="orderqty" />
+    <result column="lineAmt" jdbcType="VARCHAR" property="lineamt" />
+    <result column="invoiceDate" jdbcType="TIMESTAMP" property="invoicedate" />
+    <result column="channel" jdbcType="VARCHAR" property="channel" />
+    <result column="unitPrice" jdbcType="VARCHAR" property="unitprice" />
+    <result column="buyerUserId" jdbcType="VARCHAR" property="buyeruserid" />
+    <result column="shipCity" jdbcType="VARCHAR" property="shipcity" />
+    <result column="shipAddr1" jdbcType="VARCHAR" property="shipaddr1" />
+    <result column="paymentDate" jdbcType="TIMESTAMP" property="paymentdate" />
+    <result column="status" jdbcType="VARCHAR" property="status" />
+    <result column="shipState" jdbcType="VARCHAR" property="shipstate" />
+    <result column="shipCountry" jdbcType="VARCHAR" property="shipcountry" />
+    <result column="LineNum" jdbcType="INTEGER" property="linenum" />
+    <result column="ComboItemNum" jdbcType="VARCHAR" property="comboitemnum" />
+    <result column="IsFromCombo" jdbcType="INTEGER" property="isfromcombo" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    invoiceNum, itemNum, asin, orderQty, lineAmt, invoiceDate, channel, unitPrice, buyerUserId,
+    shipCity, shipAddr1, paymentDate, status, shipState, shipCountry, LineNum, ComboItemNum,
+    IsFromCombo
+  </sql>
+  <insert id="insert" parameterType="com.spider.amazon.model.InvoiceInfoInfoDO">
+    insert into invoiceInfo (invoiceNum, itemNum, asin, 
+      orderQty, lineAmt, invoiceDate, 
+      channel, unitPrice, buyerUserId, 
+      shipCity, shipAddr1, paymentDate, 
+      status, shipState, shipCountry, 
+      LineNum, ComboItemNum, IsFromCombo
+      )
+    values (#{invoicenum,jdbcType=VARCHAR}, #{itemnum,jdbcType=VARCHAR}, #{asin,jdbcType=VARCHAR}, 
+      #{orderqty,jdbcType=VARCHAR}, #{lineamt,jdbcType=VARCHAR}, #{invoicedate,jdbcType=TIMESTAMP}, 
+      #{channel,jdbcType=VARCHAR}, #{unitprice,jdbcType=VARCHAR}, #{buyeruserid,jdbcType=VARCHAR}, 
+      #{shipcity,jdbcType=VARCHAR}, #{shipaddr1,jdbcType=VARCHAR}, #{paymentdate,jdbcType=TIMESTAMP}, 
+      #{status,jdbcType=VARCHAR}, #{shipstate,jdbcType=VARCHAR}, #{shipcountry,jdbcType=VARCHAR}, 
+      #{linenum,jdbcType=INTEGER}, #{comboitemnum,jdbcType=VARCHAR}, #{isfromcombo,jdbcType=INTEGER}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.spider.amazon.model.InvoiceInfoInfoDO">
+    insert into invoiceInfo
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="invoicenum != null">
+        invoiceNum,
+      </if>
+      <if test="itemnum != null">
+        itemNum,
+      </if>
+      <if test="asin != null">
+        asin,
+      </if>
+      <if test="orderqty != null">
+        orderQty,
+      </if>
+      <if test="lineamt != null">
+        lineAmt,
+      </if>
+      <if test="invoicedate != null">
+        invoiceDate,
+      </if>
+      <if test="channel != null">
+        channel,
+      </if>
+      <if test="unitprice != null">
+        unitPrice,
+      </if>
+      <if test="buyeruserid != null">
+        buyerUserId,
+      </if>
+      <if test="shipcity != null">
+        shipCity,
+      </if>
+      <if test="shipaddr1 != null">
+        shipAddr1,
+      </if>
+      <if test="paymentdate != null">
+        paymentDate,
+      </if>
+      <if test="status != null">
+        status,
+      </if>
+      <if test="shipstate != null">
+        shipState,
+      </if>
+      <if test="shipcountry != null">
+        shipCountry,
+      </if>
+      <if test="linenum != null">
+        LineNum,
+      </if>
+      <if test="comboitemnum != null">
+        ComboItemNum,
+      </if>
+      <if test="isfromcombo != null">
+        IsFromCombo,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="invoicenum != null">
+        #{invoicenum,jdbcType=VARCHAR},
+      </if>
+      <if test="itemnum != null">
+        #{itemnum,jdbcType=VARCHAR},
+      </if>
+      <if test="asin != null">
+        #{asin,jdbcType=VARCHAR},
+      </if>
+      <if test="orderqty != null">
+        #{orderqty,jdbcType=VARCHAR},
+      </if>
+      <if test="lineamt != null">
+        #{lineamt,jdbcType=VARCHAR},
+      </if>
+      <if test="invoicedate != null">
+        #{invoicedate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="channel != null">
+        #{channel,jdbcType=VARCHAR},
+      </if>
+      <if test="unitprice != null">
+        #{unitprice,jdbcType=VARCHAR},
+      </if>
+      <if test="buyeruserid != null">
+        #{buyeruserid,jdbcType=VARCHAR},
+      </if>
+      <if test="shipcity != null">
+        #{shipcity,jdbcType=VARCHAR},
+      </if>
+      <if test="shipaddr1 != null">
+        #{shipaddr1,jdbcType=VARCHAR},
+      </if>
+      <if test="paymentdate != null">
+        #{paymentdate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="status != null">
+        #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="shipstate != null">
+        #{shipstate,jdbcType=VARCHAR},
+      </if>
+      <if test="shipcountry != null">
+        #{shipcountry,jdbcType=VARCHAR},
+      </if>
+      <if test="linenum != null">
+        #{linenum,jdbcType=INTEGER},
+      </if>
+      <if test="comboitemnum != null">
+        #{comboitemnum,jdbcType=VARCHAR},
+      </if>
+      <if test="isfromcombo != null">
+        #{isfromcombo,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <!-- 批量插入 -->
+  <insert id="insertBatch" parameterType="java.util.List">
+    insert into invoiceInfo (<include refid="Base_Column_List" />)
+    values
+    <foreach collection="list" item="item" index="index"  separator=",">
+      (#{item.invoicenum,jdbcType=VARCHAR}, #{item.itemnum,jdbcType=VARCHAR}, #{item.asin,jdbcType=VARCHAR},
+      #{item.orderqty,jdbcType=VARCHAR}, #{item.lineamt,jdbcType=VARCHAR}, #{item.invoicedate,jdbcType=TIMESTAMP},
+      #{item.channel,jdbcType=VARCHAR}, #{item.unitprice,jdbcType=VARCHAR}, #{item.buyeruserid,jdbcType=VARCHAR},
+      #{item.shipcity,jdbcType=VARCHAR}, #{item.shipaddr1,jdbcType=VARCHAR}, #{item.paymentdate,jdbcType=TIMESTAMP},
+      #{item.status,jdbcType=VARCHAR}, #{item.shipstate,jdbcType=VARCHAR}, #{item.shipcountry,jdbcType=VARCHAR},
+      #{item.linenum,jdbcType=INTEGER}, #{item.comboitemnum,jdbcType=VARCHAR}, #{item.isfromcombo,jdbcType=INTEGER}
+      )
+    </foreach>
+  </insert>
+</mapper>
