@@ -116,8 +116,8 @@ public class AmazonScBuyBox implements PageProcessor {
 
 
             // 5.进行操作点击下载Excel,抓取标题
-            WebElement titleElement = driver.findElement(By.xpath("//title"));
-            String title = titleElement.getAttribute("text");
+//            WebElement titleElement = driver.findElement(By.xpath("//title"));
+//            String title = titleElement.getAttribute("text");
 
             // 6.抓取点击下载元素进行点击
             // 判断是否出现了Download按钮,未在规定时间内出现重新刷新页面

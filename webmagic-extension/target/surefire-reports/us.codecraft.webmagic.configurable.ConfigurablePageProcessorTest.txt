@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: us.codecraft.webmagic.configurable.ConfigurablePageProcessorTest
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.186 sec - in us.codecraft.webmagic.configurable.ConfigurablePageProcessorTest

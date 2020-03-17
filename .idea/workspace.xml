@@ -1,0 +1,896 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="06f4650b-d5a4-42a0-b8ce-2ed3e4c0632c" name="Default" comment="">
+      <change beforePath="$PROJECT_DIR$/spider-service/src/main/java/com/spider/amazon/batch/scbuyboxinfo/CsvBatchConfigForAmzScBuyBox.java" beforeDir="false" afterPath="$PROJECT_DIR$/spider-service/src/main/java/com/spider/amazon/batch/scbuyboxinfo/CsvBatchConfigForAmzScBuyBox.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spider-service/src/main/java/com/spider/amazon/batch/vcdailyinventory/CsvBatchConfigForAmzDailyInventory.java" beforeDir="false" afterPath="$PROJECT_DIR$/spider-service/src/main/java/com/spider/amazon/batch/vcdailyinventory/CsvBatchConfigForAmzDailyInventory.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spider-service/src/main/java/com/spider/amazon/batch/vcdailysales/CsvBatchConfigForAmzDailySales.java" beforeDir="false" afterPath="$PROJECT_DIR$/spider-service/src/main/java/com/spider/amazon/batch/vcdailysales/CsvBatchConfigForAmzDailySales.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spider-service/src/main/java/com/spider/amazon/task/ScheduleTask.java" beforeDir="false" afterPath="$PROJECT_DIR$/spider-service/src/main/java/com/spider/amazon/task/ScheduleTask.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spider-service/src/main/java/com/spider/amazon/webmagic/AmazonScBuyBox.java" beforeDir="false" afterPath="$PROJECT_DIR$/spider-service/src/main/java/com/spider/amazon/webmagic/AmazonScBuyBox.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spider-service/src/main/java/com/spider/amazon/webmagic/AmazonScFbaInventory.java" beforeDir="false" afterPath="$PROJECT_DIR$/spider-service/src/main/java/com/spider/amazon/webmagic/AmazonScFbaInventory.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spider-service/src/test/java/com/config/MyConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/spider-service/src/test/java/com/config/MyConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spider-service/src/test/java/datadeal/TestScFBAInventory.java" beforeDir="false" afterPath="$PROJECT_DIR$/spider-service/src/test/java/datadeal/TestScFBAInventory.java" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CoverageDataManager">
+    <SUITE FILE_PATH="coverage/AmazonBiSpider$CsdnBlogSplider.coverage" NAME="CsdnBlogSplider Coverage Results" MODIFIED="1572253313986" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
+      <FILTER>com.spider.amazon.webmagic.*</FILTER>
+    </SUITE>
+    <SUITE FILE_PATH="coverage/AmazonBiSpider$BzyUpdateTaskRuleTest_test.coverage" NAME="BzyUpdateTaskRuleTest.test Coverage Results" MODIFIED="1573101962710" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
+    <SUITE FILE_PATH="coverage/AmazonBiSpider$BatchTest_test.coverage" NAME="BatchTest.test Coverage Results" MODIFIED="1572832878975" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
+  </component>
+  <component name="CreatePatchCommitExecutor">
+    <option name="PATCH_PATH" value="" />
+  </component>
+  <component name="DatabaseView">
+    <option name="SHOW_INTERMEDIATE" value="true" />
+    <option name="GROUP_DATA_SOURCES" value="true" />
+    <option name="GROUP_SCHEMA" value="true" />
+    <option name="GROUP_CONTENTS" value="false" />
+    <option name="SORT_POSITIONED" value="false" />
+    <option name="SHOW_EMPTY_GROUPS" value="false" />
+    <option name="AUTO_SCROLL_FROM_SOURCE" value="false" />
+    <option name="HIDDEN_KINDS">
+      <set />
+    </option>
+    <expand />
+    <select />
+  </component>
+  <component name="FavoritesManager">
+    <favorites_list name="AmazonBiSpider" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Enum" />
+        <option value="Interface" />
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MavenImportPreferences">
+    <option name="importingSettings">
+      <MavenImportingSettings>
+        <option name="importAutomatically" value="true" />
+      </MavenImportingSettings>
+    </option>
+  </component>
+  <component name="ProjectId" id="1Z3aZGMrNrk7A27sZRbCHbleLUH" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RequestMappingsPanelOrder0" value="0" />
+    <property name="RequestMappingsPanelOrder1" value="1" />
+    <property name="RequestMappingsPanelOrder2" value="2" />
+    <property name="RequestMappingsPanelWidth0" value="75" />
+    <property name="RequestMappingsPanelWidth1" value="75" />
+    <property name="RequestMappingsPanelWidth2" value="75" />
+    <property name="SearchEverywhereHistoryKey" value="rabb&#9;FILE&#9;file:///Users/zhucan/Documents/2019BILocal/Spider/AmazonBiSpider/spider-service/src/main/java/com/spider/amazon/config/RabbitConfig.java&#10;Rabbit&#9;FILE&#9;file:///Users/zhucan/Documents/2019BILocal/Spider/AmazonBiSpider/spider-service/src/main/java/com/spider/amazon/config/RabbitConfig.java&#10;rabbit&#9;FILE&#9;file:///Users/zhucan/Documents/2019BILocal/Spider/AmazonBiSpider/spider-service/src/main/java/com/spider/amazon/config/RabbitConfig.java&#10;Amazon&#9;FILE&#9;file:///Users/zhucan/Documents/2019BILocal/Spider/AmazonBiSpider/spider-service/src/main/java/com/spider/amazon/webmagic/amzvc/AmazonVcPromotionsProcessor.java&#10;Ama&#9;FILE&#9;file:///Users/zhucan/Documents/2019BILocal/Spider/AmazonBiSpider/spider-service/src/main/java/com/spider/amazon/webmagic/amzvc/AmazonVcPromotionsProcessor.java&#10;A&#9;FILE&#9;file:///Users/zhucan/Documents/2019BILocal/Spider/AmazonBiSpider/spider-api/src/main/java/com/spider/amazon/service/IAmzVcHttpService.java&#10;app&#9;FILE&#9;file:///Users/zhucan/Documents/2019BILocal/Spider/AmazonBiSpider/spider-service/src/main/resources/application.properties&#10;BaZhuaYuAPI&#9;FILE&#9;file:///Users/zhucan/Documents/2019BILocal/Spider/AmazonBiSpider/spider-api/src/main/java/com/spider/amazon/remote/api/BaZhuaYuAPI.java&#10;baZhuaYuConfiguration&#9;PSI&#9;JAVA://com.spider.amazon.config.BaZhuaYuConfiguration&#10;VcPromotionInfoDOMapper&#9;FILE&#9;file:///Users/zhucan/Documents/2019BILocal/Spider/AmazonBiSpider/spider-service/src/main/resources/mapper/VcPromotionInfoDOMapper.xml&#10;RedisScheduler&#9;PSI&#9;JAVA://us.codecraft.webmagic.scheduler.RedisScheduler&#10;HawSrapySkuPropertyInfoDOMapper&#9;PSI&#9;JAVA://com.spider.amazon.mapper.HawSrapySkuPropertyInfoDOMapper&#10;Druid&#9;FILE&#9;file:///Users/zhucan/Documents/2019BILocal/Spider/AmazonBiSpider/spider-service/src/main/java/com/spider/amazon/config/DruidConfiguration.java&#10;Haw&#9;FILE&#9;file:///Users/zhucan/Documents/2019BILocal/Spider/AmazonBiSpider/spider-service/src/main/java/com/spider/amazon/handler/TemplateDealDataForHawHandler.java&#10;Temp&#9;PSI&#9;JAVA://com.spider.amazon.cons.TemplateHawNameCons&#10;CSVUtil&#9;PSI&#9;JAVA://com.spider.amazon.utils.CSVUtils&#10;IP&#9;PSI&#9;JAVA://us.codecraft.webmagic.utils.IPUtils&#10;WebDr&#9;FILE&#9;file:///Users/zhucan/Documents/2019BILocal/Spider/AmazonBiSpider/spider-service/src/main/java/com/spider/amazon/utils/WebDriverUtils.java&#10;Web&#9;FILE&#9;file:///Users/zhucan/Documents/2019BILocal/Spider/AmazonBiSpider/spider-service/src/main/java/com/spider/amazon/utils/WebDriverUtils.java&#10;CSVUti&#9;FILE&#9;file:///Users/zhucan/Documents/2019BILocal/Spider/AmazonBiSpider/spider-service/src/main/java/com/spider/amazon/utils/CSVUtils.java&#10;CSV&#9;PSI&#9;JAVA://com.spider.amazon.utils.CSVUtils&#10;CellType&#9;PSI&#9;JAVA://org.apache.poi.ss.usermodel.CellType&#10;HawSrapySkuInfoDO&#9;PSI&#9;JAVA://com.spider.amazon.model.HawSrapySkuInfoDO&#10;rev&#9;PSI&#9;JAVA://com.spider.amazon.mapper.reviewsInfoDOMapper&#10;HawR&#9;FILE&#9;file:///Users/zhucan/Documents/2019BILocal/Spider/AmazonBiSpider/spider-service/src/main/java/com/spider/amazon/mq/HawReceicer.java&#10;Cs&#9;FILE&#9;file:///Users/zhucan/Documents/2019BILocal/Spider/AmazonBiSpider/spider-service/src/main/java/com/spider/amazon/utils/CSVUtils.java&#10;M&#9;FILE&#9;file:///Users/zhucan/Documents/2019BILocal/Spider/AmazonBiSpider/spider-service/src/main/resources/mapper/MAsinToVskuMapDOMapper.xml&#10;HawProductServiceImpl&#9;FILE&#9;file:///Users/zhucan/Documents/2019BILocal/Spider/AmazonBiSpider/spider-service/src/main/java/com/spider/amazon/service/impl/HawProductServiceImpl.java&#10;VskuToPidMapDO&#9;FILE&#9;file:///Users/zhucan/Documents/2019BILocal/Spider/AmazonBiSpider/spider-service/src/main/java/com/spider/amazon/mapper/VskuToPidMapDOMapper.java&#10;C&#9;FILE&#9;file:///Users/zhucan/Documents/2019BILocal/Spider/AmazonBiSpider/spider-service/src/main/java/com/spider/amazon/utils/CSVUtils.java&#10;TaskSts&#9;PSI&#9;JAVA://com.spider.amazon.cons.TaskSts&#10;BaZhua&#9;FILE&#9;file:///Users/zhucan/Documents/2019BILocal/Spider/AmazonBiSpider/spider-service/src/main/java/com/spider/amazon/service/impl/BaZhuaYuServiceImpl.java&#10;pom.xml&#9;FILE&#9;file:///Users/zhucan/Documents/2019BILocal/Spider/AmazonBiSpider/spider-api/pom.xml&#10;Bazhuayu&#9;PSI&#9;JAVA://com.spider.amazon.remote.api.BaZhuaYuAPI&#10;Ba&#9;FILE&#9;file:///Users/zhucan/Documents/2019BILocal/Spider/AmazonBiSpider/spider-service/src/main/java/com/spider/amazon/service/impl/BaZhuaYuServiceImpl.java&#10;HAw&#9;FILE&#9;file:///Users/zhucan/Documents/2019BILocal/Spider/AmazonBiSpider/spider-service/src/main/java/com/spider/amazon/mq/HawDataDealReceicer.java&#10;CSVU&#9;FILE&#9;file:///Users/zhucan/Documents/2019BILocal/Spider/AmazonBiSpider/spider-service/src/main/java/com/spider/amazon/utils/CSVUtils.java&#10;sche&#9;FILE&#9;file:///Users/zhucan/Documents/2019BILocal/Spider/AmazonBiSpider/spider-service/src/main/java/com/spider/amazon/task/ScheduleTask.java&#10;schedu&#9;FILE&#9;file:///Users/zhucan/Documents/2019BILocal/Spider/AmazonBiSpider/spider-service/src/main/java/com/spider/amazon/task/ScheduleTask.java&#10;ap&#9;FILE&#9;file:///Users/zhucan/Documents/2019BILocal/Spider/AmazonBiSpider/spider-service/src/main/resources/application.properties&#10;appl&#9;FILE&#9;file:///Users/zhucan/Documents/2019BILocal/Spider/AmazonBiSpider/spider-service/src/main/resources/application.properties&#10;Pi&#9;FILE&#9;file:///Users/zhucan/Documents/2019BILocal/Spider/AmazonBiSpider/spider-service/src/main/java/com/spider/amazon/webmagic/haw/HawProductInfoPipeline.java&#10;Task&#9;PSI&#9;JAVA://com.spider.amazon.cons.TaskSts&#10;applica&#9;FILE&#9;file:///Users/zhucan/Documents/2019BILocal/Spider/AmazonBiSpider/spider-service/src/main/resources/application.properties&#10;pom&#9;FILE&#9;file:///Users/zhucan/Documents/2019BILocal/Spider/AmazonBiSpider/spider-service/pom.xml&#10;Ha&#9;FILE&#9;file:///Users/zhucan/Documents/2019BILocal/Spider/AmazonBiSpider/spider-service/src/main/java/com/spider/amazon/webmagic/haw/HawSpiderTask.java&#10;SpringBatchCallServiceImpl&#9;FILE&#9;file:///Users/zhucan/Documents/2019BILocal/Spider/AmazonBiSpider/spider-service/src/main/java/com/spider/amazon/service/impl/SpringBatchCallServiceImpl.java&#10;ISpringBatchCallService&#9;PSI&#9;JAVA://com.spider.amazon.service.ISpringBatchCallService&#10;SkuScr&#9;FILE&#9;file:///Users/zhucan/Documents/2019BILocal/Spider/AmazonBiSpider/spider-service/src/main/java/com/spider/amazon/mapper/SkuScrapyTaskDOMapper.java&#10;SkuSc&#9;FILE&#9;file:///Users/zhucan/Documents/2019BILocal/Spider/AmazonBiSpider/spider-api/src/main/java/com/spider/amazon/model/SkuScrapyTaskDO.java" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="aspect.path.notification.shown" value="true" />
+    <property name="js-jscs-nodeInterpreter" value="/usr/local/bin/node" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../AmazonBI" />
+    <property name="project.structure.last.edited" value="Modules" />
+    <property name="project.structure.proportion" value="0.15" />
+    <property name="project.structure.side.proportion" value="0.54756635" />
+    <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
+    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/spider-service/src/main/resources/mapper" />
+      <recent name="$PROJECT_DIR$/spider-api/src/main/java/com/spider/amazon/model" />
+      <recent name="$PROJECT_DIR$/spider-service/src/main/java/com/spider/amazon/mapper" />
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/spider-service/src/main/java/com/spider/amazon/batch/scbuyboxinfo" />
+    </key>
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="com.spider.amazon.mq" />
+      <recent name="com.spider.amazon.entity" />
+      <recent name="com.spider.amazon.service" />
+      <recent name="com.spider.amazon.service.impl" />
+      <recent name="com.spider.amazon.remote.api" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/spider-api/src/main/java/com/spider" />
+      <recent name="$PROJECT_DIR$/spider-api/src/main/java" />
+    </key>
+  </component>
+  <component name="RunDashboard">
+    <option name="configurationTypes">
+      <set>
+        <option value="SpringBootApplicationConfigurationType" />
+      </set>
+    </option>
+  </component>
+  <component name="RunManager" selected="Spring Boot.SpiderServiceApplication">
+    <configuration default="true" type="AndroidRunConfigurationType" factoryName="Android Application">
+      <module name="" />
+      <option name="DEPLOY" value="true" />
+      <option name="ARTIFACT_NAME" value="" />
+      <option name="PM_INSTALL_OPTIONS" value="" />
+      <option name="ACTIVITY_EXTRA_FLAGS" value="" />
+      <option name="MODE" value="default_activity" />
+      <option name="TARGET_SELECTION_MODE" value="SHOW_DIALOG" />
+      <option name="PREFERRED_AVD" value="" />
+      <option name="CLEAR_LOGCAT" value="false" />
+      <option name="SHOW_LOGCAT_AUTOMATICALLY" value="true" />
+      <option name="SKIP_NOOP_APK_INSTALLATIONS" value="true" />
+      <option name="FORCE_STOP_RUNNING_APP" value="true" />
+      <option name="DEBUGGER_TYPE" value="Java" />
+      <option name="USE_LAST_SELECTED_DEVICE" value="false" />
+      <option name="PREFERRED_AVD" value="" />
+      <Java />
+      <Profilers>
+        <option name="GAPID_DISABLE_PCS" value="false" />
+      </Profilers>
+      <option name="DEEP_LINK" value="" />
+      <option name="ACTIVITY_CLASS" value="" />
+      <method>
+        <option name="Make" enabled="true" />
+        <option name="Android.Gradle.BeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="AndroidTestRunConfigurationType" factoryName="Android Tests">
+      <module name="" />
+      <option name="TESTING_TYPE" value="0" />
+      <option name="INSTRUMENTATION_RUNNER_CLASS" value="" />
+      <option name="METHOD_NAME" value="" />
+      <option name="CLASS_NAME" value="" />
+      <option name="PACKAGE_NAME" value="" />
+      <option name="EXTRA_OPTIONS" value="" />
+      <option name="TARGET_SELECTION_MODE" value="SHOW_DIALOG" />
+      <option name="PREFERRED_AVD" value="" />
+      <option name="CLEAR_LOGCAT" value="false" />
+      <option name="SHOW_LOGCAT_AUTOMATICALLY" value="true" />
+      <option name="SKIP_NOOP_APK_INSTALLATIONS" value="true" />
+      <option name="FORCE_STOP_RUNNING_APP" value="true" />
+      <option name="DEBUGGER_TYPE" value="Java" />
+      <option name="USE_LAST_SELECTED_DEVICE" value="false" />
+      <option name="PREFERRED_AVD" value="" />
+      <Java />
+      <Profilers>
+        <option name="GAPID_DISABLE_PCS" value="false" />
+      </Profilers>
+      <method>
+        <option name="Make" enabled="true" />
+        <option name="Android.Gradle.BeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="Applet" factoryName="Applet">
+      <option name="HTML_USED" value="false" />
+      <option name="WIDTH" value="400" />
+      <option name="HEIGHT" value="300" />
+      <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
+      <module />
+    </configuration>
+    <configuration default="true" type="DjangoTestsConfigurationType" factoryName="Django tests">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="AmazonBiSpider" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="TARGET" value="" />
+      <option name="SETTINGS_FILE" value="" />
+      <option name="CUSTOM_SETTINGS" value="false" />
+      <option name="USE_OPTIONS" value="false" />
+      <option name="OPTIONS" value="" />
+      <method />
+    </configuration>
+    <configuration default="true" type="JUnitTestDiscovery" factoryName="JUnit Test Discovery" changeList="All">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <module name="" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="PACKAGE_NAME" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="METHOD_NAME" />
+      <option name="TEST_OBJECT" value="class" />
+      <option name="VM_PARAMETERS" />
+      <option name="PARAMETERS" />
+      <option name="WORKING_DIRECTORY" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="TEST_SEARCH_SCOPE">
+        <value defaultName="singleModule" />
+      </option>
+      <envs />
+      <patterns />
+      <method />
+    </configuration>
+    <configuration default="true" type="PyBehaveRunConfigurationType" factoryName="Behave">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="AmazonBiSpider" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="ADDITIONAL_ARGS" value="" />
+      <method />
+    </configuration>
+    <configuration default="true" type="PyLettuceRunConfigurationType" factoryName="Lettuce">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="AmazonBiSpider" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="ADDITIONAL_ARGS" value="" />
+      <method />
+    </configuration>
+    <configuration default="true" type="PythonConfigurationType" factoryName="Python">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="AmazonBiSpider" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <method />
+    </configuration>
+    <configuration default="true" type="TestNGTestDiscovery" factoryName="TestNG Test Discovery" changeList="All">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <module name="" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="SUITE_NAME" />
+      <option name="PACKAGE_NAME" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="METHOD_NAME" />
+      <option name="GROUP_NAME" />
+      <option name="TEST_OBJECT" value="CLASS" />
+      <option name="VM_PARAMETERS" />
+      <option name="PARAMETERS" />
+      <option name="WORKING_DIRECTORY" />
+      <option name="OUTPUT_DIRECTORY" />
+      <option name="ANNOTATION_TYPE" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="TEST_SEARCH_SCOPE">
+        <value defaultName="singleModule" />
+      </option>
+      <option name="USE_DEFAULT_REPORTERS" value="false" />
+      <option name="PROPERTIES_FILE" />
+      <envs />
+      <properties />
+      <listeners />
+      <method />
+    </configuration>
+    <configuration default="true" type="Tox" factoryName="Tox">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <module name="AmazonBiSpider" />
+      <method />
+    </configuration>
+    <configuration default="true" type="tests" factoryName="Attests">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="AmazonBiSpider" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="CLASS_NAME" value="" />
+      <option name="METHOD_NAME" value="" />
+      <option name="FOLDER_NAME" value="" />
+      <option name="TEST_TYPE" value="TEST_SCRIPT" />
+      <option name="PATTERN" value="" />
+      <option name="USE_PATTERN" value="false" />
+      <method />
+    </configuration>
+    <configuration default="true" type="tests" factoryName="Doctests">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="AmazonBiSpider" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="CLASS_NAME" value="" />
+      <option name="METHOD_NAME" value="" />
+      <option name="FOLDER_NAME" value="" />
+      <option name="TEST_TYPE" value="TEST_SCRIPT" />
+      <option name="PATTERN" value="" />
+      <option name="USE_PATTERN" value="false" />
+      <method />
+    </configuration>
+    <configuration default="true" type="tests" factoryName="Nosetests">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="AmazonBiSpider" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="CLASS_NAME" value="" />
+      <option name="METHOD_NAME" value="" />
+      <option name="FOLDER_NAME" value="" />
+      <option name="TEST_TYPE" value="TEST_SCRIPT" />
+      <option name="PATTERN" value="" />
+      <option name="USE_PATTERN" value="false" />
+      <option name="PARAMS" value="" />
+      <option name="USE_PARAM" value="false" />
+      <method />
+    </configuration>
+    <configuration default="true" type="tests" factoryName="Unittests">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="AmazonBiSpider" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="CLASS_NAME" value="" />
+      <option name="METHOD_NAME" value="" />
+      <option name="FOLDER_NAME" value="" />
+      <option name="TEST_TYPE" value="TEST_SCRIPT" />
+      <option name="PATTERN" value="" />
+      <option name="USE_PATTERN" value="false" />
+      <option name="PUREUNITTEST" value="true" />
+      <option name="PARAMS" value="" />
+      <option name="USE_PARAM" value="false" />
+      <method />
+    </configuration>
+    <configuration default="true" type="tests" factoryName="py.test">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="AmazonBiSpider" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="CLASS_NAME" value="" />
+      <option name="METHOD_NAME" value="" />
+      <option name="FOLDER_NAME" value="" />
+      <option name="TEST_TYPE" value="TEST_SCRIPT" />
+      <option name="PATTERN" value="" />
+      <option name="USE_PATTERN" value="false" />
+      <option name="testToRun" value="" />
+      <option name="keywords" value="" />
+      <option name="params" value="" />
+      <option name="USE_PARAM" value="false" />
+      <option name="USE_KEYWORD" value="false" />
+      <method />
+    </configuration>
+    <configuration name="AmazonVcWeeklySales" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="com.spider.amazon.webmagic.AmazonVcWeeklySales" />
+      <module name="spider-service" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.spider.amazon.webmagic.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="Application" factoryName="Application">
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="ArquillianJUnit" factoryName="">
+      <option name="arquillianRunConfiguration">
+        <value>
+          <option name="containerStateName" value="" />
+        </value>
+      </option>
+      <option name="TEST_OBJECT" value="class" />
+      <option name="VM_PARAMETERS" />
+      <option name="WORKING_DIRECTORY" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="ArquillianTestNG" factoryName="">
+      <option name="arquillianRunConfiguration">
+        <value>
+          <option name="containerStateName" value="" />
+        </value>
+      </option>
+      <option name="TEST_OBJECT" value="CLASS" />
+      <option name="VM_PARAMETERS" />
+      <option name="WORKING_DIRECTORY" />
+      <properties />
+      <listeners />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="FlashRunConfigurationType">
+      <option name="BCName" value="" />
+      <option name="IOSSimulatorDevice" value="" />
+      <option name="IOSSimulatorSdkPath" value="" />
+      <option name="adlOptions" value="" />
+      <option name="airProgramParameters" value="" />
+      <option name="appDescriptorForEmulator" value="Android" />
+      <option name="clearAppDataOnEachLaunch" value="true" />
+      <option name="debugTransport" value="USB" />
+      <option name="debuggerSdkRaw" value="BC SDK" />
+      <option name="emulator" value="NexusOne" />
+      <option name="emulatorAdlOptions" value="" />
+      <option name="fastPackaging" value="true" />
+      <option name="fullScreenHeight" value="0" />
+      <option name="fullScreenWidth" value="0" />
+      <option name="launchUrl" value="false" />
+      <option name="launcherParameters">
+        <LauncherParameters>
+          <option name="browser" value="a7bb68e0-33c0-4d6f-a81a-aac1fdb870c8" />
+          <option name="launcherType" value="OSDefault" />
+          <option name="newPlayerInstance" value="false" />
+          <option name="playerPath" value="/Applications/Flash Player Debugger.app" />
+        </LauncherParameters>
+      </option>
+      <option name="mobileRunTarget" value="Emulator" />
+      <option name="moduleName" value="" />
+      <option name="overriddenMainClass" value="" />
+      <option name="overriddenOutputFileName" value="" />
+      <option name="overrideMainClass" value="false" />
+      <option name="runTrusted" value="true" />
+      <option name="screenDpi" value="0" />
+      <option name="screenHeight" value="0" />
+      <option name="screenWidth" value="0" />
+      <option name="url" value="http://" />
+      <option name="usbDebugPort" value="7936" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="FlexUnitRunConfigurationType" appDescriptorForEmulator="Android" class_name="" emulatorAdlOptions="" method_name="" package_name="" scope="Class">
+      <option name="BCName" value="" />
+      <option name="launcherParameters">
+        <LauncherParameters>
+          <option name="browser" value="a7bb68e0-33c0-4d6f-a81a-aac1fdb870c8" />
+          <option name="launcherType" value="OSDefault" />
+          <option name="newPlayerInstance" value="false" />
+          <option name="playerPath" value="/Applications/Flash Player Debugger.app" />
+        </LauncherParameters>
+      </option>
+      <option name="moduleName" value="" />
+      <option name="trusted" value="true" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="GrailsRunConfigurationType" factoryName="Grails">
+      <setting name="vmparams" value="" />
+      <setting name="cmdLine" value="run-app" />
+      <setting name="passParentEnv" value="true" />
+      <setting name="grailsApplicationRoot" value="" />
+      <setting name="launchBrowser" value="true" />
+      <setting name="launchBrowserUrl" value="" />
+      <setting name="depsClasspath" value="false" />
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <method v="2" />
+    </configuration>
+    <configuration name="TestGetInvoiceService" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="spider-service" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="bopapi.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="bopapi" />
+      <option name="MAIN_CLASS_NAME" value="bopapi.TestGetInvoiceService" />
+      <option name="TEST_OBJECT" value="class" />
+      <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="TestPOHeaderService" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="spider-service" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="bopapi.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="bopapi" />
+      <option name="MAIN_CLASS_NAME" value="bopapi.TestPOHeaderService" />
+      <option name="TEST_OBJECT" value="class" />
+      <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="TestVendorPOService" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="spider-service" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="bopapi.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="bopapi" />
+      <option name="MAIN_CLASS_NAME" value="bopapi.TestVendorPOService" />
+      <option name="TEST_OBJECT" value="class" />
+      <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="TestWarehouseTransferService" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="spider-service" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="bopapi.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="bopapi" />
+      <option name="MAIN_CLASS_NAME" value="bopapi.TestWarehouseTransferService" />
+      <option name="TEST_OBJECT" value="class" />
+      <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="JUnit" factoryName="JUnit">
+      <option name="TEST_OBJECT" value="class" />
+      <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType" factoryName="Kotlin script">
+      <option name="filePath" />
+      <option name="vmParameters" />
+      <option name="alternativeJrePath" />
+      <option name="programParameters" />
+      <option name="passParentEnvs" value="true" />
+      <option name="workingDirectory" />
+      <option name="isAlternativeJrePathEnabled" value="false" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="WORKING_DIRECTORY" />
+      <module name="" />
+      <option name="filePath" />
+      <option name="vmParameters" />
+      <option name="alternativeJrePath" />
+      <option name="programParameters" />
+      <option name="passParentEnvs" value="true" />
+      <option name="workingDirectory" />
+      <option name="isAlternativeJrePathEnabled" value="false" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="WORKING_DIRECTORY" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="SpiderServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+      <module name="spider-service" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.spider.SpiderServiceApplication" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
+      <option name="ALTERNATIVE_JRE_PATH" value="C:/Program Files/Java/jdk1.8.0_73" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="TestNG">
+      <option name="TEST_OBJECT" value="CLASS" />
+      <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
+      <properties />
+      <listeners />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="#org.jetbrains.idea.devkit.run.PluginConfigurationType">
+      <module name="" />
+      <option name="VM_PARAMETERS" value="-Xmx512m -Xms256m -XX:MaxPermSize=250m -ea" />
+      <option name="PROGRAM_PARAMETERS" />
+      <predefined_log_file enabled="true" id="idea.log" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="js.build_tools.gulp">
+      <node-interpreter>project</node-interpreter>
+      <node-options />
+      <gulpfile />
+      <tasks />
+      <arguments />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Application.AmazonVcWeeklySales" />
+      <item itemvalue="JUnit.TestWarehouseTransferService" />
+      <item itemvalue="JUnit.TestGetInvoiceService" />
+      <item itemvalue="JUnit.TestPOHeaderService" />
+      <item itemvalue="JUnit.TestVendorPOService" />
+      <item itemvalue="Spring Boot.SpiderServiceApplication" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="JUnit.TestVendorPOService" />
+        <item itemvalue="JUnit.TestPOHeaderService" />
+        <item itemvalue="JUnit.TestGetInvoiceService" />
+        <item itemvalue="JUnit.TestWarehouseTransferService" />
+        <item itemvalue="Application.AmazonVcWeeklySales" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="06f4650b-d5a4-42a0-b8ce-2ed3e4c0632c" name="Default" comment="" />
+      <created>1572245575803</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1572245575803</updated>
+      <workItem from="1572245581376" duration="27120000" />
+      <workItem from="1572329059705" duration="32530000" />
+      <workItem from="1572423619652" duration="3611000" />
+      <workItem from="1572427296850" duration="17314000" />
+      <workItem from="1572489592689" duration="5018000" />
+      <workItem from="1572500027105" duration="1464000" />
+      <workItem from="1572502901549" duration="33372000" />
+      <workItem from="1572600826592" duration="476000" />
+      <workItem from="1572601341298" duration="306000" />
+      <workItem from="1572602024586" duration="166328000" />
+      <workItem from="1573570158060" duration="132028000" />
+      <workItem from="1574498673455" duration="45949000" />
+      <workItem from="1574790469396" duration="31637000" />
+      <workItem from="1574997043181" duration="184977000" />
+      <workItem from="1576461106097" duration="18101000" />
+      <workItem from="1576563108241" duration="1283000" />
+      <workItem from="1576630898972" duration="559185000" />
+      <workItem from="1581429648835" duration="27357000" />
+      <workItem from="1581902985292" duration="15394000" />
+      <workItem from="1581951843139" duration="34551000" />
+      <workItem from="1582109244634" duration="37091000" />
+      <workItem from="1582602482350" duration="26640000" />
+      <workItem from="1582803073658" duration="161716000" />
+      <workItem from="1583902982297" duration="17593000" />
+      <workItem from="1584002731705" duration="936000" />
+      <workItem from="1584003792688" duration="6777000" />
+      <workItem from="1584070286930" duration="1052000" />
+      <workItem from="1584076980860" duration="9529000" />
+      <workItem from="1584324838286" duration="14950000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TodoView">
+    <todo-panel id="selected-file">
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+    <todo-panel id="all">
+      <are-packages-shown value="true" />
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="Vcs.Log.UiProperties">
+    <option name="RECENTLY_FILTERED_USER_GROUPS">
+      <collection />
+    </option>
+    <option name="RECENTLY_FILTERED_BRANCH_GROUPS">
+      <collection />
+    </option>
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="740" y="278" key="FileChooserDialogImpl" timestamp="1584347445724">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="740" y="278" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1584347445724" />
+    <state width="1877" height="270" key="GridCell.Tab.0.bottom" timestamp="1584093519061">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1877" height="270" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1584093519061" />
+    <state width="1877" height="270" key="GridCell.Tab.0.center" timestamp="1584093519061">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1877" height="270" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1584093519061" />
+    <state width="1877" height="270" key="GridCell.Tab.0.left" timestamp="1584093519061">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1877" height="270" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1584093519061" />
+    <state width="1877" height="270" key="GridCell.Tab.0.right" timestamp="1584093519061">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1877" height="270" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1584093519061" />
+    <state x="108" y="95" width="1686" height="759" key="find.popup" timestamp="1584329364974">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="108" y="95" width="1686" height="759" key="find.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1584329364974" />
+    <state x="623" y="225" width="672" height="678" key="search.everywhere.popup" timestamp="1584326420344">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="623" y="225" width="672" height="678" key="search.everywhere.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1584326420344" />
+  </component>
+  <component name="antWorkspaceConfiguration">
+    <option name="IS_AUTOSCROLL_TO_SOURCE" value="false" />
+    <option name="FILTER_TARGETS" value="false" />
+  </component>
+  <component name="masterDetails">
+    <states>
+      <state key="ArquillianSettingsConfigurable.UI">
+        <settings>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.29424778" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="ArtifactsStructureConfigurable.UI">
+        <settings>
+          <artifact-editor />
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.54756635" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="FacetStructureConfigurable.UI">
+        <settings>
+          <last-edited>Spring</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.54756635" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="GlobalLibrariesConfigurable.UI">
+        <settings>
+          <last-edited>Python 2.7.10 (/usr/bin/python) interpreter library</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="JdkListConfigurable.UI">
+        <settings>
+          <last-edited>1.8</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="ModuleStructureConfigurable.UI">
+        <settings>
+          <last-edited>spider-api</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.54756635" />
+                <option value="0.6" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="ProjectJDKs.UI">
+        <settings>
+          <last-edited>1.8</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="ProjectLibrariesConfigurable.UI">
+        <settings>
+          <last-edited>Maven: com.alibaba:fastjson:1.2.28</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.54756635" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="ScopeChooserConfigurable.UI">
+        <settings>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.19296482" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+    </states>
+  </component>
+</project>

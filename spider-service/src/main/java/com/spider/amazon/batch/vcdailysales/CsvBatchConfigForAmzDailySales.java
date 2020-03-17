@@ -70,7 +70,7 @@ public class CsvBatchConfigForAmzDailySales {
 
     private Map<String, Object> paramMaps;
 
-    private final static String filePath = "C:\\Users\\keeley.z\\Downloads\\Sales Diagnostic_Detail View_US.csv";
+    private final static String filePath = "C:\\Users\\paulin.f\\Downloads\\Sales Diagnostic_Detail View_US.csv";
     private final static String fileName = "Sales Diagnostic_Detail View_US";
 
     @Autowired

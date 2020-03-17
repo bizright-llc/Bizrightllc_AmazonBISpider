@@ -67,7 +67,7 @@ public class CsvBatchConfigForAmzScBuyBox {
 
     private Map<String, Object> paramMaps;
 
-    private final static String filePath = "C:\\Users\\keeley.z\\Downloads\\BusinessReport";
+    private final static String filePath = "C:\\Users\\paulin.f\\Downloads\\BusinessReport";
     private final static String fileName = "BusinessReport";
     private final static int OFF_SET = 0;
 

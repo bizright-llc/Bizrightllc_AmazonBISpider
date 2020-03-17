@@ -17,7 +17,7 @@ public class MyConfig {
 
     private Map<String, Object> paramMaps;
 
-    private final static String filePath = "C:\\Users\\keeley.z\\Downloads\\Inventory Health_US-1.csv";
+    private final static String filePath = "C:\\Users\\paulin.f\\Downloads\\Inventory Health_US-1.csv";
 
     @Bean
     public void bean1(){

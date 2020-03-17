@@ -69,7 +69,7 @@ public class CsvBatchConfigForAmzDailyInventory {
 
     private Map<String, Object> paramMaps;
 
-    private final static String filePath = "C:\\Users\\keeley.z\\Downloads\\Inventory Health_US.csv";
+    private final static String filePath = "C:\\Users\\paulin.f\\Downloads\\Inventory Health_US.csv";
     private final static String fileName = "Inventory Health_US";
 
     @Autowired

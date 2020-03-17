@@ -71,7 +71,7 @@ public class ScheduleTask {
      * Fba库存日报处理属性
      */
     private final static String fbaInventoryFileName = "Fba_Inventory";
-    private static final String filePath = "C:\\Users\\keeley.z\\Downloads\\";
+    private static final String filePath = "C:\\Users\\paulin.f\\Downloads\\";
     private static final int offerSetDay = 0;
     private static final int invoiceOfferSetDay=0;
     private static final int poHeaderOfferSetDay=0;
@@ -221,7 +221,7 @@ public class ScheduleTask {
     }
 
 
-    /**
+    /**schedulerVcDailyInventoryDataDeal
      * 定时处理Amazon VC 每日库存报表
      */
     @Scheduled(cron = "0 0 7-12 * * ?  ")

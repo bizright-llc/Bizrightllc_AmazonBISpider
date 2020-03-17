@@ -44,7 +44,7 @@ public class AmazonScFbaInventory implements PageProcessor {
 
     private static final int offerSetDay = 0;
 
-    private static final String filePath = "C:\\Users\\keeley.z\\Downloads\\";
+    private static final String filePath = "C:\\Users\\paulin.f\\Downloads\\";
 
     private static final String newFileName = "Fba_Inventory";
 

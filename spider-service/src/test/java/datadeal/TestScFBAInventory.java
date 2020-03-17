@@ -23,7 +23,7 @@ class TestScFBAInventory {
      * Fba库存日报处理属性
      */
     private final static String fbaInventoryFileName = "Fba_Inventory";
-    private static final String filePath = "C:\\Users\\keeley.z\\Downloads\\";
+    private static final String filePath = "C:\\Users\\paulin.f\\Downloads\\";
     private static final int offerSetDay = 0;
 
     @Test
