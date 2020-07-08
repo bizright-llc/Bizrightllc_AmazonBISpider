@@ -15,6 +15,7 @@ import com.spider.amazon.service.*;
 import com.spider.amazon.service.impl.SpringBatchCallServiceImpl;
 import com.spider.amazon.webmagic.*;
 import com.spider.amazon.webmagic.amz.AmazonAdConsumeProcessor;
+import com.spider.amazon.webmagic.amzvc.AmazonVcPromotionsPipeline;
 import com.spider.amazon.webmagic.amzvc.AmazonVcPromotionsProcessor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -159,11 +160,13 @@ public class ScheduleTask {
 
     /**
      * 定时下载Amazon VC Promotion info and Promotion product info
+     * Run at every monday
      */
-    @Scheduled(cron = "0 0 4 * * ?")
+    @Scheduled(cron = "0 0 4 * * MON")
     public void schedulerVcDailyPromotionInfo() {
         log.info("0.step234=>开始执行［schedulerVcDailyPromotionInfo］");
         Spider spider = Spider.create(new AmazonVcPromotionsProcessor());
+        spider.addPipeline(new AmazonVcPromotionsPipeline());
         spider.addUrl(spiderConfig.getSpiderIndex());
         spider.setExitWhenComplete(true);
         spider.run();
