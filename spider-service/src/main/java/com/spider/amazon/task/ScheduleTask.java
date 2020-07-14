@@ -102,7 +102,7 @@ public class ScheduleTask {
     @Scheduled(cron = "0 40 1 * * ?")
     public void schedulerScFbaInventory() {
         log.info("0.step56=>开始执行［schedulerScFbaInventory］");
-        Spider spider = Spider.create(new AmazonScFbaInventory());
+        Spider spider = Spider.create(new AmazonScFbaInventory(spiderConfig));
         spider.addUrl(spiderConfig.getSpiderIndex());
         spider.setExitWhenComplete(true);
         spider.run();
@@ -115,7 +115,7 @@ public class ScheduleTask {
     @Scheduled(cron = "0 50 1 * * 1")
     public void schedulerScBuyBox() {
         log.info("0.step56=>开始执行［schedulerScBuyBox］");
-        Spider spider = Spider.create(new AmazonScBuyBox());
+        Spider spider = Spider.create(new AmazonScBuyBox(spiderConfig));
         spider.addUrl(spiderConfig.getSpiderIndex());
         spider.setExitWhenComplete(true);
         spider.run();
@@ -165,7 +165,7 @@ public class ScheduleTask {
     @Scheduled(cron = "0 0 4 * * MON")
     public void schedulerVcDailyPromotionInfo() {
         log.info("0.step234=>开始执行［schedulerVcDailyPromotionInfo］");
-        Spider spider = Spider.create(new AmazonVcPromotionsProcessor());
+        Spider spider = Spider.create(new AmazonVcPromotionsProcessor(spiderConfig));
         spider.addPipeline(new AmazonVcPromotionsPipeline());
         spider.addUrl(spiderConfig.getSpiderIndex());
         spider.setExitWhenComplete(true);

@@ -39,7 +39,7 @@ public class PromotionReceicer{
 
         // 2.调用爬虫
         log.info("调用爬虫 promotionList=>[{}] crawId=>[{}]",promotionList,crawId);
-        Spider spider= Spider.create(new AmazonVcPromotionsProcessor());
+        Spider spider= Spider.create(new AmazonVcPromotionsProcessor(spiderConfig));
         spider.addPipeline(new AmazonVcPromotionsPipeline());
         spider.thread(2);
         for ( PromotionList singlePromotionList:promotionList) {
