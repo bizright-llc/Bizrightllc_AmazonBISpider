@@ -2,6 +2,7 @@ package com.spider.amazon.webmagic;
 
 import cn.hutool.core.date.DateUtil;
 import com.common.exception.ServiceException;
+import com.spider.amazon.config.SpiderConfig;
 import com.spider.amazon.cons.DateFormat;
 import com.spider.amazon.cons.DriverPathCons;
 import com.spider.amazon.cons.RespErrorEnum;
@@ -12,10 +13,14 @@ import com.spider.amazon.utils.JsonToListUtil;
 import com.spider.amazon.utils.UsDateUtils;
 import com.spider.amazon.utils.WebDriverUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.SystemUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.remote.CapabilityType;
+import org.openqa.selenium.remote.DesiredCapabilities;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -24,6 +29,7 @@ import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.Spider;
 import us.codecraft.webmagic.processor.PageProcessor;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -36,10 +42,19 @@ import static java.lang.Thread.sleep;
 @Slf4j
 public class AmazonScBuyBox implements PageProcessor {
 
-    private static final String jsonPathSc = "C:\\Program Files\\Java\\BiSpider\\cookieSc.json";
+    //
+//    private static final String jsonPathSc = "C:\\Program Files\\Java\\BiSpider\\cookieSc.json";
+    private static final String jsonPathSc = "/Users/shaochinlin/Documents/Bizright/BI/BiSpider/cookieSc.json";
+
+    private SpiderConfig spiderConfig;
 
     @Autowired
-    private CookiesUtils cookiesUtils;
+    public AmazonScBuyBox(SpiderConfig spiderConfig) {
+        this.spiderConfig = spiderConfig;
+    }
+
+//    @Autowired
+//    private CookiesUtils cookiesUtils;
 
     @Value("${amazon.sc.freelogin.cookies.name}")
     private String cookiesConfigName;
@@ -74,7 +89,26 @@ public class AmazonScBuyBox implements PageProcessor {
 
         // 1.建立WebDriver
         System.setProperty("webdriver.chrome.driver", DriverPathCons.CHROME_DRIVER_PATH);
-        WebDriver driver = new ChromeDriver();
+
+//        String downloadFilepath = "/Users/shaochinlin/Documents/Bizright";
+//        HashMap<String, Object> chromePrefs = new HashMap<String, Object>();
+//        chromePrefs.put("profile.default_content_settings.popups", 0);
+//        chromePrefs.put("download.default_directory", downloadFilepath);
+//
+//        ChromeOptions chromeOptions = new ChromeOptions();
+//        chromeOptions.setExperimentalOption("prefs", chromePrefs);
+//
+//        DesiredCapabilities cap = DesiredCapabilities.chrome();
+//        cap.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);
+//        cap.setCapability(ChromeOptions.CAPABILITY, chromeOptions);
+
+        WebDriver driver = null;
+
+        if (SystemUtils.IS_OS_WINDOWS) {
+            driver = WebDriverUtils.getWebDriver(spiderConfig.getDownloadPathWindows());
+        } else {
+            driver = WebDriverUtils.getWebDriver(spiderConfig.getDownloadPathLinux());
+        }
 
         try {
 
@@ -82,19 +116,23 @@ public class AmazonScBuyBox implements PageProcessor {
             driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
 
             // 2.初始打开页面
-            driver.get(SpiderUrl.SPIDER_SC_INDEX);
+//            driver.get(SpiderUrl.SPIDER_SC_INDEX);
+            driver.get(SpiderUrl.SPIDER_INDEX);
 
             // 3.add Cookies 在工具类中解析json
             driver.manage().deleteAllCookies();
-            List<Cookie> listCookies = JsonToListUtil.amazonSourceCookieList2CookieList(JsonToListUtil.getListByPath(jsonPathSc));
+            List<Cookie> listCookies = JsonToListUtil.amazonSourceCookieList2CookieList(JsonToListUtil.getListByPath(spiderConfig.getAmzScCookieFilepath()));
             for (Cookie cookie : listCookies) {
+
+                System.out.println(cookie.getName() + ":" + cookie.getDomain());
+
                 // Cookie(String name, String value, String domain, String path, Date expiry, boolean isSecure, boolean isHttpOnly)
-                if (!cookie.getName().equals("__Host-mons-selections")) {
+                // Havn't know why cannot add this cookie
+                if (!cookie.getName().equals("__Host-mons-selections") && !cookie.getName().equals("__Host-mselc")) {
                     driver.manage().addCookie(new org.openqa.selenium.Cookie(cookie.getName(), cookie.getValue(), cookie.getDomain(),
                             cookie.getPath(), cookie.getExpiry(), cookie.getIsSecure(), cookie.getIsHttpOnly()));
                 }
             }
-
 
             // 4.重定向跳转
             // 构造查询日期数据，获取上一个自然周的数据
@@ -134,6 +172,7 @@ public class AmazonScBuyBox implements PageProcessor {
                 throw new ServiceException(RespErrorEnum.SPIDER_EXEC.getSubStatusCode(), RespErrorEnum.SPIDER_EXEC.getSubStatusMsg());
             }
         } catch (Exception e) {
+            e.printStackTrace();
             throw new ServiceException(RespErrorEnum.SPIDER_EXEC.getSubStatusCode(), RespErrorEnum.SPIDER_EXEC.getSubStatusMsg());
         } finally {
             driver.quit();
@@ -145,16 +184,17 @@ public class AmazonScBuyBox implements PageProcessor {
 
     }
 
-    public static void main(String[] args) {
-        System.out.println("0.step67=>抓取程序开启。");
-
-        Spider.create(new AmazonScBuyBox())
-                .addUrl(SpiderUrl.SPIDER_SC_INDEX)
-                .run();
-
-        System.out.println("end.step93=>抓取程序结束。");
-
-    }
+//    public static void main(String[] args) {
+//
+//        System.out.println("0.step67=>抓取程序开启。");
+//
+//        Spider.create(new AmazonScBuyBox())
+//                .addUrl(SpiderUrl.SPIDER_SC_INDEX)
+//                .run();
+//
+//        System.out.println("end.step93=>抓取程序结束。");
+//
+//    }
 
 }
 
