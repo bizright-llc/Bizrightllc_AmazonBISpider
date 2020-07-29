@@ -28,11 +28,8 @@ public class SpiderConfig {
     @Value("${spider.amazon.haw.addr.index}")
     private String spiderHawIndex;
 
-    @Value("${spider.download.path.windows}")
-    private String downloadPathWindows;
-
-    @Value("${spider.download.path.linux}")
-    private String downloadPathLinux;
+    @Value("${spider.download.path}")
+    private String downloadPath;
 
     @Value("${spider.amazon.vc.cookie}")
     private String amzVcCookieFilepath;
