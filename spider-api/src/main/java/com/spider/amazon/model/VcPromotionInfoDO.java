@@ -2,6 +2,8 @@ package com.spider.amazon.model;
 
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Builder(toBuilder = true)
 @ToString
 @Data
@@ -10,7 +12,7 @@ import lombok.*;
 public class VcPromotionInfoDO {
     private String crawId;
 
-    private String createdOn;
+    private String createdOnStr;
 
     private String promotionId;
 
@@ -18,9 +20,9 @@ public class VcPromotionInfoDO {
 
     private String name;
 
-    private String startDate;
+    private String startDateStr;
 
-    private String endDate;
+    private String endDateStr;
 
     private String type;
 
@@ -37,5 +39,11 @@ public class VcPromotionInfoDO {
     private String merchandisingFee;
 
     private String crawFlg;
+
+    private LocalDateTime createdOn;
+
+    private LocalDateTime startDate;
+
+    private LocalDateTime endDate;
 
 }

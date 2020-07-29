@@ -41,6 +41,5 @@ public class AmazonVcPromotionsPipeline implements Pipeline {
             }
         }
 
-
     }
 }

@@ -1,135 +1,487 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.spider.amazon.mapper.VcPromotionProductInfoDOMapper">
-  <resultMap id="BaseResultMap" type="com.spider.amazon.model.VcPromotionProductInfoDO">
-    <result column="craw_id" jdbcType="VARCHAR" property="crawId" />
-    <result column="promotion_id" jdbcType="VARCHAR" property="promotionId" />
-    <result column="pname" jdbcType="VARCHAR" property="pname" />
-    <result column="upc" jdbcType="VARCHAR" property="upc" />
-    <result column="amazon_price" jdbcType="VARCHAR" property="amazonPrice" />
-    <result column="website_price" jdbcType="VARCHAR" property="websitePrice" />
-    <result column="funding" jdbcType="VARCHAR" property="funding" />
-    <result column="likely_price" jdbcType="VARCHAR" property="likelyPrice" />
-    <result column="units_sold" jdbcType="VARCHAR" property="unitsSold" />
-    <result column="amount_spent" jdbcType="VARCHAR" property="amountSpent" />
-    <result column="revenue" jdbcType="VARCHAR" property="revenue" />
-    <result column="craw_flg" jdbcType="VARCHAR" property="crawFlg" />
-    <result column="asin" jdbcType="VARCHAR" property="asin" />
-  </resultMap>
-  <sql id="Base_Column_List">
-    craw_id, promotion_id, pname, upc, amazon_price, website_price, funding, likely_price, 
-    units_sold, amount_spent, revenue, craw_flg, asin
-  </sql>
-  <insert id="insert" parameterType="com.spider.amazon.model.VcPromotionProductInfoDO">
-    insert into VcPromotionProductInfo (craw_id, promotion_id, pname, 
-      upc, amazon_price, website_price, 
-      funding, likely_price, units_sold, 
-      amount_spent, revenue, craw_flg,
-      asin
-      )
-    values (#{crawId,jdbcType=VARCHAR}, #{promotionId,jdbcType=VARCHAR}, #{pname,jdbcType=VARCHAR}, 
-      #{upc,jdbcType=VARCHAR}, #{amazonPrice,jdbcType=VARCHAR}, #{websitePrice,jdbcType=VARCHAR}, 
-      #{funding,jdbcType=VARCHAR}, #{likelyPrice,jdbcType=VARCHAR}, #{unitsSold,jdbcType=VARCHAR}, 
-      #{amountSpent,jdbcType=VARCHAR}, #{revenue,jdbcType=VARCHAR}, #{crawFlg,jdbcType=VARCHAR},
-      #{asin,jdbcType=VARCHAR}
-      )
-  </insert>
-  <insert id="insertSelective" parameterType="com.spider.amazon.model.VcPromotionProductInfoDO">
-    insert into VcPromotionProductInfo
-    <trim prefix="(" suffix=")" suffixOverrides=",">
-      <if test="crawId != null">
-        craw_id,
-      </if>
-      <if test="promotionId != null">
-        promotion_id,
-      </if>
-      <if test="pname != null">
-        pname,
-      </if>
-      <if test="upc != null">
-        upc,
-      </if>
-      <if test="amazonPrice != null">
-        amazon_price,
-      </if>
-      <if test="websitePrice != null">
-        website_price,
-      </if>
-      <if test="funding != null">
-        funding,
-      </if>
-      <if test="likelyPrice != null">
-        likely_price,
-      </if>
-      <if test="unitsSold != null">
-        units_sold,
-      </if>
-      <if test="amountSpent != null">
-        amount_spent,
-      </if>
-      <if test="revenue != null">
-        revenue,
-      </if>
-      <if test="crawFlg != null">
-        craw_flg,
-      </if>
-      <if test="asin != null">
-        asin,
-      </if>
-    </trim>
-    <trim prefix="values (" suffix=")" suffixOverrides=",">
-      <if test="crawId != null">
-        #{crawId,jdbcType=VARCHAR},
-      </if>
-      <if test="promotionId != null">
-        #{promotionId,jdbcType=VARCHAR},
-      </if>
-      <if test="pname != null">
-        #{pname,jdbcType=VARCHAR},
-      </if>
-      <if test="upc != null">
-        #{upc,jdbcType=VARCHAR},
-      </if>
-      <if test="amazonPrice != null">
-        #{amazonPrice,jdbcType=VARCHAR},
-      </if>
-      <if test="websitePrice != null">
-        #{websitePrice,jdbcType=VARCHAR},
-      </if>
-      <if test="funding != null">
-        #{funding,jdbcType=VARCHAR},
-      </if>
-      <if test="likelyPrice != null">
-        #{likelyPrice,jdbcType=VARCHAR},
-      </if>
-      <if test="unitsSold != null">
-        #{unitsSold,jdbcType=VARCHAR},
-      </if>
-      <if test="amountSpent != null">
-        #{amountSpent,jdbcType=VARCHAR},
-      </if>
-      <if test="revenue != null">
-        #{revenue,jdbcType=VARCHAR},
-      </if>
-      <if test="crawFlg != null">
-        #{crawFlg,jdbcType=VARCHAR},
-      </if>
-      <if test="asin != null">
-        #{asin,jdbcType=VARCHAR},
-      </if>
-    </trim>
-  </insert>
-  <!-- 批量插入 -->
-  <insert id="insertBatch" parameterType="java.util.List">
-    insert into VcPromotionProductInfo (<include refid="Base_Column_List" />)
-    values
-    <foreach collection="list" item="item" index="index"  separator=",">
-      (#{item.crawId,jdbcType=VARCHAR}, #{item.promotionId,jdbcType=VARCHAR}, #{item.pname,jdbcType=VARCHAR},
-      #{item.upc,jdbcType=VARCHAR}, #{item.amazonPrice,jdbcType=VARCHAR}, #{item.websitePrice,jdbcType=VARCHAR},
-      #{item.funding,jdbcType=VARCHAR}, #{item.likelyPrice,jdbcType=VARCHAR}, #{item.unitsSold,jdbcType=VARCHAR},
-      #{item.amountSpent,jdbcType=VARCHAR}, #{item.revenue,jdbcType=VARCHAR}, #{item.crawFlg,jdbcType=VARCHAR},
-      #{item.asin,jdbcType=VARCHAR}
-      )
-    </foreach>
-  </insert>
+    <resultMap id="BaseResultMap" type="com.spider.amazon.model.VcPromotionProductInfoDO">
+        <result column="CrawId" jdbcType="VARCHAR" property="crawId"/>
+        <result column="PromotionId" jdbcType="VARCHAR" property="promotionId"/>
+        <result column="ProductName" jdbcType="VARCHAR" property="productName"/>
+        <result column="Upc" jdbcType="VARCHAR" property="upc"/>
+        <result column="AmazonPriceStr" jdbcType="VARCHAR" property="amazonPriceStr"/>
+        <result column="AmazonPrice" jdbcType="DECIMAL" property="amazonPrice"/>
+        <result column="WebsitePriceStr" jdbcType="VARCHAR" property="websitePriceStr"/>
+        <result column="WebsitePrice" jdbcType="DECIMAL" property="websitePrice"/>
+        <result column="FundingStr" jdbcType="VARCHAR" property="fundingStr"/>
+        <result column="Funding" jdbcType="DECIMAL" property="funding"/>
+        <result column="LikelyPriceStr" jdbcType="VARCHAR" property="likelyPriceStr"/>
+        <result column="LikelyPrice" jdbcType="DECIMAL" property="likelyPrice"/>
+        <result column="UnitsSoldStr" jdbcType="VARCHAR" property="unitsSoldStr"/>
+        <result column="UnitsSold" jdbcType="INTEGER" property="unitsSold"/>
+        <result column="amount_spent" jdbcType="VARCHAR" property="amountSpent"/>
+        <result column="RevenueStr" jdbcType="VARCHAR" property="revenueStr"/>
+        <result column="Revenue" jdbcType="DECIMAL" property="revenue"/>
+        <result column="craw_flg" jdbcType="VARCHAR" property="crawFlg"/>
+        <result column="asin" jdbcType="VARCHAR" property="asin"/>
+    </resultMap>
+    <sql id="allColumn">
+        CrawId, PromotionId, ProductName, Upc, AmazonPriceStr, AmazonPrice, WebsitePriceStr, WebsitePrice, FundingStr, Funding,
+    LikelyPriceStr, LikelyPrice, UnitsSoldStr, UnitsSold, AmountSpentStr, AmountSpent, RevenueStr, Revenue, CrawFlg, Asin
+    </sql>
+    <insert id="insert" parameterType="com.spider.amazon.model.VcPromotionProductInfoDO">
+        insert into VcPromotionProductInfo (<include refid="allColumn"/>)
+        values (
+        <choose>
+            <when test="crawId != null">
+                #{crawId,jdbcType=VARCHAR}
+            </when>
+            <otherwise>
+                ''
+            </otherwise>
+        </choose>
+        ,
+        <choose>
+            <when test="promotionId != null">
+                #{promotionId,jdbcType=VARCHAR}
+            </when>
+            <otherwise>
+                ''
+            </otherwise>
+        </choose>
+        ,
+        <choose>
+            <when test="productName != null">
+                #{productName,jdbcType=VARCHAR}
+            </when>
+            <otherwise>
+                ''
+            </otherwise>
+        </choose>
+        ,
+        <choose>
+            <when test="upc != null">
+                #{upc,jdbcType=VARCHAR}
+            </when>
+            <otherwise>
+                ''
+            </otherwise>
+        </choose>
+        ,
+        <choose>
+            <when test="amazonPriceStr != null">
+                #{amazonPriceStr,jdbcType=VARCHAR}
+            </when>
+            <otherwise>
+                ''
+            </otherwise>
+        </choose>
+        ,
+        <choose>
+            <when test="amazonPrice != null">
+                #{amazonPrice,jdbcType=DECIMAL}
+            </when>
+            <otherwise>
+                0.00
+            </otherwise>
+        </choose>
+        ,
+        <choose>
+            <when test="websitePriceStr != null">
+                #{websitePriceStr,jdbcType=VARCHAR}
+            </when>
+            <otherwise>
+                ''
+            </otherwise>
+        </choose>
+        ,
+        <choose>
+            <when test="websitePrice != null">
+                #{websitePrice,jdbcType=DECIMAL}
+            </when>
+            <otherwise>
+                0.00
+            </otherwise>
+        </choose>
+        ,
+        <choose>
+            <when test="fundingStr != null">
+                #{fundingStr,jdbcType=VARCHAR}
+            </when>
+            <otherwise>
+                ''
+            </otherwise>
+        </choose>
+        ,
+        <choose>
+            <when test="funding != null">
+                #{funding,jdbcType=DECIMAL}
+            </when>
+            <otherwise>
+                ''
+            </otherwise>
+        </choose>
+        ,
+        <choose>
+            <when test="likelyPriceStr != null">
+                #{likelyPriceStr,jdbcType=VARCHAR}
+            </when>
+            <otherwise>
+                ''
+            </otherwise>
+        </choose>
+        ,
+        <choose>
+            <when test="likelyPrice != null">
+                #{likelyPrice,jdbcType=DECIMAL}
+            </when>
+            <otherwise>
+                0.00
+            </otherwise>
+        </choose>
+        ,
+        <choose>
+            <when test="unitsSoldStr != null">
+                #{unitsSoldStr,jdbcType=VARCHAR}
+            </when>
+            <otherwise>
+                ''
+            </otherwise>
+        </choose>
+        ,
+        <choose>
+            <when test="unitsSold != null">
+                #{unitsSold,jdbcType=INTEGER}
+            </when>
+            <otherwise>
+                0
+            </otherwise>
+        </choose>
+        ,
+        <choose>
+            <when test="amountSpentStr != null">
+                #{amountSpentStr,jdbcType=VARCHAR}
+            </when>
+            <otherwise>
+                ''
+            </otherwise>
+        </choose>
+        ,
+        <choose>
+            <when test="amountSpent != null">
+                #{amountSpent,jdbcType=DECIMAL}
+            </when>
+            <otherwise>
+                0.00
+            </otherwise>
+        </choose>
+        ,
+        <choose>
+            <when test="revenueStr != null">
+                #{revenueStr,jdbcType=VARCHAR}
+            </when>
+            <otherwise>
+                ''
+            </otherwise>
+        </choose>
+        ,
+        <choose>
+            <when test="revenue != null">
+                #{revenue,jdbcType=DECIMAL}
+            </when>
+            <otherwise>
+                0.00
+            </otherwise>
+        </choose>
+        ,
+        <choose>
+            <when test="crawFlg != null">
+                #{crawFlg,jdbcType=VARCHAR}
+            </when>
+            <otherwise>
+                ''
+            </otherwise>
+        </choose>
+        ,
+        <choose>
+            <when test="asin != null">
+                #{asin,jdbcType=VARCHAR}
+            </when>
+            <otherwise>
+                ''
+            </otherwise>
+        </choose>
+        )
+    </insert>
+    <insert id="insertSelective" parameterType="com.spider.amazon.model.VcPromotionProductInfoDO">
+        insert into VcPromotionProductInfo
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="crawId != null">
+                craw_id,
+            </if>
+            <if test="promotionId != null">
+                promotion_id,
+            </if>
+            <if test="pname != null">
+                pname,
+            </if>
+            <if test="upc != null">
+                upc,
+            </if>
+            <if test="amazonPrice != null">
+                amazon_price,
+            </if>
+            <if test="websitePrice != null">
+                website_price,
+            </if>
+            <if test="funding != null">
+                funding,
+            </if>
+            <if test="likelyPrice != null">
+                likely_price,
+            </if>
+            <if test="unitsSold != null">
+                units_sold,
+            </if>
+            <if test="amountSpent != null">
+                amount_spent,
+            </if>
+            <if test="revenue != null">
+                revenue,
+            </if>
+            <if test="crawFlg != null">
+                craw_flg,
+            </if>
+            <if test="asin != null">
+                asin,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="crawId != null">
+                #{crawId,jdbcType=VARCHAR},
+            </if>
+            <if test="promotionId != null">
+                #{promotionId,jdbcType=VARCHAR},
+            </if>
+            <if test="pname != null">
+                #{pname,jdbcType=VARCHAR},
+            </if>
+            <if test="upc != null">
+                #{upc,jdbcType=VARCHAR},
+            </if>
+            <if test="amazonPrice != null">
+                #{amazonPrice,jdbcType=VARCHAR},
+            </if>
+            <if test="websitePrice != null">
+                #{websitePrice,jdbcType=VARCHAR},
+            </if>
+            <if test="funding != null">
+                #{funding,jdbcType=VARCHAR},
+            </if>
+            <if test="likelyPrice != null">
+                #{likelyPrice,jdbcType=VARCHAR},
+            </if>
+            <if test="unitsSold != null">
+                #{unitsSold,jdbcType=VARCHAR},
+            </if>
+            <if test="amountSpent != null">
+                #{amountSpent,jdbcType=VARCHAR},
+            </if>
+            <if test="revenue != null">
+                #{revenue,jdbcType=VARCHAR},
+            </if>
+            <if test="crawFlg != null">
+                #{crawFlg,jdbcType=VARCHAR},
+            </if>
+            <if test="asin != null">
+                #{asin,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+
+    <!-- 批量插入 -->
+    <insert id="insertBatch" parameterType="java.util.List">
+        insert into VcPromotionProductInfo (<include refid="allColumn"/>)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (
+            <choose>
+                <when test="item.crawId != null">
+                    #{item.crawId,jdbcType=VARCHAR}
+                </when>
+                <otherwise>
+                    ''
+                </otherwise>
+            </choose>
+            ,
+            <choose>
+                <when test="item.promotionId != null">
+                    #{item.promotionId,jdbcType=VARCHAR}
+                </when>
+                <otherwise>
+                    ''
+                </otherwise>
+            </choose>
+            ,
+            <choose>
+                <when test="item.productName != null">
+                    #{item.productName,jdbcType=VARCHAR}
+                </when>
+                <otherwise>
+                    ''
+                </otherwise>
+            </choose>
+            ,
+            <choose>
+                <when test="item.upc != null">
+                    #{item.upc,jdbcType=VARCHAR}
+                </when>
+                <otherwise>
+                    ''
+                </otherwise>
+            </choose>
+            ,
+            <choose>
+                <when test="item.amazonPriceStr != null">
+                    #{item.amazonPriceStr,jdbcType=VARCHAR}
+                </when>
+                <otherwise>
+                    ''
+                </otherwise>
+            </choose>
+            ,
+            <choose>
+                <when test="item.amazonPrice != null">
+                    #{item.amazonPrice,jdbcType=DECIMAL}
+                </when>
+                <otherwise>
+                    0.00
+                </otherwise>
+            </choose>
+            ,
+            <choose>
+                <when test="item.websitePriceStr != null">
+                    #{item.websitePriceStr,jdbcType=VARCHAR}
+                </when>
+                <otherwise>
+                    ''
+                </otherwise>
+            </choose>
+            ,
+            <choose>
+                <when test="item.websitePrice != null">
+                    #{item.websitePrice,jdbcType=DECIMAL}
+                </when>
+                <otherwise>
+                    0.00
+                </otherwise>
+            </choose>
+            ,
+            <choose>
+                <when test="item.fundingStr != null">
+                    #{item.fundingStr,jdbcType=VARCHAR}
+                </when>
+                <otherwise>
+                    ''
+                </otherwise>
+            </choose>
+            ,
+            <choose>
+                <when test="item.funding != null">
+                    #{item.funding,jdbcType=DECIMAL}
+                </when>
+                <otherwise>
+                    ''
+                </otherwise>
+            </choose>
+            ,
+            <choose>
+                <when test="item.likelyPriceStr != null">
+                    #{item.likelyPriceStr,jdbcType=VARCHAR}
+                </when>
+                <otherwise>
+                    ''
+                </otherwise>
+            </choose>
+            ,
+            <choose>
+                <when test="item.likelyPrice != null">
+                    #{item.likelyPrice,jdbcType=DECIMAL}
+                </when>
+                <otherwise>
+                    0.00
+                </otherwise>
+            </choose>
+            ,
+            <choose>
+                <when test="item.unitsSoldStr != null">
+                    #{item.unitsSoldStr,jdbcType=VARCHAR}
+                </when>
+                <otherwise>
+                    ''
+                </otherwise>
+            </choose>
+            ,
+            <choose>
+                <when test="item.unitsSold != null">
+                    #{item.unitsSold,jdbcType=INTEGER}
+                </when>
+                <otherwise>
+                    0
+                </otherwise>
+            </choose>
+            ,
+            <choose>
+                <when test="item.amountSpentStr != null">
+                    #{item.amountSpentStr,jdbcType=VARCHAR}
+                </when>
+                <otherwise>
+                    ''
+                </otherwise>
+            </choose>
+            ,
+            <choose>
+                <when test="item.amountSpent != null">
+                    #{item.amountSpent,jdbcType=DECIMAL}
+                </when>
+                <otherwise>
+                    0.00
+                </otherwise>
+            </choose>
+            ,
+            <choose>
+                <when test="item.revenueStr != null">
+                    #{item.revenueStr,jdbcType=VARCHAR}
+                </when>
+                <otherwise>
+                    ''
+                </otherwise>
+            </choose>
+            ,
+            <choose>
+                <when test="item.revenue != null">
+                    #{item.revenue,jdbcType=DECIMAL}
+                </when>
+                <otherwise>
+                    0.00
+                </otherwise>
+            </choose>
+            ,
+            <choose>
+                <when test="item.crawFlg != null">
+                    #{item.crawFlg,jdbcType=VARCHAR}
+                </when>
+                <otherwise>
+                    ''
+                </otherwise>
+            </choose>
+            ,
+            <choose>
+                <when test="item.asin != null">
+                    #{item.asin,jdbcType=VARCHAR}
+                </when>
+                <otherwise>
+                    ''
+                </otherwise>
+            </choose>
+            )
+        </foreach>
+    </insert>
 </mapper>

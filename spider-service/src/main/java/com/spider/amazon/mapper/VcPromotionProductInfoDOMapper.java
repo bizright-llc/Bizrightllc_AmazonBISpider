@@ -7,6 +7,7 @@ import java.util.List;
 
 @Mapper
 public interface VcPromotionProductInfoDOMapper {
+
     int insert(VcPromotionProductInfoDO record);
 
     int insertSelective(VcPromotionProductInfoDO record);

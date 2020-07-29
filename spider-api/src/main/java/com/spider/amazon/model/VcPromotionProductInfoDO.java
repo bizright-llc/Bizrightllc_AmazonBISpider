@@ -2,6 +2,8 @@ package com.spider.amazon.model;
 
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Builder(toBuilder = true)
 @ToString
 @Data
@@ -12,23 +14,37 @@ public class VcPromotionProductInfoDO {
 
     private String promotionId;
 
-    private String pname;
+    private String productName;
 
     private String upc;
 
-    private String amazonPrice;
+    private String amazonPriceStr;
 
-    private String websitePrice;
+    private BigDecimal amazonPrice;
 
-    private String funding;
+    private String websitePriceStr;
 
-    private String likelyPrice;
+    private BigDecimal websitePrice;
 
-    private String unitsSold;
+    private String fundingStr;
 
-    private String amountSpent;
+    private BigDecimal funding;
 
-    private String revenue;
+    private String likelyPriceStr;
+
+    private BigDecimal likelyPrice;
+
+    private String unitsSoldStr;
+
+    private Integer unitsSold;
+
+    private String amountSpentStr;
+
+    private BigDecimal amountSpent;
+
+    private String revenueStr;
+
+    private BigDecimal revenue;
 
     private String crawFlg;
 

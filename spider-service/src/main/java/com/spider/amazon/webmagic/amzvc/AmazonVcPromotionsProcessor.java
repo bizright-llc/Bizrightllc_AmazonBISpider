@@ -11,7 +11,7 @@ import com.spider.amazon.entity.Cookie;
 import com.spider.amazon.model.VcPromotionInfoDO;
 import com.spider.amazon.model.VcPromotionProductInfoDO;
 import com.spider.amazon.remote.api.SpiderUrl;
-import com.spider.amazon.utils.CookiesUtils;
+import com.spider.amazon.utils.ConvertUtils;
 import com.spider.amazon.utils.JsonToListUtil;
 import com.spider.amazon.utils.WebDriverUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +22,6 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Request;
@@ -30,9 +29,9 @@ import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.Spider;
 import us.codecraft.webmagic.processor.PageProcessor;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static cn.hutool.core.thread.ThreadUtil.sleep;
@@ -46,17 +45,6 @@ import static cn.hutool.core.thread.ThreadUtil.sleep;
 @Slf4j
 public class AmazonVcPromotionsProcessor implements PageProcessor {
 
-//    public static final String INDEX_URL = "https://www.google.com/";
-
-//    public static final String MAIN_URL = "https://vendorcentral.amazon.com/hz/vendor/members/promotions/list/home?ref_=vc_xx_subNav";
-//    private static final String jsonPathSc = "/Users/shaochinlin/Documents/Bizright/BI/BiSpider/cookieSc.json";
-
-//    @Autowired
-//    private CookiesUtils cookiesUtils;
-
-    //    @Value("${amazon.vc.freelogin.cookies.name}")
-//    private String cookiesConfigName;
-//
     private SpiderConfig spiderConfig;
 
     @Autowired
@@ -77,8 +65,6 @@ public class AmazonVcPromotionsProcessor implements PageProcessor {
      * @return
      */
     public Site getSite() {
-//        Set<Cookie> cookies = cookiesUtils.keyValueCookies2CookiesSet(cookiesConfigName, ";", "=");
-//        Set<Cookie> cookies = cookiesUtils.keyValueCookies2CookiesSet("amazon.vc.freelogin.cookies", ";", "=");
 
         List<Cookie> listCookies = JsonToListUtil.amazonSourceCookieList2CookieList(JsonToListUtil.getList());
 
@@ -165,11 +151,6 @@ public class AmazonVcPromotionsProcessor implements PageProcessor {
                 log.info("page [{}]", pageIndex);
                 WebDriverUtils.waitForLoad(driver);
                 if (pageIndex != 1) {
-
-                    //test
-                    if(pageIndex >= 10){
-                        break;
-                    }
 
                     String nextEleXPath = "//*[@id='promotion-list-pagination']/ul/li[contains(@class,'a-last')]/a";
                     String overlayXPath = "//div[@class='mt-loading-overlay']";
@@ -285,8 +266,10 @@ public class AmazonVcPromotionsProcessor implements PageProcessor {
         String endDate = ObjectUtil.isNotEmpty(pdEle3) ? pdEle3.getText().trim() : "";
         WebElement pdEle4 = WebDriverUtils.expWaitForElement(driver, By.xpath("//*[@id='promotion-detail-page']//table[contains(@class,'a-spacing-top-micro')]//td[contains(text(),'Type')]/../td[2]"), 10);
         String type = ObjectUtil.isNotEmpty(pdEle4) ? pdEle4.getText().trim() : "";
-        WebElement pdEle5 = WebDriverUtils.expWaitForElement(driver, By.xpath("//*[@id='promotion-detail-page']//table[contains(@class,'a-spacing-top-micro')]//td[contains(text(),'Hero product')]/../td[2]"), 10);
-        String heroProduct = ObjectUtil.isNotEmpty(pdEle5) ? pdEle5.getText().trim() : "";
+//        WebElement pdEle5 = WebDriverUtils.expWaitForElement(driver, By.xpath("//*[@id='promotion-detail-page']//table[contains(@class,'a-spacing-top-micro')]//td[contains(text(),'Hero product')]/../td[2]"), 10);
+//        String heroProduct = ObjectUtil.isNotEmpty(pdEle5) ? pdEle5.getText().trim() : "";
+        // Dont have hero product on the page
+        String heroProduct = "";
         WebElement pdEle6 = WebDriverUtils.expWaitForElement(driver, By.xpath("//*[@id='promotion-detail-page']//table[contains(@class,'a-spacing-top-micro')]//td[contains(text(),'Vendor code')]/../td[2]"), 10);
         String vendorCode = ObjectUtil.isNotEmpty(pdEle6) ? pdEle6.getText().trim() : "";
         WebElement pdEle7 = WebDriverUtils.expWaitForElement(driver, By.xpath("//*[@id='promotion-detail-page']//table[contains(@class,'a-spacing-top-micro')]//td[contains(text(),'Marketplace')]/../td[2]"), 10);
@@ -326,6 +309,14 @@ public class AmazonVcPromotionsProcessor implements PageProcessor {
             WebElement proEle9 = productElement.findElement(By.xpath("//*[@id='" + asin + "-metrics-revenue-value']"));
             String revenue = ObjectUtil.isNotEmpty(proEle9) ? proEle9.getText().trim() : "";
 
+            upc = upc.replace("UPC:", "").trim();
+            amazonPrice = amazonPrice.replace("$", "");
+            promotionSelectProductIdWebsitePrice = promotionSelectProductIdWebsitePrice.replace("$", "");
+            funding = funding.replace("$", "");
+            likelyPrice = likelyPrice.replace("$", "");
+            amountSpent = amountSpent.replace("$", "");
+            revenue = revenue.replace("$", "");
+
             buildPromotionsInfo(page, promotionId, crawId, asin, pName, upc, amazonPrice,
                     promotionSelectProductIdWebsitePrice, funding, likelyPrice, unitsSold,
                     amountSpent, revenue);
@@ -333,8 +324,26 @@ public class AmazonVcPromotionsProcessor implements PageProcessor {
 
     }
 
-    private void buildPromotionsInfo(Page page, String crawId, String createdOn, String promotionId, String status, String name,
-                                     String startDate, String endDate, String type, String heroProduct,
+    /**
+     * Add Promotion Info to page parameter
+     * @param page
+     * @param crawId
+     * @param createdOnStr
+     * @param promotionId
+     * @param status
+     * @param name
+     * @param startDateStr
+     * @param endDateStr
+     * @param type
+     * @param heroProduct
+     * @param vendorCode
+     * @param marketplace
+     * @param billingContact
+     * @param fundingAgreement
+     * @param merchandisingFee
+     */
+    private void buildPromotionsInfo(Page page, String crawId, String createdOnStr, String promotionId, String status, String name,
+                                     String startDateStr, String endDateStr, String type, String heroProduct,
                                      String vendorCode, String marketplace, String billingContact, String fundingAgreement,
                                      String merchandisingFee) {
         Object listObj = page.getResultItems().get("vcPromotionInfoDOList");
@@ -347,15 +356,18 @@ public class AmazonVcPromotionsProcessor implements PageProcessor {
         vcPromotionInfoDOList.add(VcPromotionInfoDO.builder().billingContact(billingContact)
                 .crawFlg("I")
                 .crawId(crawId)
-                .createdOn(createdOn)
-                .endDate(endDate)
+                .createdOnStr(createdOnStr)
+                .createdOn(ConvertUtils.convertStringToLocalDateTime(createdOnStr, ConvertUtils.VC_PROMOTION_DATETIME))
+                .endDateStr(endDateStr)
+                .endDate(ConvertUtils.convertStringToLocalDateTime(endDateStr, ConvertUtils.VC_PROMOTION_DATETIME))
                 .fundingAgreement(fundingAgreement)
                 .heroProduct(heroProduct)
                 .marketPlace(marketplace)
                 .merchandisingFee(merchandisingFee)
                 .name(name)
                 .promotionId(promotionId)
-                .startDate(startDate)
+                .startDateStr(startDateStr)
+                .startDate(ConvertUtils.convertStringToLocalDateTime(startDateStr, ConvertUtils.VC_PROMOTION_DATETIME))
                 .status(status)
                 .type(type)
                 .vendorCode(vendorCode).build());
@@ -364,9 +376,25 @@ public class AmazonVcPromotionsProcessor implements PageProcessor {
 
     }
 
-    private void buildPromotionsInfo(Page page, String promotionId, String crawId, String asin, String pName, String upc, String amazonPrice,
-                                     String promotionSelectProductIdWebsitePrice, String funding, String likelyPrice, String unitsSold,
-                                     String amountSpent, String revenue) {
+    /**
+     * Add Promotion Product Info to page parameters
+     * @param page
+     * @param promotionId
+     * @param crawId
+     * @param asin
+     * @param pName
+     * @param upc
+     * @param amazonPriceStr
+     * @param promotionSelectProductIdWebsitePriceStr
+     * @param fundingStr
+     * @param likelyPriceStr
+     * @param unitsSoldStr
+     * @param amountSpentStr
+     * @param revenueStr
+     */
+    private void buildPromotionsInfo(Page page, String promotionId, String crawId, String asin, String pName, String upc, String amazonPriceStr,
+                                     String promotionSelectProductIdWebsitePriceStr, String fundingStr, String likelyPriceStr, String unitsSoldStr,
+                                     String amountSpentStr, String revenueStr) {
         Object listObj = page.getResultItems().get("vcPromotionProductInfoDOList");
         List<VcPromotionProductInfoDO> vcPromotionProductInfoDOList;
         if (ObjectUtil.isNotEmpty(listObj)) {
@@ -375,19 +403,35 @@ public class AmazonVcPromotionsProcessor implements PageProcessor {
             vcPromotionProductInfoDOList = new ArrayList<>();
         }
 
+        BigDecimal funding = ConvertUtils.convertStringToBigDecimal(fundingStr);
+        BigDecimal likelyPrice = ConvertUtils.convertStringToBigDecimal(likelyPriceStr);
+        BigDecimal amazonPrice = ConvertUtils.convertStringToBigDecimal(amazonPriceStr);
+        BigDecimal websitePrice = ConvertUtils.convertStringToBigDecimal(promotionSelectProductIdWebsitePriceStr);;
+        BigDecimal amountSpent = ConvertUtils.convertStringToBigDecimal(amountSpentStr);
+        BigDecimal revenue = ConvertUtils.convertStringToBigDecimal(revenueStr);
+
+        Integer unitsSold = ConvertUtils.convertStringToInteger(unitsSoldStr);
+
         vcPromotionProductInfoDOList.add(VcPromotionProductInfoDO.builder()
+                .amazonPriceStr(amazonPriceStr)
                 .amazonPrice(amazonPrice)
+                .amountSpentStr(amountSpentStr)
                 .amountSpent(amountSpent)
                 .crawFlg("I")
                 .crawId(crawId)
+                .fundingStr(fundingStr)
                 .funding(funding)
+                .likelyPriceStr(likelyPriceStr)
                 .likelyPrice(likelyPrice)
-                .pname(pName)
+                .productName(pName)
                 .promotionId(promotionId)
+                .revenueStr(revenueStr)
                 .revenue(revenue)
+                .unitsSoldStr(unitsSoldStr)
                 .unitsSold(unitsSold)
                 .upc(upc)
-                .websitePrice(promotionSelectProductIdWebsitePrice)
+                .websitePriceStr(promotionSelectProductIdWebsitePriceStr)
+                .websitePrice(websitePrice)
                 .asin(asin).build());
 
         page.putField("vcPromotionProductInfoDOList", vcPromotionProductInfoDOList);
