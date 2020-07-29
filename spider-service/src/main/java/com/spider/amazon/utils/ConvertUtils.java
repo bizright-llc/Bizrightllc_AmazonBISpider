@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
-public class DateTimeUtils {
+public class ConvertUtils {
 
     public static String VC_PROMOTION_DATETIME = "MMMM d, yyyy h:mm:ss a zzz";
 
