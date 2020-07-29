@@ -31,6 +31,7 @@ import static java.lang.Thread.sleep;
 
 /**
  * Amazon供应商中心每周销量数据抓取
+ * https://vendorcentral.amazon.com/analytics/dashboard/salesDiagnostic
  */
 @Component
 @Slf4j
@@ -179,7 +180,7 @@ public class AmazonVcWeeklySales implements PageProcessor {
                 throw new ServiceException(RespErrorEnum.SPIDER_EXEC.getSubStatusCode(), RespErrorEnum.SPIDER_EXEC.getSubStatusMsg());
             }
         } catch (Exception e) {
-            throw new ServiceException(RespErrorEnum.SPIDER_EXEC.getSubStatusCode(),RespErrorEnum.SPIDER_EXEC.getSubStatusMsg());
+            throw new ServiceException(RespErrorEnum.SPIDER_EXEC.getSubStatusCode(), RespErrorEnum.SPIDER_EXEC.getSubStatusMsg());
         } finally {
             driver.quit();
         }

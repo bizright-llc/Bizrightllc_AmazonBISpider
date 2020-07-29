@@ -29,9 +29,11 @@ public class AmzVcDailyInventory implements Serializable {
     private String aged90DaysSellableUnits;
     private String replenishmentCategory;
     private String availableInventory;
-    private String UnhealthyInventory;
-    private String UnhealthyInventoryTrailing30dayAverage;
-    private String UnhealthyUnits;
+    private String unhealthyInventory;
+    private String unhealthyInventoryTrailing30dayAverage;
+    private String unhealthyUnits;
+    private String viewingDate;
     private String insertTime;
+    private String distributeView;
 
 }

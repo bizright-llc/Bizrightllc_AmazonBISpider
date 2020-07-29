@@ -15,8 +15,10 @@ import com.spider.amazon.service.*;
 import com.spider.amazon.service.impl.SpringBatchCallServiceImpl;
 import com.spider.amazon.webmagic.*;
 import com.spider.amazon.webmagic.amz.AmazonAdConsumeProcessor;
+import com.spider.amazon.webmagic.amzvc.AmazonVcManufacturingDailySales;
 import com.spider.amazon.webmagic.amzvc.AmazonVcPromotionsPipeline;
 import com.spider.amazon.webmagic.amzvc.AmazonVcPromotionsProcessor;
+import com.spider.amazon.webmagic.amzvc.AmazonVcSourcingDailySales;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -124,10 +126,15 @@ public class ScheduleTask {
     /**
      * 定时下载Amazon VC 每日销量报表
      */
-    @Scheduled(cron = "0 0 2 * * ?")
+//    @Scheduled(cron = "0 0 2 * * ?")
     public void schedulerVcDailySales() {
         log.info("0.step56=>开始执行［schedulerVcDailySales］");
-        Spider spider = Spider.create(new AmazonVcDailySales());
+        Spider spider = Spider.create(new AmazonVcManufacturingDailySales(spiderConfig));
+        spider.addUrl(spiderConfig.getSpiderIndex());
+        spider.setExitWhenComplete(true);
+        spider.run();
+
+        Spider spider2 = Spider.create(new AmazonVcSourcingDailySales(spiderConfig));
         spider.addUrl(spiderConfig.getSpiderIndex());
         spider.setExitWhenComplete(true);
         spider.run();
@@ -162,7 +169,7 @@ public class ScheduleTask {
      * 定时下载Amazon VC Promotion info and Promotion product info
      * Run at every monday
      */
-    @Scheduled(cron = "0 0 4 * * MON")
+    @Scheduled(cron = "0 0 4 * * ?")
     public void schedulerVcDailyPromotionInfo() {
         log.info("0.step234=>开始执行［schedulerVcDailyPromotionInfo］");
         Spider spider = Spider.create(new AmazonVcPromotionsProcessor(spiderConfig));

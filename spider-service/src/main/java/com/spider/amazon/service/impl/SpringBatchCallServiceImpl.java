@@ -1,6 +1,7 @@
 package com.spider.amazon.service.impl;
 
 import com.common.exception.ServiceException;
+import com.spider.amazon.config.SpiderConfig;
 import com.spider.amazon.cons.RespErrorEnum;
 import com.spider.amazon.service.ISpringBatchCallService;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +19,6 @@ import org.springframework.stereotype.Service;
 @Service
 @Slf4j
 public class SpringBatchCallServiceImpl implements ISpringBatchCallService {
-
 
     @Autowired
     private SimpleJobLauncher csvJobLauncherForAmzDailySales;
@@ -41,37 +41,37 @@ public class SpringBatchCallServiceImpl implements ISpringBatchCallService {
     @Override
     public void callVcSalesReportDataDeal() {
         log.info("1.ste39p=>调用 ［结果文件处理］");
-        runBatch(csvJobLauncherForAmzDailySales,importJobForAmzDailySales);
+        runBatch(csvJobLauncherForAmzDailySales, importJobForAmzDailySales);
     }
 
     @Override
     public void callVcInventoryReportDataDeal() {
         log.info("1.step45=>调用 ［结果文件处理］");
-        runBatch(csvJobLauncherForAmzDailyInventory,importJobForAmzDailyInventory);
-
+        runBatch(csvJobLauncherForAmzDailyInventory, importJobForAmzDailyInventory);
     }
 
     @Override
     public void callScBuyBoxReportDataDeal() {
         log.info("1.step52=>调用 ［结果文件处理］");
-        runBatch(csvJobLauncherForAmzScBuyBox,importJobForAmzScBuyBox);
+        runBatch(csvJobLauncherForAmzScBuyBox, importJobForAmzScBuyBox);
     }
 
 
     void runBatch(SimpleJobLauncher simpleJobLauncher, Job job) {
         log.info("0.step142=>调用 Batch处理");
-        JobParameters jobParameters = new JobParametersBuilder().addLong("time", System.currentTimeMillis())
+        JobParameters jobParameters = new JobParametersBuilder()
+                .addLong("time", System.currentTimeMillis())
                 .toJobParameters();
         try {
             simpleJobLauncher.run(job, jobParameters);
         } catch (JobExecutionAlreadyRunningException e) {
-            throw new ServiceException(RespErrorEnum.SPIDER_EXEC.getSubStatusCode(),e.getMessage());
+            throw new ServiceException(RespErrorEnum.SPIDER_EXEC.getSubStatusCode(), e.getMessage());
         } catch (JobRestartException e) {
-            throw new ServiceException(RespErrorEnum.SPIDER_EXEC.getSubStatusCode(),e.getMessage());
+            throw new ServiceException(RespErrorEnum.SPIDER_EXEC.getSubStatusCode(), e.getMessage());
         } catch (JobInstanceAlreadyCompleteException e) {
-            throw new ServiceException(RespErrorEnum.SPIDER_EXEC.getSubStatusCode(),e.getMessage());
+            throw new ServiceException(RespErrorEnum.SPIDER_EXEC.getSubStatusCode(), e.getMessage());
         } catch (JobParametersInvalidException e) {
-            throw new ServiceException(RespErrorEnum.SPIDER_EXEC.getSubStatusCode(),e.getMessage());
+            throw new ServiceException(RespErrorEnum.SPIDER_EXEC.getSubStatusCode(), e.getMessage());
         }
     }
 

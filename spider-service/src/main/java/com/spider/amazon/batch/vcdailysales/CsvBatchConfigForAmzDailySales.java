@@ -5,10 +5,14 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
+import com.common.exception.ServiceException;
 import com.spider.amazon.config.DruidConfiguration;
+import com.spider.amazon.config.SpiderConfig;
 import com.spider.amazon.cons.DateFormat;
+import com.spider.amazon.cons.RespErrorEnum;
 import com.spider.amazon.entity.AmzVcDailySales;
 import com.spider.amazon.utils.CSVUtils;
+import com.spider.amazon.utils.FileUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -16,6 +20,7 @@ import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
@@ -33,6 +38,7 @@ import org.springframework.batch.item.file.mapping.DefaultLineMapper;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -44,6 +50,7 @@ import org.springframework.transaction.interceptor.DefaultTransactionAttribute;
 
 import javax.sql.DataSource;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.List;
@@ -70,8 +77,11 @@ public class CsvBatchConfigForAmzDailySales {
 
     private Map<String, Object> paramMaps;
 
-    private final static String filePath = "C:\\Users\\paulin.f\\Downloads\\Sales Diagnostic_Detail View_US.csv";
+    //    private final static String filePath = "C:\\Users\\paulin.f\\Downloads\\Sales Diagnostic_Detail View_US.csv";
     private final static String fileName = "Sales Diagnostic_Detail View_US";
+
+    @Autowired
+    private SpiderConfig spiderConfig;
 
     @Autowired
     private StepBuilderFactory stepBuilderFactory;
@@ -82,31 +92,20 @@ public class CsvBatchConfigForAmzDailySales {
      * @return
      */
     @Bean
-    public ItemReader<AmzVcDailySales> readerForAmzDailySales() {
-        // 使用FlatFileItemReader去读cvs文件，一行即一条数据
-        FlatFileItemReader<AmzVcDailySales> reader = new FlatFileItemReader<>();
-        // 设置文件处在路径
-//        reader.setResource(new ClassPathResource("Sales Diagnostic_Detail View_US.csv"));
-        reader.setResource(new FileSystemResource(filePath));
-        reader.setLinesToSkip(2); // 跳过头两行
-        // entity与csv数据做映射
-        reader.setLineMapper(new DefaultLineMapper<AmzVcDailySales>() {
-            {
-                setLineTokenizer(new DelimitedLineTokenizer() {
-                    {
-                        setNames(new String[]{"asin", "productTitle", "shippedCogs", "shippedCogsOfTotal", "shippedCogsPriorPeriod",
-                                "shippedCogsLastyear", "shippedUnits", "shippedUnitsOfTotal", "shippedUnitsPriorPeriod", "shippedUnitsLastYear",
-                                "customerReturns", "freeReplacements","AverageSalesPrice","AverageSalesPricePriorPeriod"});
-                    }
-                });
-                setFieldSetMapper(new BeanWrapperFieldSetMapper<AmzVcDailySales>() {
-                    {
-                        setTargetType(AmzVcDailySales.class);
-                    }
-                });
-            }
-        });
-        return reader;
+    @StepScope
+    public FlatFileItemReader<AmzVcDailySales> readerForAmzDailySales(@Value("#{jobExecutionContext[filePath]}") String filePath,
+                                                                      @Value("#{jobExecutionContext[paramMaps]}") Map<String, Object> paramMaps) {
+
+        String distributorView = paramMaps.get("distributorView").toString();
+
+        if (distributorView.equals("Sourcing")) {
+            return getSourcingDistributorReader(filePath);
+        } else if (distributorView.equals("Manufacturing")) {
+            return getManufacturingDistributorReader(filePath);
+        } else {
+            throw new ServiceException(RespErrorEnum.TASK_DEAL_ERROR.toString(), String.format("File {} distributor view is not support", filePath));
+        }
+
     }
 
 
@@ -116,8 +115,9 @@ public class CsvBatchConfigForAmzDailySales {
      * @return
      */
     @Bean
-    public ItemProcessor<AmzVcDailySales, AmzVcDailySales> processorForAmzDailySales() {
-        CsvItemProcessorForAmzDailySales csvItemProcessorForAmzDailySales = new CsvItemProcessorForAmzDailySales();
+    @StepScope
+    public ItemProcessor<AmzVcDailySales, AmzVcDailySales> processorForAmzDailySales(@Value("#{jobExecutionContext[paramMaps]}") Map<String, Object> paramMaps) {
+        CsvItemProcessorForAmzDailySales csvItemProcessorForAmzDailySales = new CsvItemProcessorForAmzDailySales(paramMaps);
         // 设置校验器
         csvItemProcessorForAmzDailySales.setValidator(csvBeanValidatorForAmzDailySales());
         return csvItemProcessorForAmzDailySales;
@@ -140,39 +140,55 @@ public class CsvBatchConfigForAmzDailySales {
      * @return
      */
     @Bean
-    public ItemWriter<AmzVcDailySales> writerForAmzDailySales(DataSource dataSource) {
+    @StepScope
+    public ItemWriter<AmzVcDailySales> writerForAmzDailySales(@Value("#{jobExecutionContext[filePath]}") String filePath,
+                                                              @Value("#{jobExecutionContext[paramMaps]}") Map<String, Object> paramMaps,
+                                                              DataSource dataSource) {
         // 使用jdbcBcatchItemWrite写数据到数据库中
         JdbcBatchItemWriter<AmzVcDailySales> writer = new JdbcBatchItemWriter<>();
         // 设置有参数的sql语句
         writer.setItemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<AmzVcDailySales>());
-        // 判断是销量日报还是周报
+//        // 判断是销量日报还是周报
+        // 不需判
         String sql = "";
-        paramMaps=stepForAmzDailySalesPrepare(filePath);
 
-        log.info("filePath:"+filePath);
-        log.info("paramMaps:"+CollUtil.isEmpty(paramMaps));
+        log.info("filePath:" + filePath);
+        log.info("paramMaps:" + CollUtil.isEmpty(paramMaps));
         if (CollUtil.isNotEmpty(paramMaps)) {
-            String viewingDate= paramMaps.get("viewing").toString().split("-")[0];
-            String viewingDateEnd= paramMaps.get("viewing").toString().split("-")[1];
-            viewingDate=DateUtil.format(DateUtil.parse(viewingDate,DateFormat.YEAR_MONTH_DAY_MMddyy1 ), DateFormat.YEAR_MONTH_DAY_yyyyMMdd);
-            viewingDateEnd=DateUtil.format(DateUtil.parse(viewingDateEnd,DateFormat.YEAR_MONTH_DAY_MMddyy1 ), DateFormat.YEAR_MONTH_DAY_yyyyMMdd);
-            if (paramMaps.get("reportingRange").toString().equals("Weekly")) {
-                sql = "INSERT INTO [dbo].[vendorWeeklySalesInfo]([asin], [product_title], [shipped_cogs], " +
-                        "[shipped_cogs_of_total], [shipped_cogs_prior_period], [shipped_cogs_last_year], " +
-                        "[shipped_units], [shipped_units_of_total], [shipped_units_prior_period], " +
-                        "[shipped_units_last_year], [customer_returns], [free_replacements], " +
-                        "[viewing_date],[viewing_date_end]) VALUES (:asin,:productTitle,:shippedCogs,:shippedCogsOfTotal,:shippedCogsPriorPeriod," +
-                        ":shippedCogsLastyear,:shippedUnits,:shippedUnitsOfTotal,:shippedUnitsPriorPeriod,:shippedUnitsLastYear," +
-                        ":customerReturns,:freeReplacements,'" + viewingDate + "','" + viewingDateEnd + "')";
-            } else if (paramMaps.get("reportingRange").toString().equals("Daily")) {
+            // Check distributor view type
+            String distributorView = paramMaps.get("distributorView").toString();
+
+            if (distributorView.equals("Sourcing")) {
+
                 sql = "INSERT INTO [dbo].[vendorSalesInfo]([asin], [product_title], [shipped_cogs], " +
                         "[shipped_cogs_of_total], [shipped_cogs_prior_period], [shipped_cogs_last_year], " +
                         "[shipped_units], [shipped_units_of_total], [shipped_units_prior_period], " +
                         "[shipped_units_last_year], [customer_returns], [free_replacements], " +
                         "[viewing_date]) VALUES (:asin,:productTitle,:shippedCogs,:shippedCogsOfTotal,:shippedCogsPriorPeriod," +
-                        ":shippedCogsLastyear,:shippedUnits,:shippedUnitsOfTotal,:shippedUnitsPriorPeriod,:shippedUnitsLastYear," +
-                        ":customerReturns,:freeReplacements,'" + viewingDate + "')";
+                        ":shippedCogsLastYear,:shippedUnits,:shippedUnitsOfTotal,:shippedUnitsPriorPeriod,:shippedUnitsLastYear," +
+                        ":customerReturns,:freeReplacements, :viewingDate)";
+
+            } else if (distributorView.equals("Manufacturing")) {
+
+                sql = "INSERT INTO [dbo].[vendorSalesInfo]([asin], [product_title], [shipped_cogs], " +
+                        "[shipped_cogs_of_total], [shipped_cogs_prior_period], [shipped_cogs_last_year], " +
+                        "[shipped_units], [shipped_units_of_total], [shipped_units_prior_period], " +
+                        "[shipped_units_last_year], [customer_returns], [free_replacements], " +
+                        "[subcategory_sales_rank], [subcategory_better_worse], [average_sales_price], [average_sales_price_prior_period], " +
+                        "[change_in_glance_view_prior_period], [change_in_glance_view_last_year], [rep_oos]," +
+                        "[rep_oos_of_total], [rep_oos_prior_period], [lbb_price], [viewing_date]) " +
+                        "VALUES (" +
+                        ":asin,:productTitle,:shippedCogs,:shippedCogsOfTotal,:shippedCogsPriorPeriod," +
+                        ":shippedCogsLastYear,:shippedUnits,:shippedUnitsOfTotal,:shippedUnitsPriorPeriod,:shippedUnitsLastYear," +
+                        ":customerReturns,:freeReplacements" +
+                        ":SubcategorySalesRank, :SubcategoryBetterWorse, :AverageSalesPrice," +
+                        ":AverageSalesPricePriorPeriod, :ChangeinGlanceViewPriorPeriod, " +
+                        ":ChangeinGVLastYear, :RepOOS, :RepOOSofTotal, :RepOOSPriorPeriod," +
+                        ":LBBPrice, :viewingDate" +
+                        ")";
+
             }
+
         } else {
             sql = "INSERT INTO [dbo].[BATCH_JOB_EXEC](EXEC_ID) VALUES (:asin)";
         }
@@ -281,11 +297,13 @@ public class CsvBatchConfigForAmzDailySales {
                     ExecutionContext jobContext = context.getStepContext().getStepExecution().getJobExecution().getExecutionContext();
                     //Gets the data here
                     Map<String, Object> paramMaps = (Map<String, Object>) jobContext.get("paramMaps");
-                    String viewingDate= paramMaps.get("viewing").toString().split("-")[0];
-                    viewingDate=DateUtil.format(DateUtil.parse(viewingDate,DateFormat.YEAR_MONTH_DAY_MMddyy1 ), DateFormat.YEAR_MONTH_DAY_yyyyMMdd);
+                    String filePath = jobContext.get("filePath").toString();
+                    String viewingDate = paramMaps.get("viewingDate").toString();
+                    String reportingRange = paramMaps.get("reportingRange").toString();
+                    viewingDate = DateUtil.format(DateUtil.parse(viewingDate, DateFormat.YEAR_MONTH_DAY_MMddyy1), DateFormat.YEAR_MONTH_DAY_yyyyMMdd);
                     // 文件重命名
                     // 周销量报表和日销量报表名字区别
-                    FileUtil.rename(new File(filePath), StrUtil.concat(true, fileName, "-", StrUtil.toString(paramMaps.get("reportingRange")), "-",viewingDate, "-", IdUtil.simpleUUID()), true, false);
+                    FileUtil.rename(new File(filePath), StrUtil.concat(true, fileName, "-", StrUtil.toString(reportingRange), "-", viewingDate, "-", IdUtil.simpleUUID()), true, false);
                     return RepeatStatus.FINISHED;
                 }).build();
     }
@@ -294,16 +312,39 @@ public class CsvBatchConfigForAmzDailySales {
     public Step stepForAmzDailySalesCheckFile() {
         return stepBuilderFactory.get("stepForAmzDailySalesCheckFile")
                 .tasklet((StepContribution contribution, ChunkContext context) -> {
+
+                    class MyFileFilter implements FileFilter {
+
+                        public boolean accept(File f) {
+                            if (f.getName().contains(fileName) && !f.getName().contains("Daily")) {
+                                return true;
+                            }
+                            return false;
+                        }
+                    }
+
+                    MyFileFilter filter = new MyFileFilter();
+
+                    File[] files = FileUtils.getFileFromDir(spiderConfig.getDownloadPath(), filter);
+
+                    if (files == null || files.length == 0) {
+                        log.info("No daily sales file to process");
+                        throw new FileNotFoundException("No Daily Sales Files");
+                    }
+
+                    File file = files.length > 0 ? files[0] : null;
+
                     // 文件存在检查
-                    if (FileUtil.exist(filePath)) {
+                    if (file != null && FileUtil.exist(file.getPath())) {
                         // 文件头预处理
-                        Map<String, Object> paramMaps = stepForAmzDailySalesPrepare(filePath);
+                        Map<String, Object> paramMaps = stepForAmzDailySalesPrepare(file.getPath());
                         ExecutionContext jobContext = context.getStepContext().getStepExecution().getJobExecution().getExecutionContext();
                         jobContext.put("paramMaps", paramMaps);
+                        jobContext.put("filePath", file.getPath());
 
                         return RepeatStatus.FINISHED;
                     } else {
-                        throw new FileNotFoundException("File Not Found : " + filePath);
+                        throw new FileNotFoundException("File Not Found : " + file == null ? "" : file.getPath());
                     }
                 }).build();
     }
@@ -320,14 +361,26 @@ public class CsvBatchConfigForAmzDailySales {
             // 读取文件第一行
             List<List<String>> csvRowList = CSVUtils.readCSVAdv(filePath, 0, 1, 11);
             // 获取报表维度及时间
+            String distributorView = csvRowList.get(0).get(1);
+
+            distributorView = distributorView.substring(distributorView.indexOf("[") + 1, distributorView.indexOf("]"));
+
             String reportingRange = csvRowList.get(0).get(7);
             String viewing = csvRowList.get(0).get(8);
+
+            viewing = viewing.substring(viewing.indexOf("[") + 1, viewing.indexOf("]"));
+
+            String viewingDate = viewing.split("-")[0].trim();
+            viewingDate = DateUtil.format(DateUtil.parse(viewingDate, DateFormat.YEAR_MONTH_DAY_MMddyy1), DateFormat.YEAR_MONTH_DAY_yyyyMMdd);
+
             if (log.isInfoEnabled()) {
+                log.info("distributorView: " + distributorView);
                 log.info("reportingRange:" + reportingRange);
-                log.info("viewing:" + viewing);
+                log.info("viewingDate:" + viewingDate);
             }
+            resultMap.put("distributorView", distributorView);
             resultMap.put("reportingRange", reportingRange.substring(reportingRange.indexOf("[") + 1, reportingRange.indexOf("]")));
-            resultMap.put("viewing", viewing.substring(viewing.indexOf("[") + 1, viewing.indexOf("]")));
+            resultMap.put("viewingDate", viewingDate);
 
             return resultMap;
         } else {
@@ -335,5 +388,63 @@ public class CsvBatchConfigForAmzDailySales {
         }
     }
 
+    private FlatFileItemReader<AmzVcDailySales> getSourcingDistributorReader(String filePath) {
+        // 使用FlatFileItemReader去读cvs文件，一行即一条数据
+        FlatFileItemReader<AmzVcDailySales> reader = new FlatFileItemReader<>();
+        // 设置文件处在路径
+//        reader.setResource(new ClassPathResource("Sales Diagnostic_Detail View_US.csv"));
+        reader.setResource(new FileSystemResource(filePath));
+        reader.setLinesToSkip(2); // 跳过头两行
+        // entity与csv数据做映射
+        reader.setLineMapper(new DefaultLineMapper<AmzVcDailySales>() {
+            {
+                setLineTokenizer(new DelimitedLineTokenizer() {
+                    {
+                        setNames("asin", "productTitle", "shippedCogs", "shippedCogsOfTotal", "shippedCogsPriorPeriod",
+                                "shippedCogsLastYear", "shippedUnits", "shippedUnitsOfTotal", "shippedUnitsPriorPeriod", "shippedUnitsLastYear",
+                                "customerReturns", "freeReplacements", "AverageSalesPrice", "AverageSalesPricePriorPeriod");
+                    }
+                });
+                setFieldSetMapper(new BeanWrapperFieldSetMapper<AmzVcDailySales>() {
+                    {
+                        setTargetType(AmzVcDailySales.class);
+                    }
+                });
+            }
+        });
+        return reader;
+    }
+
+    private FlatFileItemReader<AmzVcDailySales> getManufacturingDistributorReader(String filePath) {
+        // 使用FlatFileItemReader去读cvs文件，一行即一条数据
+        FlatFileItemReader<AmzVcDailySales> reader = new FlatFileItemReader<>();
+        // 设置文件处在路径
+//        reader.setResource(new ClassPathResource("Sales Diagnostic_Detail View_US.csv"));
+        reader.setResource(new FileSystemResource(filePath));
+        reader.setLinesToSkip(2); // 跳过头两行
+        // entity与csv数据做映射
+        reader.setLineMapper(new DefaultLineMapper<AmzVcDailySales>() {
+            {
+                setLineTokenizer(new DelimitedLineTokenizer() {
+                    {
+                        setNames("asin", "productTitle", "shippedCogs", "shippedCogsOfTotal", "shippedCogsPriorPeriod",
+                                "shippedCogsLastyear", "shippedUnits", "shippedUnitsOfTotal", "shippedUnitsPriorPeriod", "shippedUnitsLastYear",
+                                "OrderedUnits", "OrderedUnitsOfTotal", "OrderedUnitsPriorPeriod", "OrderedUnitsOfTotal",
+                                "customerReturns", "freeReplacements",
+                                "SubcategorySalesRank", "SubcategoryBetterWorse", "AverageSalesPrice", "AverageSalesPricePriorPeriod",
+                                "ChangeinGlanceViewPriorPeriod", "ChangeinGVLastYear", "RepOOS", "RepOOSofTotal",
+                                "RepOOSPriorPeriod", "LBBPrice");
+                    }
+                });
+
+                setFieldSetMapper(new BeanWrapperFieldSetMapper<AmzVcDailySales>() {
+                    {
+                        setTargetType(AmzVcDailySales.class);
+                    }
+                });
+            }
+        });
+        return reader;
+    }
 
 }

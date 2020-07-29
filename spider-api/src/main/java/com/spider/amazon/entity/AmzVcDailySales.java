@@ -16,13 +16,13 @@ public class AmzVcDailySales implements Serializable {
     private String shippedCogs;
     private String shippedCogsOfTotal;
     private String shippedCogsPriorPeriod;
-    private String shippedCogsLastyear;
+    private String shippedCogsLastYear;
     private String shippedUnits;
     private String shippedUnitsOfTotal;
     private String shippedUnitsPriorPeriod;
     private String shippedUnitsLastYear;
     private String OrderedUnits;
-    private String OrderedUnitsofTotal;
+    private String OrderedUnitsOfTotal;
     private String OrderedUnitsPriorPeriod;
     private String OrderedUnitsLastYear;
     private String customerReturns;
@@ -38,4 +38,5 @@ public class AmzVcDailySales implements Serializable {
     private String RepOOSPriorPeriod;
     private String LBBPrice;
     private String viewingDate;
+    private String distributorView;
 }

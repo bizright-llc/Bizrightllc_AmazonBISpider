@@ -1,6 +1,7 @@
 package com.spider.amazon.config;
 
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -15,6 +16,7 @@ import java.util.concurrent.ThreadPoolExecutor;
  */
 @Configuration
 @EnableScheduling
+@ComponentScan("com.spider.amazon.task")
 public class ScheduleConfig implements SchedulingConfigurer {
 
     @Override

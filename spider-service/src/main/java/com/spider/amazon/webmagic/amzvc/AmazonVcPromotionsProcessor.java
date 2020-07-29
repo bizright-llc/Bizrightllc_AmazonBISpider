@@ -85,7 +85,8 @@ public class AmazonVcPromotionsProcessor implements PageProcessor {
         log.info("Extras:[{}]", page.getRequest().getExtras());
 
         log.info("抓取主逻辑");
-        if (page.getUrl().regex(SpiderUrl.SPIDER_INDEX).match()) { // 列表页
+        if (page.getUrl().regex(SpiderUrl.SPIDER_INDEX).match()) {
+            // 列表页
             processMain(page);
         } else { // 详情页
             processDetail(page);
@@ -125,12 +126,15 @@ public class AmazonVcPromotionsProcessor implements PageProcessor {
 
             // 3.add Cookies 在工具类中解析json
             driver.manage().deleteAllCookies();
-            List<Cookie> listCookies = JsonToListUtil.amazonSourceCookieList2CookieList(JsonToListUtil.getList());
-            for (Cookie cookie : listCookies) {
-                // Cookie(String name, String value, String domain, String path, Date expiry, boolean isSecure, boolean isHttpOnly)
-                driver.manage().addCookie(new org.openqa.selenium.Cookie(cookie.getName(), cookie.getValue(), cookie.getDomain(),
-                        cookie.getPath(), cookie.getExpiry(), cookie.getIsSecure(), cookie.getIsHttpOnly()));
-            }
+
+            WebDriverUtils.addCookies(driver, JsonToListUtil.amazonSourceCookieList2CookieList(JsonToListUtil.getListByPath(spiderConfig.getAmzVcCookieFilepath())));
+
+//            List<Cookie> listCookies = JsonToListUtil.amazonSourceCookieList2CookieList(JsonToListUtil.getList());
+//            for (Cookie cookie : listCookies) {
+//                // Cookie(String name, String value, String domain, String path, Date expiry, boolean isSecure, boolean isHttpOnly)
+//                driver.manage().addCookie(new org.openqa.selenium.Cookie(cookie.getName(), cookie.getValue(), cookie.getDomain(),
+//                        cookie.getPath(), cookie.getExpiry(), cookie.getIsSecure(), cookie.getIsHttpOnly()));
+//            }
 
             // 4.重定向跳转
             driver.manage().timeouts().pageLoadTimeout(20, TimeUnit.SECONDS); // 页面加载超时时间
@@ -148,6 +152,7 @@ public class AmazonVcPromotionsProcessor implements PageProcessor {
             int pageIndex = 0;
             do {
                 pageIndex++;
+                
                 log.info("page [{}]", pageIndex);
                 WebDriverUtils.waitForLoad(driver);
                 if (pageIndex != 1) {
@@ -215,12 +220,8 @@ public class AmazonVcPromotionsProcessor implements PageProcessor {
 
             // 3.add Cookies 在工具类中解析json
             driver.manage().deleteAllCookies();
-            List<Cookie> listCookies = JsonToListUtil.amazonSourceCookieList2CookieList(JsonToListUtil.getList());
-            for (Cookie cookie : listCookies) {
-                // Cookie(String name, String value, String domain, String path, Date expiry, boolean isSecure, boolean isHttpOnly)
-                driver.manage().addCookie(new org.openqa.selenium.Cookie(cookie.getName(), cookie.getValue(), cookie.getDomain(),
-                        cookie.getPath(), cookie.getExpiry(), cookie.getIsSecure(), cookie.getIsHttpOnly()));
-            }
+
+            WebDriverUtils.addCookies(driver, JsonToListUtil.amazonSourceCookieList2CookieList(JsonToListUtil.getListByPath(spiderConfig.getAmzVcCookieFilepath())));
 
             // 4.重定向跳转
             driver.manage().timeouts().pageLoadTimeout(20, TimeUnit.SECONDS); // 页面加载超时时间

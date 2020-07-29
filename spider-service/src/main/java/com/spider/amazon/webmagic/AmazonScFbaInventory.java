@@ -10,7 +10,6 @@ import com.spider.amazon.cons.DriverPathCons;
 import com.spider.amazon.cons.RespErrorEnum;
 import com.spider.amazon.entity.Cookie;
 import com.spider.amazon.remote.api.SpiderUrl;
-import com.spider.amazon.utils.CookiesUtils;
 import com.spider.amazon.utils.JsonToListUtil;
 import com.spider.amazon.utils.WebDriverUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -18,11 +17,9 @@ import org.apache.commons.lang3.SystemUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Site;
@@ -102,13 +99,8 @@ public class AmazonScFbaInventory implements PageProcessor {
         System.setProperty("webdriver.chrome.driver", DriverPathCons.CHROME_DRIVER_PATH);
         WebDriver driver = null;
 
-        String filePath = "";
+        String filePath = spiderConfig.getDownloadPath();
 
-        if (SystemUtils.IS_OS_WINDOWS) {
-            filePath = spiderConfig.getDownloadPathWindows();
-        } else {
-            filePath = spiderConfig.getDownloadPathLinux();
-        }
         driver = WebDriverUtils.getWebDriver(filePath);
 
         String filename = "";

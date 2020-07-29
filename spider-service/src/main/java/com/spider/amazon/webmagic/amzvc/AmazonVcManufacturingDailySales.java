@@ -1,22 +1,21 @@
-package com.spider.amazon.webmagic;
+package com.spider.amazon.webmagic.amzvc;
 
 import com.common.exception.ServiceException;
+import com.spider.amazon.config.SpiderConfig;
 import com.spider.amazon.cons.DriverPathCons;
 import com.spider.amazon.cons.RespErrorEnum;
 import com.spider.amazon.entity.Cookie;
-import com.spider.amazon.utils.CookiesUtils;
 import com.spider.amazon.utils.JsonToListUtil;
 import com.spider.amazon.utils.WebDriverUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.SystemUtils;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Site;
@@ -24,25 +23,39 @@ import us.codecraft.webmagic.Spider;
 import us.codecraft.webmagic.processor.PageProcessor;
 
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.Thread.sleep;
 
 /**
  * Amazon供应商中心每日销量数据抓取
+ * Sales Diagnostic
+ * Download csv From Amazon Vendor central
+ * https://vendorcentral.amazon.com/analytics/dashboard/salesDiagnostic
+ *
+ * Distribute View : Manufacturing
+ * Sales View: Shipped COGS
+ * Reporting Range: Daily
  */
 @Component
 @Slf4j
-public class AmazonVcDailySales implements PageProcessor {
+public class AmazonVcManufacturingDailySales implements PageProcessor {
 
     private static int DATE_OFFSET=-3;
 
-    @Autowired
-    private CookiesUtils cookiesUtils;
+    private final static String manufacturingViewXPath = "//*[@id=\"dashboard-filter-distributorView\"]/div/awsui-button-dropdown/div/div/ul/li[contains(@data-testid,'manufacturer')]";
+    private final static String sourcingViewXPath = "//*[@id=\"dashboard-filter-distributorView\"]/div/awsui-button-dropdown/div/div/ul/li[contains(@data-testid,'manufacturer')]";
 
-    @Value("${amazon.vc.freelogin.cookies.name}")
-    private String cookiesConfigName;
+    private final static String salesViewShippedCOGSLevelXPath = "//*[@id='dashboard-filter-viewFilter']//awsui-button-dropdown//ul/li[contains(@data-testid, \"shippedCOGSLevel\")]";
+
+    private final String detailCsvXPath = "//*[@id=\"downloadButton\"]/awsui-button-dropdown/div/div/ul/li/ul[contains(@aria-label, 'Detail View')]/li[contains(@data-testid, 'salesDiagnosticDetail_csv')]";
+
+    private SpiderConfig spiderConfig;
+
+    @Autowired
+    public AmazonVcManufacturingDailySales(SpiderConfig spiderConfig) {
+        this.spiderConfig = spiderConfig;
+    }
 
     private Site site = Site
             .me()
@@ -59,9 +72,9 @@ public class AmazonVcDailySales implements PageProcessor {
      */
     public Site getSite() {
 //        Set<Cookie> cookies = cookiesUtils.keyValueCookies2CookiesSet(cookiesConfigName, ";", "=");
-        Set<Cookie> cookies = cookiesUtils.keyValueCookies2CookiesSet("amazon.vc.freelogin.cookies", ";", "=");
+        List<Cookie> listCookies = JsonToListUtil.amazonSourceCookieList2CookieList(JsonToListUtil.getListByPath(spiderConfig.getAmzVcCookieFilepath()));
 
-        for (Cookie cookie : cookies) {
+        for (Cookie cookie : listCookies) {
             site.addCookie(cookie.getName().toString(), cookie.getValue().toString());
         }
         return site;
@@ -80,49 +93,36 @@ public class AmazonVcDailySales implements PageProcessor {
 
         // 1.建立WebDriver
         System.setProperty("webdriver.chrome.driver", DriverPathCons.CHROME_DRIVER_PATH);
-        WebDriver driver = new ChromeDriver();
+
+        String downloadFilePath = spiderConfig.getDownloadPath();
+
+        WebDriver driver = WebDriverUtils.getWebDriver(downloadFilePath);
 
         try {
 
             // 1.1设置页面超时等待时间,20S
             driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
 
-            // 2.初始打开页面
-            driver.get("https://www.google.com");
+            WebDriverWait wait = new WebDriverWait(driver, 20);
 
+            //4.1 navigate to sales daily page
+            navigateToPage(driver, wait);
 
-            // 3.add Cookies 在工具类中解析json
-            driver.manage().deleteAllCookies();
-            List<Cookie> listCookies = JsonToListUtil.amazonSourceCookieList2CookieList(JsonToListUtil.getList());
-            for (Cookie cookie : listCookies) {
-                // Cookie(String name, String value, String domain, String path, Date expiry, boolean isSecure, boolean isHttpOnly)
-                driver.manage().addCookie(new org.openqa.selenium.Cookie(cookie.getName(), cookie.getValue(), cookie.getDomain(),
-                        cookie.getPath(), cookie.getExpiry(), cookie.getIsSecure(), cookie.getIsHttpOnly()));
-            }
-
-
-            // 4.重定向跳转
-            driver.get("https://vendorcentral.amazon.com/analytics/dashboard/salesDiagnostic");
-
-//        // 获得cookie
-//        Set<org.openqa.selenium.Cookie> coo = driver.manage().getCookies();
-//        System.out.println(coo);
-
-            //4.1点击日期选择按钮
-            WebElement reportingRangeButtonElement = WebDriverUtils.expWaitForElement(driver, By.xpath("//*[@id='dashboard-filter-reportingRange']//awsui-button-dropdown//button[1]"), 10);
+            //4.1点击日期选择按钮, Reporting range
+            WebElement reportingRangeButtonElement = WebDriverUtils.expWaitForElement(driver, By.xpath("//*[@id=\"dashboard-filter-reportingRange\"]//awsui-button-dropdown//awsui-button/button"), 10);
             if (log.isInfoEnabled()) {
                 log.info("1.step105=>reportingRangeButtonElement:" + reportingRangeButtonElement.toString());
             }
-            reportingRangeButtonElement.click();
+            WebDriverUtils.elementClick(reportingRangeButtonElement);
 
             //4.2点击选择daily
-            WebElement dailySelectElement = WebDriverUtils.expWaitForElement(driver, By.xpath("//*[@id='dashboard-filter-reportingRange']//awsui-button-dropdown//ul/li[1]/a"), 10);
+            WebElement dailySelectElement = WebDriverUtils.expWaitForElement(driver, By.xpath("//*[@id=\"dashboard-filter-reportingRange\"]/div/awsui-button-dropdown//ul/li[contains(@data-testid, 'DAILY')]"), 10);
             if (log.isInfoEnabled()) {
                 log.info("2.step112=>dailySelectElement:" + dailySelectElement.toString());
             }
             dailySelectElement.click();
 
-            // 4.21点击DistributeView View
+            // 4.21 Choose DistributeView View
             WebElement distributeViewViewButtonElement = WebDriverUtils.expWaitForElement(driver, By.xpath("//*[@id='dashboard-filter-distributorView']//awsui-button-dropdown//button"), 10);
             if (log.isInfoEnabled()) {
                 log.info("1.step105=>distributeViewViewButtonElement:" + distributeViewViewButtonElement.toString());
@@ -133,44 +133,38 @@ public class AmazonVcDailySales implements PageProcessor {
             if (log.isInfoEnabled()) {
                 log.info("1.1.step137=>点击选择View");
             }
-            WebElement distributeViewSelectElement = WebDriverUtils.expWaitForElement(driver, By.xpath("//*[@id='dashboard-filter-distributorView']//awsui-button-dropdown//ul/li[2]/a"), 10);
+            WebElement distributeViewSelectElement = WebDriverUtils.expWaitForElement(driver, By.xpath(manufacturingViewXPath), 10);
             if (log.isInfoEnabled()) {
                 log.info("2.step112=>distributeViewSelectElement:" + distributeViewSelectElement.toString());
             }
             distributeViewSelectElement.click();
 
-            // 4.21点击SalesView
+            // 4.21 Choose SalesView
             WebElement salesViewButtonElement = WebDriverUtils.expWaitForElement(driver, By.xpath("//*[@id='dashboard-filter-viewFilter']//awsui-button-dropdown//button[1]"), 10);
             if (log.isInfoEnabled()) {
                 log.info("1.step105=>salesViewButtonElement:" + salesViewButtonElement.toString());
             }
             salesViewButtonElement.click();
 
-            // 4.22点击SalesViewSelect
+            // 4.22 Select Shipped COGS
             if (log.isInfoEnabled()) {
                 log.info("1.1.step137=>点击选择SalesView");
             }
-            WebElement salesViewSelectElement = WebDriverUtils.expWaitForElement(driver, By.xpath("//*[@id='dashboard-filter-viewFilter']//awsui-button-dropdown//ul/li[2]/a"), 10);
+            WebElement salesViewSelectElement = WebDriverUtils.expWaitForElement(driver, By.xpath(salesViewShippedCOGSLevelXPath), 10);
             if (log.isInfoEnabled()) {
                 log.info("2.step112=>salesViewSelectElement:" + salesViewSelectElement.toString());
             }
             salesViewSelectElement.click();
 
-//            // 4.23 设置抓取日期
-//            WebElement dateFromElement = WebDriverUtils.expWaitForElement(driver, By.xpath("//*[@id='dashboard-filter-periodPicker']/div/div/div[1]/input"), 10);
-//            WebElement dateToElement = WebDriverUtils.expWaitForElement(driver, By.xpath("//*[@id='dashboard-filter-periodPicker']/div/div/div[3]/input"), 10);
-//            dateFromElement.click();
-//            dateFromElement.sendKeys(DateUtil.format(DateUtil.offsetDay(DateUtil.date(),DATE_OFFSET), DateFormat.YEAR_MONTH_DAY_MMddyy1));
-//            dateToElement.sendKeys(DateUtil.format(DateUtil.offsetDay(DateUtil.date(),DATE_OFFSET), DateFormat.YEAR_MONTH_DAY_MMddyy1));
-
-
             //4.3点击应用按钮
             WebElement applyElement = WebDriverUtils.expWaitForElement(driver, By.xpath("//*[@id='dashboard-filter-applyCancel']/div/awsui-button[2]/button"), 10);
             applyElement.click();
 
-            // 5.进行操作点击下载Excel,抓取标题
-            WebElement titleElement = driver.findElement(By.xpath("//title"));
-            String title = titleElement.getAttribute("text");
+            sleep(10000);
+
+//            // 5.进行操作点击下载Excel,抓取标题
+//            WebElement titleElement = driver.findElement(By.xpath("//title"));
+//            String title = titleElement.getAttribute("text");
 
             // 6.抓取点击下载元素进行点击
             // 判断是否出现了Download按钮,未在规定时间内出现重新刷新页面
@@ -178,14 +172,14 @@ public class AmazonVcDailySales implements PageProcessor {
             downloadButtonElement.click();
 
             // 7.抓取CSV元素生成并进行点击
-            WebElement detailCsvDownloadButtonElement = WebDriverUtils.expWaitForElement(driver, By.xpath("//*[@id='downloadButton']/awsui-button-dropdown//ul/li[3]/ul/li[2]/a"), 10);
+            WebElement detailCsvDownloadButtonElement = WebDriverUtils.expWaitForElement(driver, By.xpath(detailCsvXPath), 10);
             detailCsvDownloadButtonElement.click();
 
             // 8.获取点击之后的弹出框点击确定
             if (log.isInfoEnabled()) {
                 log.info("1.step132=>wait for alert is present");
             }
-            WebDriverWait wait = new WebDriverWait(driver, 20);
+
             wait.until(ExpectedConditions.alertIsPresent());
             if (log.isInfoEnabled()) {
                 log.info("1.1.step137=>scrapy the alert");
@@ -213,10 +207,48 @@ public class AmazonVcDailySales implements PageProcessor {
 
     }
 
+    /**
+     * Navigate driver to Daily Sales page
+     * @param driver
+     * @param wait
+     * @throws InterruptedException
+     */
+    private void navigateToPage(WebDriver driver, WebDriverWait wait) throws InterruptedException {
+
+        // 1.1设置页面超时等待时间,20S
+        driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
+
+        // 2.初始打开页面
+        driver.manage().timeouts().pageLoadTimeout(20, TimeUnit.SECONDS); // 页面加载超时时间
+        driver.get("https://www.google.com");
+
+
+        // 3.add Cookies 在工具类中解析json
+        driver.manage().deleteAllCookies();
+        List<Cookie> listCookies = JsonToListUtil.amazonSourceCookieList2CookieList(JsonToListUtil.getListByPath(spiderConfig.getAmzVcCookieFilepath()));
+
+        WebDriverUtils.addCookies(driver, listCookies);
+
+        // 4.重定向跳转
+        driver.manage().timeouts().pageLoadTimeout(20, TimeUnit.SECONDS); // 页面加载超时时间
+        driver.get("https://vendorcentral.amazon.com/analytics/dashboard");
+
+        sleep(10000);
+
+        //4.0 click salesDiagnostic
+        WebElement inventoryHealthButtonElement = WebDriverUtils.expWaitForElement(driver, By.xpath("//span[1]/a[contains(@data-reactid,'salesDiagnostic')]"), 10);
+        if (log.isInfoEnabled() && inventoryHealthButtonElement != null) {
+            log.info("1.step105=>reportingRangeButtonElement:" + inventoryHealthButtonElement.toString());
+        }
+        WebDriverUtils.elementClick(inventoryHealthButtonElement);
+        sleep(10000);
+
+    }
+
     public static void main(String[] args) {
         System.out.println("0.step67=>抓取程序开启。");
 
-        Spider.create(new AmazonVcDailySales())
+        Spider.create(new AmazonVcManufacturingDailySales(null))
                 .addUrl("https://www.google.com")
                 .run();
 

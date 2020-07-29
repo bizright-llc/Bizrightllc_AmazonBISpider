@@ -8,7 +8,6 @@ import com.spider.amazon.cons.DriverPathCons;
 import com.spider.amazon.cons.RespErrorEnum;
 import com.spider.amazon.entity.Cookie;
 import com.spider.amazon.remote.api.SpiderUrl;
-import com.spider.amazon.utils.CookiesUtils;
 import com.spider.amazon.utils.JsonToListUtil;
 import com.spider.amazon.utils.UsDateUtils;
 import com.spider.amazon.utils.WebDriverUtils;
@@ -17,19 +16,13 @@ import org.apache.commons.lang3.SystemUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.remote.CapabilityType;
-import org.openqa.selenium.remote.DesiredCapabilities;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Site;
-import us.codecraft.webmagic.Spider;
 import us.codecraft.webmagic.processor.PageProcessor;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -102,13 +95,7 @@ public class AmazonScBuyBox implements PageProcessor {
 //        cap.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);
 //        cap.setCapability(ChromeOptions.CAPABILITY, chromeOptions);
 
-        WebDriver driver = null;
-
-        if (SystemUtils.IS_OS_WINDOWS) {
-            driver = WebDriverUtils.getWebDriver(spiderConfig.getDownloadPathWindows());
-        } else {
-            driver = WebDriverUtils.getWebDriver(spiderConfig.getDownloadPathLinux());
-        }
+        WebDriver driver = WebDriverUtils.getWebDriver(spiderConfig.getDownloadPath());
 
         try {
 
