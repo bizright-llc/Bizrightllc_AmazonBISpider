@@ -27,7 +27,7 @@ class AmazonScFbaInventoryTest {
 
         spiderConfig = spy(new SpiderConfig());
 
-        Mockito.doReturn("/Users/shaochinlin/Documents/Bizright/BI/BiSpider").when(spiderConfig).getDownloadPathLinux();
+        Mockito.doReturn("/Users/shaochinlin/Documents/Bizright/BI/BiSpider").when(spiderConfig).getDownloadPath();
         Mockito.doReturn("/Users/shaochinlin/Documents/Bizright/BI/BiSpider/cookieSc.json").when(spiderConfig).getAmzScCookieFilepath();
         Mockito.doReturn("https://www.google.com/").when(spiderConfig).getSpiderIndex();
 
