@@ -1,5 +1,6 @@
 package com.spider.amazon.webmagic.amzvc;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.common.exception.ServiceException;
@@ -30,7 +31,10 @@ import us.codecraft.webmagic.Spider;
 import us.codecraft.webmagic.processor.PageProcessor;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Formatter;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -149,10 +153,22 @@ public class AmazonVcPromotionsProcessor implements PageProcessor {
             WebElement maxNumEle = WebDriverUtils.expWaitForElement(driver, By.xpath("//*[@id='promotion-list-record-per-page-drop-down_2']"), 10);
             maxNumEle.click();
 
+
+            // 4.3 Search the promotion end date not before today
+            LocalDate today = LocalDate.now();
+            today.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"));
+
+            String todayStr = today.toString();
+
+            // promotion date end date
+            WebElement endDateAfterEle = WebDriverUtils.expWaitForElement(driver, By.xpath("//*[@id=\"endDateAfter\"]"), 10);
+            endDateAfterEle.sendKeys(todayStr);
+            WebDriverUtils.waitForLoad(driver);
+
             int pageIndex = 0;
             do {
                 pageIndex++;
-                
+
                 log.info("page [{}]", pageIndex);
                 WebDriverUtils.waitForLoad(driver);
                 if (pageIndex != 1) {
@@ -163,7 +179,7 @@ public class AmazonVcPromotionsProcessor implements PageProcessor {
                     WebElement nextEle = WebDriverUtils.expWaitForElement(driver, By.xpath(nextEleXPath), 10);
 //                    ExpectedConditions.elementToBeClickable(nextEle);
 //                    nextEle.click();
-                    if (nextEle.isEnabled()) {
+                    if (nextEle != null && nextEle.isEnabled()) {
                         WebDriverUtils.elementClick(nextEle);
                     } else {
                         break;
