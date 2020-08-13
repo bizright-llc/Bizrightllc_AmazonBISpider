@@ -29,12 +29,27 @@ public class WebDriverUtils {
         chromePrefs.put("download.default_directory", downloadPath);
         ChromeOptions options = new ChromeOptions();
         options.setExperimentalOption("prefs", chromePrefs);
+        options.addArguments("--headless", "--disable-gpu", "--window-size=1920,1200","--ignore-certificate-errors", "--silent");
         DesiredCapabilities cap = DesiredCapabilities.chrome();
         cap.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);
         cap.setCapability(ChromeOptions.CAPABILITY, options);
 
         WebDriver driver = new ChromeDriver(cap);
 
+        return driver;
+    }
+
+    public static WebDriver getBackgroudWebDriver(){
+        ChromeOptions options = new ChromeOptions();
+        // driver work at background
+        options.addArguments("--headless", "--disable-gpu", "--window-size=1920,1200","--ignore-certificate-errors", "--silent");
+        WebDriver driver = new ChromeDriver(options);
+
+        return driver;
+    }
+
+    public static WebDriver getWebDriver(){
+        WebDriver driver = new ChromeDriver();
         return driver;
     }
 

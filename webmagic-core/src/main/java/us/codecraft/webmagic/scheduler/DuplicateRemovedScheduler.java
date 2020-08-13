@@ -35,6 +35,8 @@ public abstract class DuplicateRemovedScheduler implements Scheduler {
         if (shouldReserved(request) || noNeedToRemoveDuplicate(request) || !duplicatedRemover.isDuplicate(request, task)) {
             logger.debug("push to queue {}", request.getUrl());
             pushWhenNoDuplicate(request, task);
+        }else if (duplicatedRemover.isDuplicate(request, task) && request.isRetry()){
+            pushWhenNoDuplicate(request, task);
         }
     }
 

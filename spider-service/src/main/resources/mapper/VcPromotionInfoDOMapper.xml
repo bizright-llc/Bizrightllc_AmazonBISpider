@@ -23,6 +23,11 @@
     VendorCode, MarketPlace, BillingContact, FundingAgreement, MerchandisingFee,
     CrawFlg, CreatedOn, StartDate, EndDate
     </sql>
+
+    <select id="existByPromotionId" parameterType="java.lang.Long" resultType="java.lang.Boolean">
+        SELECT count(*) FROM VcPromotionInfo WHERE PromotionId = #{promotionId, jdbcType=BIGINT}
+    </select>
+
     <insert id="insert" parameterType="com.spider.amazon.model.VcPromotionInfoDO">
         insert into VcPromotionInfo (<include refid="Base_Column_List"/>)
         values (

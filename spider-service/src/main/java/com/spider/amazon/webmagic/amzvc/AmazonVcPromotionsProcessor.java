@@ -16,11 +16,17 @@ import com.spider.amazon.utils.ConvertUtils;
 import com.spider.amazon.utils.JsonToListUtil;
 import com.spider.amazon.utils.WebDriverUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.xmlbeans.impl.xb.xsdschema.FieldDocument;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+import org.jsoup.select.Selector;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -29,6 +35,10 @@ import us.codecraft.webmagic.Request;
 import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.Spider;
 import us.codecraft.webmagic.processor.PageProcessor;
+import us.codecraft.webmagic.selector.Selectable;
+import us.codecraft.xsoup.XElement;
+import us.codecraft.xsoup.XElements;
+import us.codecraft.xsoup.Xsoup;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -51,6 +61,8 @@ public class AmazonVcPromotionsProcessor implements PageProcessor {
 
     private SpiderConfig spiderConfig;
 
+    private String overlayXPath = "//div[@class='mt-loading-overlay']";
+
     @Autowired
     public AmazonVcPromotionsProcessor(SpiderConfig spiderConfig) {
         this.spiderConfig = spiderConfig;
@@ -70,7 +82,7 @@ public class AmazonVcPromotionsProcessor implements PageProcessor {
      */
     public Site getSite() {
 
-        List<Cookie> listCookies = JsonToListUtil.amazonSourceCookieList2CookieList(JsonToListUtil.getList());
+        List<Cookie> listCookies = JsonToListUtil.amazonSourceCookieList2CookieList(JsonToListUtil.getListByPath(spiderConfig.getAmzVcCookieFilepath()));
 
         for (Cookie cookie : listCookies) {
             site.addCookie(cookie.getName(), cookie.getValue());
@@ -114,7 +126,7 @@ public class AmazonVcPromotionsProcessor implements PageProcessor {
 
         // 1.建立WebDriver
         System.setProperty("webdriver.chrome.driver", DriverPathCons.CHROME_DRIVER_PATH);
-        WebDriver driver = new ChromeDriver();
+        WebDriver driver = WebDriverUtils.getBackgroudWebDriver();
 
         try {
 
@@ -153,17 +165,20 @@ public class AmazonVcPromotionsProcessor implements PageProcessor {
             WebElement maxNumEle = WebDriverUtils.expWaitForElement(driver, By.xpath("//*[@id='promotion-list-record-per-page-drop-down_2']"), 10);
             maxNumEle.click();
 
+            sleep(1000);
+
 
             // 4.3 Search the promotion end date not before today
-            LocalDate today = LocalDate.now();
-            today.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"));
+            LocalDate tmr = LocalDate.now();
+            tmr.plusDays(1);
+            tmr.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"));
 
-            String todayStr = today.toString();
+            String todayStr = tmr.toString();
 
             // promotion date end date
             WebElement endDateAfterEle = WebDriverUtils.expWaitForElement(driver, By.xpath("//*[@id=\"endDateAfter\"]"), 10);
             endDateAfterEle.sendKeys(todayStr);
-            WebDriverUtils.waitForLoad(driver);
+            wait.until(ExpectedConditions.invisibilityOfElementLocated(By.xpath(overlayXPath)));
 
             int pageIndex = 0;
             do {
@@ -174,13 +189,12 @@ public class AmazonVcPromotionsProcessor implements PageProcessor {
                 if (pageIndex != 1) {
 
                     String nextEleXPath = "//*[@id='promotion-list-pagination']/ul/li[contains(@class,'a-last')]/a";
-                    String overlayXPath = "//div[@class='mt-loading-overlay']";
-                    wait.until(ExpectedConditions.invisibilityOfElementLocated(By.xpath(overlayXPath)));
-                    WebElement nextEle = WebDriverUtils.expWaitForElement(driver, By.xpath(nextEleXPath), 10);
+                    WebElement nextEle = WebDriverUtils.expWaitForElement(driver, By.xpath(nextEleXPath), 20);
 //                    ExpectedConditions.elementToBeClickable(nextEle);
 //                    nextEle.click();
                     if (nextEle != null && nextEle.isEnabled()) {
                         WebDriverUtils.elementClick(nextEle);
+                        wait.until(ExpectedConditions.invisibilityOfElementLocated(By.xpath(overlayXPath)));
                     } else {
                         break;
                     }
@@ -198,10 +212,11 @@ public class AmazonVcPromotionsProcessor implements PageProcessor {
             } while (WebDriverUtils.isExistsElementFindByXpath(driver, By.xpath("//*[@id='promotion-list-pagination']/ul/li[contains(@class,'a-last')]/a"), 20));
 
         } catch (Exception e) {
+            driver.quit();
             e.printStackTrace();
             throw new ServiceException(RespErrorEnum.SPIDER_EXEC.getSubStatusCode(), RespErrorEnum.SPIDER_EXEC.getSubStatusMsg());
         } finally {
-            driver.close();
+            driver.quit();
         }
 
         if (log.isInfoEnabled()) {
@@ -220,7 +235,7 @@ public class AmazonVcPromotionsProcessor implements PageProcessor {
 
         // 1.建立WebDriver
         System.setProperty("webdriver.chrome.driver", DriverPathCons.CHROME_DRIVER_PATH);
-        WebDriver driver = new ChromeDriver();
+        WebDriver driver = WebDriverUtils.getBackgroudWebDriver();
 
         try {
 
@@ -247,10 +262,11 @@ public class AmazonVcPromotionsProcessor implements PageProcessor {
             getDetail(page, driver);
 
         } catch (Exception e) {
+            driver.quit();
             e.printStackTrace();
             throw new ServiceException(RespErrorEnum.SPIDER_EXEC.getSubStatusCode(), RespErrorEnum.SPIDER_EXEC.getSubStatusMsg());
         } finally {
-            driver.close();
+            driver.quit();
         }
 
     }

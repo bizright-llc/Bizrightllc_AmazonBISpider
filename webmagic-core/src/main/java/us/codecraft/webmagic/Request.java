@@ -53,6 +53,11 @@ public class Request implements Serializable {
 
     private String charset;
 
+    /**
+     * When it is set to True, schedule add to queue even duplicate
+     */
+    private boolean retry = false;
+
     public Request() {
     }
 
@@ -76,6 +81,21 @@ public class Request implements Serializable {
     public Request setPriority(long priority) {
         this.priority = priority;
         return this;
+    }
+
+    /**
+     * Set the retry to re add to queue list
+     *
+     * @param retry
+     * @return
+     */
+    public Request setRetry(boolean retry){
+        this.retry = retry;
+        return this;
+    }
+
+    public boolean isRetry(){
+        return retry;
     }
 
     public Object getExtra(String key) {

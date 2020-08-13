@@ -11,6 +11,8 @@ public interface VcPromotionInfoDOMapper {
 
     int insert(VcPromotionInfoDO record);
 
+    boolean existByPromotionId(Long promotionId);
+
     int insertSelective(VcPromotionInfoDO record);
 
     int insertBatch(List<VcPromotionInfoDO> recordList);
