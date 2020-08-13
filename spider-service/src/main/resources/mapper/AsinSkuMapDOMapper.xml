@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spider.amazon.mapper.AsinSkuMapDOMapper">
+    <resultMap id="BaseResultMap" type="com.spider.amazon.model.AsinSkuMapDO">
+        <result column="asin" jdbcType="VARCHAR" property="asin"/>
+        <result column="sku" jdbcType="VARCHAR" property="sku"/>
+        <result column="PM" jdbcType="VARCHAR" property="pm"/>
+        <result column="CreatedBy" jdbcType="VARCHAR" property="createdBy"/>
+        <result column="UpdatedBy" jdbcType="VARCHAR" property="updatedBy"/>
+        <result column="CreatedAt" jdbcType="TIMESTAMP" property="createdAt"/>
+        <result column="UpdatedAt" jdbcType="TIMESTAMP" property="updatedAt"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        asin, sku, PM, CreatedBy, UpdatedBy, CreatedAt, UpdatedAt
+    </sql>
+    <insert id="insert" parameterType="com.spider.amazon.model.AsinSkuMapDO">
+        insert into asin_sku_map (asin, sku, PM, CreatedBy, UpdatedBy, CreatedAt, UpdatedAt)
+        values (#{asin,jdbcType=VARCHAR}, #{sku,jdbcType=VARCHAR}, #{pm,jdbcType=VARCHAR},
+                #{createdBy,jdbcType=VARCHAR}, #{updatedBy,jdbcType=VARCHAR}, getdate(),getdate())
+    </insert>
+    <insert id="insertSelective" parameterType="com.spider.amazon.model.AsinSkuMapDO">
+        insert into asin_sku_map
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="asin != null">
+                asin,
+            </if>
+            <if test="sku != null">
+                sku,
+            </if>
+            <if test="pm != null">
+                PM,
+            </if>
+            <if test="createdBy != null">
+                CreatedBy,
+            </if>
+            <if test="updatedBy != null">
+                UpdatedBy,
+            </if>
+            CreatedAt,
+            UpdatedAt
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="asin != null">
+                #{asin,jdbcType=VARCHAR},
+            </if>
+            <if test="sku != null">
+                #{sku,jdbcType=VARCHAR},
+            </if>
+            <if test="pm != null">
+                #{pm,jdbcType=VARCHAR},
+            </if>
+            <if test="createdBy != null">
+                #{CreatedBy,jdbcType=VARCHAR},
+            </if>
+            <if test="updatedBy != null">
+                #{UpdatedBy,jdbcType=VARCHAR},
+            </if>
+            getdate(),
+            getdate()
+        </trim>
+    </insert>
+    <!--  <update id="update" parameterType="com.spider.amazon.model.AsinSkuMapDO">-->
+    <!--    update asin_sku_map-->
+    <!--  </update>-->
+
+    <!-- 批量插入 -->
+    <insert id="insertBatch" parameterType="java.util.List">
+        insert into asin_sku_map (<include refid="Base_Column_List"/>)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.asin,jdbcType=VARCHAR}, #{item.sku,jdbcType=VARCHAR}, #{item.pm,jdbcType=VARCHAR},
+            #{item.createdBy,jdbcType=VARCHAR}, #{item.updatedBy,jdbcType=VARCHAR}, getdate(), getdate())
+        </foreach>
+    </insert>
+</mapper>
