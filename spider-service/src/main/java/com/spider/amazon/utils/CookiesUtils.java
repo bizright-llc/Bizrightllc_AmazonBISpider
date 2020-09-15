@@ -3,12 +3,14 @@ package com.spider.amazon.utils;
 
 import com.spider.amazon.entity.Cookie;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Cookie工具类
@@ -53,14 +55,67 @@ public class CookiesUtils {
 
         return cookies;
     }
-//
-//    public List<Cookie> chromeJsonCookis2CookieList(Json) {
-//
-//
-//
-//
-//        return null;
-//    }
+
+    public static Set<Cookie> parseCookiesStr(String cookiesStr){
+
+        log.info("[parseCookiesStr]");
+
+        String[] cookiesList = cookiesStr.split(";");
+
+        Set<Cookie> cookies = new HashSet<>();
+        for (String str : cookiesList) {
+            if(StringUtils.isEmpty(str) || StringUtils.isBlank(str) || !StringUtils.contains(str, "=")){
+                continue;
+            }
+            Cookie cookie = new Cookie();
+            int eqIndex = str.trim().indexOf("=");
+            cookie.setName(str.trim().substring(0, eqIndex));
+            cookie.setValue(str.trim().substring(eqIndex));
+            cookies.add(cookie);
+        }
+
+        return cookies;
+    }
+
+    public static List<org.openqa.selenium.Cookie> cookiesToSeleniumCookies(Collection<Cookie> cookies){
+        if(cookies == null){
+            return new ArrayList<>();
+        }
+
+        return cookies.stream().map(c -> {
+
+            if(c.getIsSecure() != null && c.getIsHttpOnly() != null){
+                return new org.openqa.selenium.Cookie(c.getName(), c.getValue(), c.getDomain(), c.getPath(), c.getExpiry(), c.getIsSecure(), c.getIsHttpOnly());
+            }else{
+                if(c.getIsSecure() != null){
+                    return new org.openqa.selenium.Cookie(c.getName(), c.getValue(), c.getDomain(), c.getPath(), c.getExpiry(), c.getIsSecure());
+                }else{
+                    return new org.openqa.selenium.Cookie(c.getName(), c.getValue(), c.getDomain(), c.getPath(), c.getExpiry());
+                }
+            }
+
+        }).collect(Collectors.toList());
+    }
+
+    public static List<Cookie> seleniumCookieToCookie(Collection<org.openqa.selenium.Cookie> seleniumCookies){
+
+        if(seleniumCookies == null){
+            return new ArrayList<>();
+        }
+
+        ModelMapper modelMapper = new ModelMapper();
+
+        return seleniumCookies.stream().map(sc -> {
+            Cookie c = modelMapper.map(sc, Cookie.class);
+
+            c.setIsSecure(sc.isSecure());
+            c.setIsHttpOnly(sc.isHttpOnly());
+
+            return c;
+        }).collect(Collectors.toList());
+
+    }
+
     public static void main(String[] args) {
 
         CookiesUtils cookiesUtils = new CookiesUtils();

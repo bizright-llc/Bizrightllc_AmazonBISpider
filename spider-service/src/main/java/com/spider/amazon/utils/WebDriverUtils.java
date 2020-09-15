@@ -2,6 +2,10 @@ package com.spider.amazon.utils;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.spider.amazon.entity.Cookie;
+import com.spider.amazon.service.MailService;
+import com.spider.amazon.service.impl.MailServiceImpl;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
@@ -16,10 +20,14 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
+
+import static java.lang.Thread.sleep;
 
 /**
  * driver工具集,目前仅支持chromedriver
  */
+@Slf4j
 public class WebDriverUtils {
 
     public static WebDriver getWebDriver(String downloadPath) {
@@ -138,11 +146,26 @@ public class WebDriverUtils {
         }
 
         for (Cookie cookie : listCookies) {
-            // Havn't Know the reason cannot add these token
+            // Haven't Know the reason cannot add these token
             if (!cookie.getName().equals("__Host-mons-selections") && !cookie.getName().equals("__Host-mselc")) {
-                driver.manage().addCookie(new org.openqa.selenium.Cookie(cookie.getName(), cookie.getValue(), cookie.getDomain(),
-                        cookie.getPath(), cookie.getExpiry(), cookie.getIsSecure(), cookie.getIsHttpOnly()));
+                if(cookie.getDomain() == null){
+                    driver.manage().addCookie(new org.openqa.selenium.Cookie(cookie.getName(), cookie.getValue()));
+                }else{
+                    driver.manage().addCookie(new org.openqa.selenium.Cookie(cookie.getName(), cookie.getValue(), cookie.getDomain(),
+                            cookie.getPath(), cookie.getExpiry(), cookie.getIsSecure(), cookie.getIsHttpOnly()));
+                }
             }
+        }
+    }
+
+    public static void addSeleniumCookies(WebDriver driver, List<org.openqa.selenium.Cookie> listCookies) {
+        if(driver == null){
+            return;
+        }
+
+        for (org.openqa.selenium.Cookie cookie : listCookies) {
+            // Haven't Know the reason cannot add these token
+            driver.manage().addCookie(cookie);
         }
     }
 
@@ -156,4 +179,108 @@ public class WebDriverUtils {
             element.click();
         }
     }
+
+    /**
+     * Re login to get the latest cookies for amazon vendor central
+     * @param driver
+     */
+    public static void getAmazonVCCookies(WebDriver driver){
+
+        try{
+
+            driver.get("https://vendorcentral.amazon.com/hz/vendor/members/support/hub");
+
+            WebElement signInBtnEle = expWaitForElement(driver, By.id("login-button-container"), 5);
+            elementClick(signInBtnEle);
+
+            WebElement emailInputEle = expWaitForElement(driver, By.name("email"), 5);
+            emailInputEle.sendKeys("james.l@bzrthinc.com");
+
+            WebElement passwordInputEle = expWaitForElement(driver, By.name("password"), 5);
+            passwordInputEle.sendKeys("Lovebizright");
+
+            WebElement rememberMeCheckBoxEle = expWaitForElement(driver, By.name("rememberMe"), 5);
+            elementClick(rememberMeCheckBoxEle);
+
+            WebElement loginBtnEle = expWaitForElement(driver, By.id("signInSubmit"), 5);
+            elementClick(loginBtnEle);
+
+            sleep(1000);
+
+            WebElement authSendCodeBtnEle = expWaitForElement(driver, By.id("auth-send-code"), 5);
+
+            if (authSendCodeBtnEle != null)
+            {
+                elementClick(authSendCodeBtnEle);
+            }
+
+            MailService mailService = new MailServiceImpl();
+            mailService.login("bizright.spider@gmail.com", "Lovebizright");
+
+            String otpCode = "";
+            for (int i=0; i<5; i++){
+                otpCode = mailService.getLastAmazonVCOTP();
+                if(StringUtils.isNotEmpty(otpCode)){
+                    break;
+                }
+            }
+
+            WebElement otpCodeInputEle = expWaitForElement(driver, By.id("auth-mfa-otpcode"), 5);
+            otpCodeInputEle.sendKeys(otpCode);
+
+            WebElement otpRememberCheckBoxEle = expWaitForElement(driver, By.id("auth-mfa-remember-device"), 5);
+            elementClick(otpRememberCheckBoxEle);
+
+            WebElement otpSignInBtnEle = expWaitForElement(driver, By.id("auth-signin-button"), 5);
+            elementClick(otpSignInBtnEle);
+
+        }catch (Exception ex){
+            log.info("[getAmazonVCCookies] throw exception");
+            log.info(ex.getLocalizedMessage());
+        }
+
+    }
+
+    /**
+     * Check web driver amazon vendor central cookies valid or not
+     *
+     * @param driver
+     * @return
+     */
+    public static boolean checkAmazonVCCookiesValid(WebDriver driver) throws InterruptedException {
+
+        log.info("[checkAmazonVCCookiesValid] check web driver amazon vc cookies");
+
+        if(driver == null){
+            throw new IllegalArgumentException("Web driver cannot be null");
+        }
+
+        try{
+            driver.navigate().to("https://vendorcentral.amazon.com/hz/vendor/members/home/check");
+
+            sleep(1000);
+
+            WebElement logoutBtnEle = expWaitForElement(driver, By.id("logout_topRightNav"), 5);
+
+            if(logoutBtnEle != null){
+
+                WebElement regionSpanEle = expWaitForElement(driver, By.id("account-region_topRightNav"), 5);
+
+                if (regionSpanEle != null)
+                {
+                    String text = regionSpanEle.getText();
+                    if (text.contains("US"))
+                    {
+                        return true;
+                    }
+                }
+
+            }
+            return false;
+        }catch (Exception ex){
+            return false;
+        }
+
+    }
+
 }

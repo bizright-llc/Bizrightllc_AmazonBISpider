@@ -1,32 +1,30 @@
 package com.spider.amazon.webmagic.amzvc;
 
-import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.common.exception.ServiceException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.spider.amazon.config.SpiderConfig;
 import com.spider.amazon.cons.DateFormat;
 import com.spider.amazon.cons.DriverPathCons;
 import com.spider.amazon.cons.RespErrorEnum;
 import com.spider.amazon.entity.Cookie;
+import com.spider.amazon.model.Consts;
 import com.spider.amazon.model.VcPromotionInfoDO;
 import com.spider.amazon.model.VcPromotionProductInfoDO;
 import com.spider.amazon.remote.api.SpiderUrl;
+import com.spider.amazon.service.CommonSettingService;
 import com.spider.amazon.utils.ConvertUtils;
+import com.spider.amazon.utils.CookiesUtils;
 import com.spider.amazon.utils.JsonToListUtil;
 import com.spider.amazon.utils.WebDriverUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.xmlbeans.impl.xb.xsdschema.FieldDocument;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-import org.jsoup.select.Selector;
+import org.modelmapper.ModelMapper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -35,18 +33,14 @@ import us.codecraft.webmagic.Request;
 import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.Spider;
 import us.codecraft.webmagic.processor.PageProcessor;
-import us.codecraft.webmagic.selector.Selectable;
-import us.codecraft.xsoup.XElement;
-import us.codecraft.xsoup.XElements;
-import us.codecraft.xsoup.Xsoup;
 
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Formatter;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static cn.hutool.core.thread.ThreadUtil.sleep;
 
@@ -61,11 +55,14 @@ public class AmazonVcPromotionsProcessor implements PageProcessor {
 
     private SpiderConfig spiderConfig;
 
+    private CommonSettingService commonSettingService;
+
     private String overlayXPath = "//div[@class='mt-loading-overlay']";
 
     @Autowired
-    public AmazonVcPromotionsProcessor(SpiderConfig spiderConfig) {
+    public AmazonVcPromotionsProcessor(SpiderConfig spiderConfig, CommonSettingService commonSettingService) {
         this.spiderConfig = spiderConfig;
+        this.commonSettingService = commonSettingService;
     }
 
     private Site site = Site
@@ -126,7 +123,11 @@ public class AmazonVcPromotionsProcessor implements PageProcessor {
 
         // 1.建立WebDriver
         System.setProperty("webdriver.chrome.driver", DriverPathCons.CHROME_DRIVER_PATH);
-        WebDriver driver = WebDriverUtils.getBackgroudWebDriver();
+        WebDriver driver = WebDriverUtils.getWebDriver();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        ModelMapper modelMapper = new ModelMapper();
 
         try {
 
@@ -138,23 +139,31 @@ public class AmazonVcPromotionsProcessor implements PageProcessor {
 
             // 2.初始打开页面
             driver.manage().timeouts().pageLoadTimeout(20, TimeUnit.SECONDS); // 页面加载超时时间
-            driver.get("https://www.google.com/");
+            driver.navigate().to("https://vendorcentral.amazon.com/404page");
 
             // 3.add Cookies 在工具类中解析json
             driver.manage().deleteAllCookies();
+            List<Cookie> cookies = commonSettingService.getAmazonVCCookies();
 
-            WebDriverUtils.addCookies(driver, JsonToListUtil.amazonSourceCookieList2CookieList(JsonToListUtil.getListByPath(spiderConfig.getAmzVcCookieFilepath())));
+            List<org.openqa.selenium.Cookie> savedCookies = CookiesUtils.cookiesToSeleniumCookies(cookies);
 
-//            List<Cookie> listCookies = JsonToListUtil.amazonSourceCookieList2CookieList(JsonToListUtil.getList());
-//            for (Cookie cookie : listCookies) {
-//                // Cookie(String name, String value, String domain, String path, Date expiry, boolean isSecure, boolean isHttpOnly)
-//                driver.manage().addCookie(new org.openqa.selenium.Cookie(cookie.getName(), cookie.getValue(), cookie.getDomain(),
-//                        cookie.getPath(), cookie.getExpiry(), cookie.getIsSecure(), cookie.getIsHttpOnly()));
-//            }
+            WebDriverUtils.addSeleniumCookies(driver, savedCookies);
+
+            // cookies are not valid
+            if(!WebDriverUtils.checkAmazonVCCookiesValid(driver)){
+                driver.manage().deleteAllCookies();
+                WebDriverUtils.getAmazonVCCookies(driver);
+
+                List<Cookie> driverCookies = CookiesUtils.seleniumCookieToCookie(driver.manage().getCookies());
+
+                String newCookiesStr = objectMapper.writeValueAsString(driverCookies);
+
+                commonSettingService.setValue(Consts.AMAZON_VC_COOKIES, newCookiesStr, "system");
+            }
 
             // 4.重定向跳转
             driver.manage().timeouts().pageLoadTimeout(20, TimeUnit.SECONDS); // 页面加载超时时间
-            driver.get("https://vendorcentral.amazon.com/hz/vendor/members/promotions/list/home?ref_=vc_xx_subNav");
+            driver.navigate().to("https://vendorcentral.amazon.com/hz/vendor/members/promotions/list/home?ref_=vc_xx_subNav");
 
 
             // 4.1 点击页记录数按钮
@@ -478,12 +487,12 @@ public class AmazonVcPromotionsProcessor implements PageProcessor {
 //        Spider.create(new AmazonVcPromotionsProcessor())
 //                .addUrl("https://www.google.com/")
 //                .run();
-        Spider spider = Spider.create(new AmazonVcPromotionsProcessor(null));
-        spider.addPipeline(new AmazonVcPromotionsPipeline());
-        spider.addUrl("https://www.google.com/");
-        spider.run();
-
-        System.out.println("end.step93=>抓取程序结束。");
+//        Spider spider = Spider.create(new AmazonVcPromotionsProcessor(null, commonSettingService));
+//        spider.addPipeline(new AmazonVcPromotionsPipeline());
+//        spider.addUrl("https://www.google.com/");
+//        spider.run();
+//
+//        System.out.println("end.step93=>抓取程序结束。");
 
     }
 
