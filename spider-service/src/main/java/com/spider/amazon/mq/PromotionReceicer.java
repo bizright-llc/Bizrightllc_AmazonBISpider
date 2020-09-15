@@ -5,6 +5,7 @@ import cn.hutool.json.JSONUtil;
 import com.rabbitmq.client.Channel;
 import com.spider.amazon.config.SpiderConfig;
 import com.spider.amazon.entity.PromotionList;
+import com.spider.amazon.service.CommonSettingService;
 import com.spider.amazon.webmagic.amzvc.AmazonVcPromotionsPipeline;
 import com.spider.amazon.webmagic.amzvc.AmazonVcPromotionsProcessor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +29,9 @@ public class PromotionReceicer{
     @Autowired
     private SpiderConfig spiderConfig;
 
+    @Autowired
+    private CommonSettingService commonSettingService;
+
     @RabbitListener(queues = "${promotion.queue.name}",containerFactory = "singleManuelListenerContainer")
     public void consumePromotionQueue(Message message,Channel channel,@Header(AmqpHeaders.DELIVERY_TAG) long tag) {
 
@@ -39,7 +43,7 @@ public class PromotionReceicer{
 
         // 2.调用爬虫
         log.info("调用爬虫 promotionList=>[{}] crawId=>[{}]",promotionList,crawId);
-        Spider spider= Spider.create(new AmazonVcPromotionsProcessor(spiderConfig));
+        Spider spider= Spider.create(new AmazonVcPromotionsProcessor(spiderConfig, commonSettingService));
         spider.addPipeline(new AmazonVcPromotionsPipeline());
         spider.thread(2);
         for ( PromotionList singlePromotionList:promotionList) {

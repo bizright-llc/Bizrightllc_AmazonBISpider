@@ -26,4 +26,9 @@ public class SpiderUrl {
     // IP池主页
     public static final String IP_POOL_INDEX = "https://www.kuaidaili.com";
 
+    // Amazon VC index 頁面
+    public static final String AMAZON_VC_INDEX = "https://vendorcentral.amazon.com/404page";
+
+    public static final String AMAZON_VC_PROMOTION = "https://vendorcentral.amazon.com/hz/vendor/members/promotions/list/home?ref_=vc_xx_subNav";
+
 }

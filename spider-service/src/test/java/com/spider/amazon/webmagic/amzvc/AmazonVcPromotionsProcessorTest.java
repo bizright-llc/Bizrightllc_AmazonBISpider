@@ -8,6 +8,7 @@ import com.spider.amazon.mapper.VcPromotionInfoDOMapper;
 import com.spider.amazon.mapper.VcPromotionProductInfoDOMapper;
 import com.spider.amazon.model.VcPromotionInfoDO;
 import com.spider.amazon.model.VcPromotionProductInfoDO;
+import com.spider.amazon.service.CommonSettingService;
 import com.spider.amazon.utils.SpringContextUtils;
 import com.spider.amazon.webmagic.AmazonScBuyBox;
 import org.junit.Before;
@@ -44,6 +45,9 @@ class AmazonVcPromotionsProcessorTest {
 
     @Autowired
     private VcPromotionProductInfoDOMapper vcPromotionProductInfoDOMapper;
+
+    @Autowired
+    private CommonSettingService commonSettingService;
 
 //    @Before
 //    public void init(){
@@ -124,14 +128,8 @@ class AmazonVcPromotionsProcessorTest {
     @Test
     public void TestAmazonVcPromotionProcessor() throws InterruptedException {
 
-//        spiderConfig = spy(new SpiderConfig());
-//
-//        Mockito.doReturn("/Users/shaochinlin/Documents/Bizright/BI/BiSpider").when(spiderConfig).getDownloadPathLinux();
-//        Mockito.doReturn("/Users/shaochinlin/Documents/Bizright/BI/BiSpider/cookieVc.json").when(spiderConfig).getAmzScCookieFilepath();
-//        Mockito.doReturn("https://www.google.com/").when(spiderConfig).getSpiderIndex();
-
         // 3.调用爬虫
-        Spider spider= Spider.create(new AmazonVcPromotionsProcessor(spiderConfig));
+        Spider spider= Spider.create(new AmazonVcPromotionsProcessor(spiderConfig, commonSettingService));
         spider.addPipeline(new AmazonVcPromotionsPipeline());
         spider.thread(2);
         Request request = new Request(spiderConfig.getSpiderIndex());

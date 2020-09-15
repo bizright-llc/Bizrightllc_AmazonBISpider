@@ -68,7 +68,7 @@ public class AmazonVcPromotionsProcessor implements PageProcessor {
     private Site site = Site
             .me()
             .setRetryTimes(3)
-            .setDomain("https://vendorcentral.amazon.com/hz/vendor/members/promotions/list/home?ref_=vc_xx_subNav")
+            .setDomain(SpiderUrl.AMAZON_VC_PROMOTION)
             .setSleepTime(3000)
             .setUserAgent("User-Agent:Mozilla/5.0(Macintosh;IntelMacOSX10_7_0)AppleWebKit/535.11(KHTML,likeGecko)Chrome/17.0.963.56Safari/535.11");
 
@@ -79,9 +79,11 @@ public class AmazonVcPromotionsProcessor implements PageProcessor {
      */
     public Site getSite() {
 
-        List<Cookie> listCookies = JsonToListUtil.amazonSourceCookieList2CookieList(JsonToListUtil.getListByPath(spiderConfig.getAmzVcCookieFilepath()));
+//        List<Cookie> listCookies = JsonToListUtil.amazonSourceCookieList2CookieList(JsonToListUtil.getListByPath(spiderConfig.getAmzVcCookieFilepath()));
 
-        for (Cookie cookie : listCookies) {
+        List<Cookie> cookies = commonSettingService.getAmazonVCCookies();
+
+        for (Cookie cookie : cookies) {
             site.addCookie(cookie.getName(), cookie.getValue());
         }
 
@@ -122,7 +124,8 @@ public class AmazonVcPromotionsProcessor implements PageProcessor {
         String crawId = DateUtil.format(DateUtil.date(), DateFormat.YEAR_MONTH_DAY_yyyyMMddHHmmss1);
 
         // 1.建立WebDriver
-        System.setProperty("webdriver.chrome.driver", DriverPathCons.CHROME_DRIVER_PATH);
+        System.setProperty("webdriver.chrome.driver", spiderConfig.getChromeDriverPath());
+
         WebDriver driver = WebDriverUtils.getWebDriver();
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -139,7 +142,7 @@ public class AmazonVcPromotionsProcessor implements PageProcessor {
 
             // 2.初始打开页面
             driver.manage().timeouts().pageLoadTimeout(20, TimeUnit.SECONDS); // 页面加载超时时间
-            driver.navigate().to("https://vendorcentral.amazon.com/404page");
+            driver.navigate().to(SpiderUrl.AMAZON_VC_INDEX);
 
             // 3.add Cookies 在工具类中解析json
             driver.manage().deleteAllCookies();
@@ -163,7 +166,7 @@ public class AmazonVcPromotionsProcessor implements PageProcessor {
 
             // 4.重定向跳转
             driver.manage().timeouts().pageLoadTimeout(20, TimeUnit.SECONDS); // 页面加载超时时间
-            driver.navigate().to("https://vendorcentral.amazon.com/hz/vendor/members/promotions/list/home?ref_=vc_xx_subNav");
+            driver.navigate().to(SpiderUrl.AMAZON_VC_PROMOTION);
 
 
             // 4.1 点击页记录数按钮
@@ -256,16 +259,22 @@ public class AmazonVcPromotionsProcessor implements PageProcessor {
 
             // 2.初始打开页面
             driver.manage().timeouts().pageLoadTimeout(20, TimeUnit.SECONDS); // 页面加载超时时间
-            driver.get("https://www.google.com/");
+            driver.get(SpiderUrl.AMAZON_VC_INDEX);
 
             // 3.add Cookies 在工具类中解析json
             driver.manage().deleteAllCookies();
 
-            WebDriverUtils.addCookies(driver, JsonToListUtil.amazonSourceCookieList2CookieList(JsonToListUtil.getListByPath(spiderConfig.getAmzVcCookieFilepath())));
+            List<Cookie> cookies = commonSettingService.getAmazonVCCookies();
+
+            List<org.openqa.selenium.Cookie> savedCookies = CookiesUtils.cookiesToSeleniumCookies(cookies);
+
+            WebDriverUtils.addSeleniumCookies(driver, savedCookies);
+
+//            WebDriverUtils.addCookies(driver, JsonToListUtil.amazonSourceCookieList2CookieList(JsonToListUtil.getListByPath(spiderConfig.getAmzVcCookieFilepath())));
 
             // 4.重定向跳转
             driver.manage().timeouts().pageLoadTimeout(20, TimeUnit.SECONDS); // 页面加载超时时间
-            driver.get(page.getUrl().get());
+            driver.navigate().to(page.getUrl().get());
 
             // 5.获取信息
             getDetail(page, driver);

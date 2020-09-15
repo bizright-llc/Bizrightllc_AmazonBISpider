@@ -66,6 +66,9 @@ public class ScheduleTask {
     @Autowired
     private IInvoiceService invoiceService;
 
+    @Autowired
+    private CommonSettingService commonSettingService;
+
 
     private final static int pageSize = 100000;
     private final static int minPageSize = 10;
@@ -172,7 +175,7 @@ public class ScheduleTask {
     @Scheduled(cron = "0 0 4 * * ?")
     public void schedulerVcDailyPromotionInfo() {
         log.info("0.step234=>开始执行［schedulerVcDailyPromotionInfo］");
-        Spider spider = Spider.create(new AmazonVcPromotionsProcessor(spiderConfig));
+        Spider spider = Spider.create(new AmazonVcPromotionsProcessor(spiderConfig, commonSettingService));
         spider.addPipeline(new AmazonVcPromotionsPipeline());
         spider.addUrl(spiderConfig.getSpiderIndex());
         spider.setExitWhenComplete(true);

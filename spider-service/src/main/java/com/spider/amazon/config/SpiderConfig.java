@@ -37,4 +37,7 @@ public class SpiderConfig {
     @Value("${spider.amazon.sc.cookie}")
     private String amzScCookieFilepath;
 
+    @Value("${spider.driver.chrome.path}")
+    private String chromeDriverPath;
+
 }
