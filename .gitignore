@@ -10,3 +10,5 @@ target/
 .eclipse
 *.gz
 *.tmp
+*.log
+.DS_Store
