@@ -7,21 +7,14 @@ import com.spider.amazon.cons.DateFormat;
 import com.spider.amazon.mapper.VcPromotionInfoDOMapper;
 import com.spider.amazon.mapper.VcPromotionProductInfoDOMapper;
 import com.spider.amazon.model.VcPromotionInfoDO;
+import com.spider.amazon.model.VcPromotionProcessorConfig;
 import com.spider.amazon.model.VcPromotionProductInfoDO;
 import com.spider.amazon.service.CommonSettingService;
-import com.spider.amazon.utils.SpringContextUtils;
-import com.spider.amazon.webmagic.AmazonScBuyBox;
-import org.junit.Before;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.testng.annotations.BeforeMethod;
 import us.codecraft.webmagic.Request;
 import us.codecraft.webmagic.Spider;
 
@@ -29,8 +22,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.spy;
 
 @ExtendWith(SpringExtension.class)
@@ -130,6 +123,75 @@ class AmazonVcPromotionsProcessorTest {
 
         // 3.调用爬虫
         Spider spider= Spider.create(new AmazonVcPromotionsProcessor(spiderConfig, commonSettingService));
+        spider.addPipeline(new AmazonVcPromotionsPipeline());
+        spider.thread(2);
+        Request request = new Request(spiderConfig.getSpiderIndex());
+
+        String crawId = DateUtil.format(DateUtil.date(), DateFormat.YEAR_MONTH_DAY_yyyyMMddHHmmss1);
+
+        request.putExtra("craw_id",crawId);
+        spider.addRequest(request);
+        spider.start();
+        Thread.sleep(300000);
+
+    }
+
+    @Test
+    public void TestAmazonVcCustomPromotionProcessor() throws InterruptedException {
+
+        AmazonVcPromotionsCustomProcessor processor = new AmazonVcPromotionsCustomProcessor(spiderConfig, commonSettingService, vcPromotionInfoDOMapper);
+
+        List<String> asinList = new ArrayList<>();
+        asinList.add("B087YZMVJB");
+        asinList.add("B087YT4F8V");
+        asinList.add("B087XNG36S");
+        asinList.add("B087XNBKSZ");
+        asinList.add("B088Z2DFR7");
+        asinList.add("B088Z5LVJ8");
+        asinList.add("B08BBZ7W4B");
+        asinList.add("B08BCFPTJ6");
+        asinList.add("B08B1G7FTV");
+        asinList.add("B089ZVPPQ2");
+        asinList.add("B08B6HXHCH");
+        asinList.add("B08B6J82YJ");
+
+        VcPromotionProcessorConfig config = new VcPromotionProcessorConfig();
+
+        config.setAsins(asinList);
+
+        processor.setVcPromotionProcessorConfig(config);
+
+        // 3.调用爬虫
+        Spider spider= Spider.create(processor);
+        spider.addPipeline(new AmazonVcPromotionsPipeline());
+        spider.thread(2);
+        Request request = new Request(spiderConfig.getSpiderIndex());
+
+        String crawId = DateUtil.format(DateUtil.date(), DateFormat.YEAR_MONTH_DAY_yyyyMMddHHmmss1);
+
+        request.putExtra("craw_id",crawId);
+        spider.addRequest(request);
+        spider.start();
+        Thread.sleep(300000);
+
+    }
+
+    @Test
+    public void testAmazonVcCustomPromotionProcessorDownloadAllPromotion() throws InterruptedException {
+
+        AmazonVcPromotionsCustomProcessor processor = new AmazonVcPromotionsCustomProcessor(spiderConfig, commonSettingService, vcPromotionInfoDOMapper);
+
+        List<String> asinList = new ArrayList<>();
+
+        VcPromotionProcessorConfig config = new VcPromotionProcessorConfig();
+
+        config.setAsins(asinList);
+        config.setSkipExist(true);
+
+        processor.setVcPromotionProcessorConfig(config);
+
+        // 3.调用爬虫
+        Spider spider= Spider.create(processor);
         spider.addPipeline(new AmazonVcPromotionsPipeline());
         spider.thread(2);
         Request request = new Request(spiderConfig.getSpiderIndex());

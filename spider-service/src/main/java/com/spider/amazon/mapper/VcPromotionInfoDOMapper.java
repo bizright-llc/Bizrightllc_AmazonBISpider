@@ -2,6 +2,7 @@ package com.spider.amazon.mapper;
 
 import com.spider.amazon.model.VcPromotionInfoDO;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
@@ -13,7 +14,7 @@ public interface VcPromotionInfoDOMapper {
 
     int insert(VcPromotionInfoDO record);
 
-    boolean existByPromotionId(Long promotionId);
+    boolean existByPromotionId(@Param("promotionId") String promotionId);
 
     int insertSelective(VcPromotionInfoDO record);
 
