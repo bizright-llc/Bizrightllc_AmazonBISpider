@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spider.amazon.mapper.AmzVcDailyInventoryMapper">
+    <resultMap id="BaseResultMap" type="com.spider.amazon.entity.AmzVcDailyInventory">
+        <result column="Asin" jdbcType="VARCHAR" property="asin"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        *
+    </sql>
+
+    <update id="insert" parameterType="com.spider.amazon.entity.AmzVcDailyInventory">
+        insert into AmazonVCDailyInventory ("Asin", "ProductTitle", "NetReceived", "NetReceivedUnits",
+                                            "SellThroughRate", "OpenPurchaseOrderQuantity", "SellableOnHandInventory",
+                                            "SellableOnHandInventoryTrailing30DayAverage", "SellableOnHandUnits",
+                                            "UnsellableOnHandInventory",
+                                            "UnsellableOnHandInventoryTrailing30DayAverage", "UnsellableOnHandUnits",
+                                            "Aged90+DaysSellableInventory",
+                                            "Aged90+DaysSellableInventoryTrailing30DayAverage",
+                                            "Aged90+DaysSellableUnits", "ReplenishmentCategory", "AvailableInventory",
+                                            "UnhealthyInventory",
+                                            "UnhealthyUnits", "DistributorView", "ViewingDate", "InsertedAt")
+        values (#{asin}, #{productTitle}, #{netReceived}, #{netReceivedUnits},
+                #{sellThroughRate}, #{openPurchaseOrderQuantity}, #{sellableOnHandInventory},
+                #{sellableOnHandInventoryTrailing30DayAverage}, #{sellableOnHandUnits},
+                #{unsellableOnHandInventory},
+                #{unsellableOnHandInventoryTrailing30DayAverage}, #{unSellableOnHandUnits},
+                #{aged90DaysSellableInventory},
+                #{aged90DaysSellableInventoryTrailing30DayAverage},
+                #{aged90DaysSellableUnits}, #{replenishmentCategory}, #{availableInventory},
+                #{unhealthyInventory},
+                #{unhealthyUnits}, #{distributorView}, #{viewingDate}, getdate())
+    </update>
+
+<!--    <update id="insert" parameterType="com.spider.amazon.entity.AmzVcDailyInventory">-->
+<!--        insert into AmazonVCDailyInventory ("Asin", "ProductTitle", "NetReceived", "NetReceivedUnits",-->
+<!--                                            "SellThroughRate", "OpenPurchaseOrderQuantity", "SellableOnHandInventory",-->
+<!--                                            "SellableOnHandInventoryTrailing30DayAverage", "SellableOnHandUnits",-->
+<!--                                            "UnsellableOnHandInventory",-->
+<!--                                            "UnsellableOnHandInventoryTrailing30DayAverage", "UnsellableOnHandUnits",-->
+<!--                                            "Aged90+DaysSellableInventory",-->
+<!--                                            "Aged90+DaysSellableInventoryTrailing30DayAverage",-->
+<!--                                            "Aged90+DaysSellableUnits", "ReplenishmentCategory", "AvailableInventory",-->
+<!--                                            "UnhealthyInventory", "UnhealthyInventoryTrailing30DayAverage",-->
+<!--                                            "UnhealthyUnits", "DistributorView", "ViewingDate", "InsertedAt")-->
+<!--        values (#{asin}, #{productTitle}, #{netReceived}, #{netReceivedUnits},-->
+<!--                #{sellThroughRate}, #{openPurchaseOrderQuantity}, #{sellableOnHandInventory},-->
+<!--                #{sellableOnHandInventoryTrailing30DayAverage}, #{sellableOnHandUnits},-->
+<!--                #{unsellableOnHandInventory},-->
+<!--                #{unsellableOnHandInventoryTrailing30DayAverage}, #{unSellableOnHandUnits},-->
+<!--                #{aged90DaysSellableInventory},-->
+<!--                #{aged90DaysSellableInventoryTrailing30DayAverage},-->
+<!--                #{aged90DaysSellableUnits}, #{replenishmentCategory}, #{availableInventory},-->
+<!--                #{unhealthyInventory},-->
+<!--                #{unhealthyInventoryTrailing30DayAverage},-->
+<!--                #{unhealthyUnits}, #{distributorView}, #{viewingDate}, getdate())-->
+<!--    </update>-->
+
+</mapper>

@@ -24,8 +24,8 @@
     CrawFlg, CreatedOn, StartDate, EndDate
     </sql>
 
-    <select id="existByPromotionId" parameterType="java.lang.Long" resultType="java.lang.Boolean">
-        SELECT count(*) FROM VcPromotionInfo WHERE PromotionId = #{promotionId, jdbcType=BIGINT}
+    <select id="existByPromotionId" parameterType="java.lang.String" resultType="java.lang.Boolean">
+        SELECT count(*) FROM VcPromotionInfo WHERE PromotionId = #{promotionId}
     </select>
 
     <insert id="insert" parameterType="com.spider.amazon.model.VcPromotionInfoDO">

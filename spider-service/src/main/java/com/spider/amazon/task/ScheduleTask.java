@@ -2,6 +2,7 @@ package com.spider.amazon.task;
 
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import com.common.exception.ServiceException;
 import com.spider.amazon.config.SpiderConfig;
@@ -13,13 +14,13 @@ import com.spider.amazon.dto.*;
 import com.spider.amazon.remote.api.SpiderUrl;
 import com.spider.amazon.service.*;
 import com.spider.amazon.service.impl.SpringBatchCallServiceImpl;
+import com.spider.amazon.utils.FileUtils;
 import com.spider.amazon.webmagic.*;
 import com.spider.amazon.webmagic.amz.AmazonAdConsumeProcessor;
-import com.spider.amazon.webmagic.amzvc.AmazonVcManufacturingDailySales;
-import com.spider.amazon.webmagic.amzvc.AmazonVcPromotionsPipeline;
-import com.spider.amazon.webmagic.amzvc.AmazonVcPromotionsProcessor;
-import com.spider.amazon.webmagic.amzvc.AmazonVcSourcingDailySales;
+import com.spider.amazon.webmagic.amzvc.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.batch.item.ExecutionContext;
+import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -28,8 +29,14 @@ import us.codecraft.webmagic.downloader.HttpClientDownloader;
 import us.codecraft.webmagic.proxy.Proxy;
 import us.codecraft.webmagic.proxy.SimpleProxyProvider;
 
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+
+import static java.lang.Thread.sleep;
 
 /**
  * 定时任务列表
@@ -73,6 +80,9 @@ public class ScheduleTask {
     private final static int pageSize = 100000;
     private final static int minPageSize = 10;
     private final static int pageNo = 1;
+
+    private final static String AMAZON_VC_INVENTORY_HEALTH_FILE_NAME = "Inventory Health_US";
+    private final static String AMAZON_VC_DAILY_SALES_FILE_NAME = "Sales Diagnostic_Detail View_US";
 
     /**
      * Fba库存日报处理属性
@@ -127,42 +137,72 @@ public class ScheduleTask {
     }
 
     /**
-     * 定时下载Amazon VC 每日销量报表
+     * 定时下载Amazon VC daily sales manufacturing view
      */
-//    @Scheduled(cron = "0 0 2 * * ?")
-    public void schedulerVcDailySales() {
+    @Scheduled(cron = "0 10 2 * * ?")
+    public void schedulerVcDailySales() throws InterruptedException {
         log.info("0.step56=>开始执行［schedulerVcDailySales］");
-        Spider spider = Spider.create(new AmazonVcManufacturingDailySales(spiderConfig));
-        spider.addUrl(spiderConfig.getSpiderIndex());
-        spider.setExitWhenComplete(true);
-        spider.run();
 
-        Spider spider2 = Spider.create(new AmazonVcSourcingDailySales(spiderConfig));
-        spider.addUrl(spiderConfig.getSpiderIndex());
-        spider.setExitWhenComplete(true);
-        spider.run();
+        try{
+            Spider spider = Spider.create(new AmazonVcManufacturingDailySales(spiderConfig, commonSettingService));
+            spider.addUrl(spiderConfig.getSpiderIndex());
+            spider.setExitWhenComplete(true);
+            spider.run();
+        }catch (Exception ex){
+            log.info("[schedulerVcDailySales] [manufacturing view] failed", ex);
+        }
     }
 
-
     /**
-     * 定时下载Amazon VC 每周销量报表
+     * 定时下载Amazon VC daily sales sourcing view
      */
-    @Scheduled(cron = "0 0 4 * * 1")
-    public void schedulerVcWeeklySales() {
-        log.info("0.step56=>开始执行［schedulerVcWeeklySales］");
-        Spider spider = Spider.create(new AmazonVcWeeklySales());
-        spider.addUrl(spiderConfig.getSpiderIndex());
-        spider.setExitWhenComplete(true);
-        spider.run();
+    @Scheduled(cron = "0 20 2 * * ?")
+    public void schedulerVcDailySalesSourcing() throws InterruptedException {
+        log.info("0.step56=>开始执行［schedulerVcDailySalesSourcing］");
+
+        try{
+            Spider spider = Spider.create(new AmazonVcSourcingDailySales(spiderConfig, commonSettingService));
+            spider.addUrl(spiderConfig.getSpiderIndex());
+            spider.setExitWhenComplete(true);
+            spider.run();
+        }catch (Exception ex){
+            log.info("[schedulerVcDailySales] [sourcing view] failed", ex);
+        }
+
     }
 
+//      already scrap daily sales
+//    /**
+//     * 定时下载Amazon VC 每周销量报表
+//     */
+//    @Scheduled(cron = "0 0 4 * * 1")
+//    public void schedulerVcWeeklySales() {
+//        log.info("0.step56=>开始执行［schedulerVcWeeklySales］");
+//        Spider spider = Spider.create(new AmazonVcWeeklySales());
+//        spider.addUrl(spiderConfig.getSpiderIndex());
+//        spider.setExitWhenComplete(true);
+//        spider.run();
+//    }
+
     /**
-     * 定时下载Amazon VC 每日库存报表
+     * Download Amazon VC daily inventory sourcing view
      */
     @Scheduled(cron = "0 0 3 * * ?")
-    public void schedulerVcDailyInventory() {
-        log.info("0.step64=>开始执行［schedulerVcDailyInventory］");
-        Spider spider = Spider.create(new AmazonVcPoInfo());
+    public void schedulerVcDailyInventorySourcing() {
+        log.info("0.step64=>开始执行［schedulerVcDailyInventorySourcing］");
+        Spider spider = Spider.create(new AmazonVcDailyInventoryHealthSourcing(spiderConfig, commonSettingService));
+        spider.addUrl(spiderConfig.getSpiderIndex());
+        spider.setExitWhenComplete(true);
+        spider.run();
+    }
+
+    /**
+     * Download Amazon VC daily inventory manufacturing view
+     */
+    @Scheduled(cron = "0 10 3 * * ?")
+    public void schedulerVcDailyInventoryManufacturing() {
+        log.info("0.step64=>开始执行［schedulerVcDailyInventoryManufacturing］");
+        Spider spider = Spider.create(new AmazonVcDailyInventoryHealthManufacturing(spiderConfig, commonSettingService));
         spider.addUrl(spiderConfig.getSpiderIndex());
         spider.setExitWhenComplete(true);
         spider.run();
@@ -247,22 +287,37 @@ public class ScheduleTask {
     }
 
 
-    /**schedulerVcDailyInventoryDataDeal
-     * 定时处理Amazon VC 每日库存报表
-     */
-    @Scheduled(cron = "0 0 7-12 * * ?  ")
-    public void schedulerVcDailyInventoryDataDeal() {
-        log.info("0.step112=>开始执行［schedulerVcDailyInventoryDataDeal］");
-        springBatchCallServiceImpl.callVcInventoryReportDataDeal();
-    }
-
     /**
      * 定时处理Amazon VC 销量报表
      */
-    @Scheduled(cron = "0 5 7-12 * * ? ")
+    @Scheduled(fixedDelay = 60000)
     public void schedulerVcSalesDataDeal() {
         log.info("0.step112=>开始执行［schedulerVcSalesDataDeal］");
-        springBatchCallServiceImpl.callVcSalesReportDataDeal();
+
+        if(checkVCDailySalesFileExist()){
+            log.info("Amazon VC Daily Sales file exist");
+            springBatchCallServiceImpl.callVcSalesReportDataDeal();
+        }else{
+            log.info("No Amazon VC Daily Sales file");
+        }
+
+    }
+
+    /**
+     * schedulerVcDailyInventoryDataDeal
+     * 定时处理Amazon VC 每日库存报表
+     */
+    @Scheduled(fixedDelay = 60000)
+    public void schedulerVcDailyInventoryDataDeal() {
+        log.info("0.step112=>开始执行［schedulerVcDailyInventoryDataDeal］");
+
+        if(checkVCInventoryFileExist()){
+            log.info("Amazon VC Inventory Sales file exist");
+            springBatchCallServiceImpl.callVcInventoryReportDataDeal();
+        }else{
+            log.info("No Amazon VC Inventory Health file");
+        }
+
     }
 
     /**
@@ -303,7 +358,8 @@ public class ScheduleTask {
     public void schedulerAdConsumer() {
 
         HttpClientDownloader httpClientDownloader = new HttpClientDownloader();
-//            调用api获取代理IP列表
+
+        // 调用api获取代理IP列表
         List<Proxy> proxies = null;
         try {
             proxies = AmazonAdConsumeProcessor.buildProxyIP();
@@ -316,6 +372,58 @@ public class ScheduleTask {
                 .addUrl(SpiderUrl.AMAZON_INDEX)
                 .setDownloader(httpClientDownloader)
                 .run();
+    }
+
+    private boolean checkVCInventoryFileExist(){
+
+        class MyFileFilter implements FileFilter {
+
+            public boolean accept(File f) {
+                if (f.getName().contains(AMAZON_VC_INVENTORY_HEALTH_FILE_NAME) && !f.getName().contains("Daily")) {
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        MyFileFilter filter = new MyFileFilter();
+
+        File[] files = FileUtils.getFileFromDir(spiderConfig.getDownloadPath(), filter);
+
+        File file = files.length > 0 ? files[0] : null;
+
+        // File exist
+        if (file != null && FileUtil.exist(file.getPath())) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private boolean checkVCDailySalesFileExist(){
+
+        class MyFileFilter implements FileFilter {
+
+            public boolean accept(File f) {
+                if (f.getName().contains(AMAZON_VC_DAILY_SALES_FILE_NAME) && !f.getName().contains("Daily")) {
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        MyFileFilter filter = new MyFileFilter();
+
+        File[] files = FileUtils.getFileFromDir(spiderConfig.getDownloadPath(), filter);
+
+        File file = files.length > 0 ? files[0] : null;
+
+        // File exist
+        if (file != null && FileUtil.exist(file.getPath())) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
 }

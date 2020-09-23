@@ -1,9 +1,12 @@
 package com.spider.amazon.service.impl;
 
 import com.spider.amazon.service.MailService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.mail.*;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.search.*;
 import java.io.IOException;
@@ -15,6 +18,7 @@ import java.util.regex.Pattern;
 /**
  * Implement of {@link MailService}
  */
+@Slf4j
 public class MailServiceImpl implements MailService {
 
     private Session session;
@@ -113,6 +117,74 @@ public class MailServiceImpl implements MailService {
         return otpCode;
     }
 
+    @Override
+    public void sendSystemMessage(String subject, String text) {
+        sendMessage(subject, text, "james.l@meetipower.com");
+    }
+
+    @Override
+    public void sendMessage(String subject, String text, String toAddress) {
+
+        if(!isLoggedIn()){
+            return;
+        }
+
+        // Sender's email ID needs to be mentioned
+        String from = "bizright.spider@gmail.com";
+
+        // Assuming you are sending email from through gmails smtp
+        String host = "smtp.gmail.com";
+
+        // Get system properties
+        Properties properties = System.getProperties();
+
+        // Setup mail server
+        properties.put("mail.smtp.host", host);
+        properties.put("mail.smtp.port", "465");
+        properties.put("mail.smtp.ssl.enable", "true");
+        properties.put("mail.smtp.auth", "true");
+
+        // Get the Session object.// and pass username and password
+        Session session = Session.getInstance(properties, new javax.mail.Authenticator() {
+
+            protected PasswordAuthentication getPasswordAuthentication() {
+
+                return new PasswordAuthentication(from, "Lovebizright");
+
+            }
+
+        });
+
+        // Used to debug SMTP issues
+        session.setDebug(true);
+
+        try {
+            // Create a default MimeMessage object.
+            MimeMessage message = new MimeMessage(session);
+
+            // Set From: header field of the header.
+            message.setFrom(new InternetAddress(from));
+
+            // Set To: header field of the header.
+            message.addRecipient(Message.RecipientType.TO, new InternetAddress(toAddress));
+
+            // Set Subject: header field
+            message.setSubject("This is the Subject Line!");
+
+            // Now set the actual message
+            message.setText("This is actual message");
+
+            log.info("sending email...");
+            // Send message
+            Transport.send(message);
+            System.out.println("Sent message successfully....");
+        } catch (MessagingException mex) {
+            log.info("Send email failed", mex);
+            mex.printStackTrace();
+        }
+
+    }
+
     public String getTextFromMimeMultipart(MimeMultipart mimeMultipart) throws MessagingException, IOException {
         StringBuilder resultSb = new StringBuilder();
         int count = mimeMultipart.getCount();
@@ -146,18 +218,10 @@ public class MailServiceImpl implements MailService {
 //        store.connect(host, username, password);
 //    }
 
-    public static void main(String[] args) throws MessagingException, IOException {
-        MailService mailService = new MailServiceImpl();
-        mailService.login("bizright.spider@gmail.com", "Lovebizright");
-        String otp = "";
-        for (int i=0; i< 5; i++){
-            otp = mailService.getLastAmazonVCOTP();
-            if(StringUtils.isNotEmpty(otp)){
-                break;
-            }
-        }
+    public static void main(String[] args) {
 
-        System.out.println(String.format("Amazon OTP %s", otp));
+
+
     }
 
 }

@@ -34,6 +34,10 @@ public interface MailService {
      */
     String getLastAmazonVCOTP() throws MessagingException, IOException;
 
+    void sendSystemMessage(String subject, String text);
+
+    void sendMessage(String toAddress, String subject, String message);
+
     Message[] getMessages();
 
 }

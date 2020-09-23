@@ -1,25 +1,26 @@
 package com.spider.amazon.webmagic.amzvc;
 
 import com.common.exception.ServiceException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.spider.amazon.config.SpiderConfig;
-import com.spider.amazon.cons.DriverPathCons;
 import com.spider.amazon.cons.RespErrorEnum;
 import com.spider.amazon.entity.Cookie;
-import com.spider.amazon.utils.JsonToListUtil;
+import com.spider.amazon.model.Consts;
+import com.spider.amazon.remote.api.SpiderUrl;
+import com.spider.amazon.service.CommonSettingService;
+import com.spider.amazon.utils.CookiesUtils;
 import com.spider.amazon.utils.WebDriverUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Site;
-import us.codecraft.webmagic.Spider;
 import us.codecraft.webmagic.processor.PageProcessor;
 
 import java.util.List;
@@ -52,9 +53,12 @@ public class AmazonVcSourcingDailySales implements PageProcessor {
 
     private SpiderConfig spiderConfig;
 
+    private CommonSettingService commonSettingService;
+
     @Autowired
-    public AmazonVcSourcingDailySales(SpiderConfig spiderConfig) {
+    public AmazonVcSourcingDailySales(SpiderConfig spiderConfig, CommonSettingService commonSettingService) {
         this.spiderConfig = spiderConfig;
+        this.commonSettingService = commonSettingService;
     }
 
     private Site site = Site
@@ -71,12 +75,6 @@ public class AmazonVcSourcingDailySales implements PageProcessor {
      * @return
      */
     public Site getSite() {
-//        Set<Cookie> cookies = cookiesUtils.keyValueCookies2CookiesSet(cookiesConfigName, ";", "=");
-        List<Cookie> listCookies = JsonToListUtil.amazonSourceCookieList2CookieList(JsonToListUtil.getListByPath(spiderConfig.getAmzVcCookieFilepath()));
-
-        for (Cookie cookie : listCookies) {
-            site.addCookie(cookie.getName(), cookie.getValue());
-        }
         return site;
     }
 
@@ -90,11 +88,12 @@ public class AmazonVcSourcingDailySales implements PageProcessor {
             log.info("0.step21=>进入抓取");
         }
 
+        ObjectMapper objectMapper = new ObjectMapper();
 
         // 1.建立WebDriver
-        System.setProperty("webdriver.chrome.driver", DriverPathCons.CHROME_DRIVER_PATH);
+        System.setProperty("webdriver.chrome.driver", spiderConfig.getChromeDriverPath());
 
-        WebDriver driver = WebDriverUtils.getWebDriver(spiderConfig.getDownloadPath());
+        WebDriver driver = WebDriverUtils.getWebDriver(spiderConfig.getDownloadPath(), true);
 
         try {
 
@@ -102,6 +101,31 @@ public class AmazonVcSourcingDailySales implements PageProcessor {
             driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
 
             WebDriverWait wait = new WebDriverWait(driver, 20);
+
+            // 2.初始打开页面
+            driver.manage().timeouts().pageLoadTimeout(20, TimeUnit.SECONDS); // 页面加载超时时间
+            driver.get(SpiderUrl.AMAZON_VC_INDEX);
+
+            // 3.Set cookie
+            driver.manage().deleteAllCookies();
+
+            List<Cookie> cookies = commonSettingService.getAmazonVCCookies();
+
+            List<org.openqa.selenium.Cookie> savedCookies = CookiesUtils.cookiesToSeleniumCookies(cookies);
+
+            WebDriverUtils.addSeleniumCookies(driver, savedCookies);
+
+            // cookies are not valid
+            if(!WebDriverUtils.checkAmazonVCCookiesValid(driver)){
+                driver.manage().deleteAllCookies();
+                WebDriverUtils.getAmazonVCCookies(driver);
+
+                List<Cookie> driverCookies = CookiesUtils.seleniumCookieToCookie(driver.manage().getCookies());
+
+                String newCookiesStr = objectMapper.writeValueAsString(driverCookies);
+
+                commonSettingService.setValue(Consts.AMAZON_VC_COOKIES, newCookiesStr, "system");
+            }
 
             //4.1 navigate to sales daily page
             navigateToPage(driver, wait);
@@ -193,6 +217,11 @@ public class AmazonVcSourcingDailySales implements PageProcessor {
                 throw new ServiceException(RespErrorEnum.SPIDER_EXEC.getSubStatusCode(), RespErrorEnum.SPIDER_EXEC.getSubStatusMsg());
             }
         } catch (Exception e) {
+
+            driver.quit();
+
+            log.info("[AmazonVcSourcingDailySales] process failed", e);
+
             e.printStackTrace();
             throw new ServiceException(RespErrorEnum.SPIDER_EXEC.getSubStatusCode(),RespErrorEnum.SPIDER_EXEC.getSubStatusMsg());
         } finally {
@@ -216,44 +245,27 @@ public class AmazonVcSourcingDailySales implements PageProcessor {
         // 1.1设置页面超时等待时间,20S
         driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
 
-        // 2.初始打开页面
-        driver.manage().timeouts().pageLoadTimeout(20, TimeUnit.SECONDS); // 页面加载超时时间
-        driver.get("https://www.google.com");
+        // 2.Navigate to daily sales page
+        driver.get(SpiderUrl.AMAZON_VC_ANALYTICS_SALES_DIAGNOSTIC);
 
+        sleep(3000);
 
-        // 3.add Cookies 在工具类中解析json
-        driver.manage().deleteAllCookies();
-        List<Cookie> listCookies = JsonToListUtil.amazonSourceCookieList2CookieList(JsonToListUtil.getListByPath(spiderConfig.getAmzVcCookieFilepath()));
+        if(driver.getCurrentUrl().equals(SpiderUrl.AMAZON_VC_ANALYTICS_SALES_DIAGNOSTIC)){
+            // 4.重定向跳转
+            driver.manage().timeouts().pageLoadTimeout(20, TimeUnit.SECONDS); // 页面加载超时时间
+            driver.get(SpiderUrl.AMAZON_VC_DASHBOARD);
 
-        WebDriverUtils.addCookies(driver, listCookies);
+            sleep(3000);
 
-        // 4.重定向跳转
-        driver.manage().timeouts().pageLoadTimeout(20, TimeUnit.SECONDS); // 页面加载超时时间
-        driver.get("https://vendorcentral.amazon.com/analytics/dashboard");
-
-        sleep(10000);
-
-        //4.0 click salesDiagnostic
-        WebElement inventoryHealthButtonElement = WebDriverUtils.expWaitForElement(driver, By.xpath("//span[1]/a[contains(@data-reactid,'salesDiagnostic')]"), 10);
-        if (log.isInfoEnabled() && inventoryHealthButtonElement != null) {
-            log.info("1.step105=>reportingRangeButtonElement:" + inventoryHealthButtonElement.toString());
+            //4.0 click salesDiagnostic
+            WebElement inventoryHealthButtonElement = WebDriverUtils.expWaitForElement(driver, By.xpath("//a[contains(@href,'/analytics/dashboard/salesDiagnostic')]"), 10);
+            if (log.isInfoEnabled() && inventoryHealthButtonElement != null) {
+                log.info("1.step105=>reportingRangeButtonElement:" + inventoryHealthButtonElement.toString());
+            }
+            WebDriverUtils.elementClick(inventoryHealthButtonElement);
+            sleep(5000);
         }
-        WebDriverUtils.elementClick(inventoryHealthButtonElement);
-        sleep(10000);
 
     }
-
-    public static void main(String[] args) {
-        System.out.println("0.step67=>抓取程序开启。");
-
-        Spider.create(new AmazonVcSourcingDailySales(null))
-                .addUrl("https://www.google.com")
-                .run();
-
-        System.out.println("end.step93=>抓取程序结束。");
-
-    }
-
-
 }
 

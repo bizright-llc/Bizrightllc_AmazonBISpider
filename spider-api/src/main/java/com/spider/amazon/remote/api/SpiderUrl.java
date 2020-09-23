@@ -26,8 +26,17 @@ public class SpiderUrl {
     // IP池主页
     public static final String IP_POOL_INDEX = "https://www.kuaidaili.com";
 
+    /**
+     * This page let system add cookies to browser
+     */
     // Amazon VC index 頁面
     public static final String AMAZON_VC_INDEX = "https://vendorcentral.amazon.com/404page";
+
+    public static final String AMAZON_VC_DASHBOARD = "https://vendorcentral.amazon.com/analytics/dashboard";
+
+    public static final String AMAZON_VC_ANALYTICS_SALES_DIAGNOSTIC = "https://vendorcentral.amazon.com/analytics/dashboard/salesDiagnostic";
+
+    public static final String AMAZON_VC_ANALYTICS_INVENTORY_HEALTH = "https://vendorcentral.amazon.com/analytics/dashboard/inventoryHealth";
 
     public static final String AMAZON_VC_PROMOTION = "https://vendorcentral.amazon.com/hz/vendor/members/promotions/list/home?ref_=vc_xx_subNav";
 

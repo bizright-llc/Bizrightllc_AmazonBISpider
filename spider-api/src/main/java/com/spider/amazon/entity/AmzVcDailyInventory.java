@@ -7,6 +7,7 @@ import java.io.Serializable;
 /**
  * @ClassName AmzVcDailyInventory
  * @Description 供应商中心每日抓取库存报表
+ *
  */
 @Data
 public class AmzVcDailyInventory implements Serializable {
@@ -23,17 +24,36 @@ public class AmzVcDailyInventory implements Serializable {
     private String sellableOnHandUnits;
     private String unsellableOnHandInventory;
     private String unsellableOnHandInventoryTrailing30DayAverage;
-    private String unsellableOnHandUnits;
+    private String unSellableOnHandUnits;
+
+    /**
+     * Aged90+DaysSellableInventory
+     */
     private String aged90DaysSellableInventory;
+
+    /**
+     * Aged90+DaysSellableInventoryTrailing30DayAverage
+     */
     private String aged90DaysSellableInventoryTrailing30DayAverage;
+
+    /**
+     * Aged90+DaysSellableUnits
+     */
     private String aged90DaysSellableUnits;
     private String replenishmentCategory;
     private String availableInventory;
     private String unhealthyInventory;
     private String unhealthyInventoryTrailing30dayAverage;
     private String unhealthyUnits;
+
+    /**
+     * File viewing date
+     */
     private String viewingDate;
-    private String insertTime;
-    private String distributeView;
+
+    /**
+     * File distributor source, manufacturing or sourcing
+     */
+    private String distributorView;
 
 }

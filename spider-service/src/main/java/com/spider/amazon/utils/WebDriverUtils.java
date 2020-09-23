@@ -35,6 +35,7 @@ public class WebDriverUtils {
         HashMap<String, Object> chromePrefs = new HashMap<String, Object>();
         chromePrefs.put("profile.default_content_settings.popups", 0);
         chromePrefs.put("download.default_directory", downloadPath);
+
         ChromeOptions options = new ChromeOptions();
         options.setExperimentalOption("prefs", chromePrefs);
         options.addArguments("--headless", "--disable-gpu", "--window-size=1920,1200","--ignore-certificate-errors", "--silent");
@@ -58,6 +59,34 @@ public class WebDriverUtils {
 
     public static WebDriver getWebDriver(){
         WebDriver driver = new ChromeDriver();
+        return driver;
+    }
+
+    /**
+     * Get web driver
+     * @param background the web driver wont show the window
+     * @param downloadPath the download file path
+     * @return
+     */
+    public static WebDriver getWebDriver(String downloadPath, boolean background){
+
+        ChromeOptions options = new ChromeOptions();
+
+        if(StringUtils.isNotEmpty(downloadPath)){
+            HashMap<String, Object> chromePrefs = new HashMap<String, Object>();
+            chromePrefs.put("profile.default_content_settings.popups", 0);
+            chromePrefs.put("download.default_directory", downloadPath);
+
+            options.setExperimentalOption("prefs", chromePrefs);
+        }
+
+        if(background){
+            // driver work at background
+            options.addArguments("--headless", "--disable-gpu", "--window-size=1920,1200","--ignore-certificate-errors", "--silent");
+        }
+
+        WebDriver driver = new ChromeDriver(options);
+
         return driver;
     }
 
@@ -146,14 +175,11 @@ public class WebDriverUtils {
         }
 
         for (Cookie cookie : listCookies) {
-            // Haven't Know the reason cannot add these token
-            if (!cookie.getName().equals("__Host-mons-selections") && !cookie.getName().equals("__Host-mselc")) {
-                if(cookie.getDomain() == null){
-                    driver.manage().addCookie(new org.openqa.selenium.Cookie(cookie.getName(), cookie.getValue()));
-                }else{
-                    driver.manage().addCookie(new org.openqa.selenium.Cookie(cookie.getName(), cookie.getValue(), cookie.getDomain(),
-                            cookie.getPath(), cookie.getExpiry(), cookie.getIsSecure(), cookie.getIsHttpOnly()));
-                }
+            if(cookie.getDomain() == null){
+                driver.manage().addCookie(new org.openqa.selenium.Cookie(cookie.getName(), cookie.getValue()));
+            }else{
+                driver.manage().addCookie(new org.openqa.selenium.Cookie(cookie.getName(), cookie.getValue(), cookie.getDomain(),
+                        cookie.getPath(), cookie.getExpiry(), cookie.getIsSecure(), cookie.getIsHttpOnly()));
             }
         }
     }

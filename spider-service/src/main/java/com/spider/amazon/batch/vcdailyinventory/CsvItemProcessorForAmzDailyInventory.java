@@ -1,5 +1,7 @@
 package com.spider.amazon.batch.vcdailyinventory;
 
+import cn.hutool.core.date.DateUtil;
+import com.spider.amazon.cons.DateFormat;
 import com.spider.amazon.entity.AmzVcDailyInventory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.StepExecution;
@@ -34,10 +36,12 @@ public class CsvItemProcessorForAmzDailyInventory extends ValidatingItemProcesso
         String distributeView = paramMaps.get("distributeView").toString();
         String viewingDate = paramMaps.get("viewingDate").toString();
 
+        viewingDate = DateUtil.format(DateUtil.parse(viewingDate, DateFormat.YEAR_MONTH_DAY_MMddyy1), DateFormat.YEAR_MONTH_DAY_MMddyyyy);
+
         // availableInventory与sellableOnHandUnits一样
         item.setAvailableInventory(item.getSellableOnHandUnits());
 
-        item.setDistributeView(distributeView);
+        item.setDistributorView(distributeView);
 
         item.setViewingDate(viewingDate);
 
