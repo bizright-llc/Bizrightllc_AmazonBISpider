@@ -374,13 +374,20 @@ public class ScheduleTask {
                 .run();
     }
 
+    /**
+     * Check if any file haven't been process
+     *
+     * @return
+     */
     private boolean checkVCInventoryFileExist(){
 
         class MyFileFilter implements FileFilter {
 
             public boolean accept(File f) {
                 if (f.getName().contains(AMAZON_VC_INVENTORY_HEALTH_FILE_NAME) && !f.getName().contains("Daily")) {
-                    return true;
+                    if(FileUtils.getFileExtension(f.getName()).equalsIgnoreCase("csv")){
+                        return true;
+                    }
                 }
                 return false;
             }
@@ -390,7 +397,7 @@ public class ScheduleTask {
 
         File[] files = FileUtils.getFileFromDir(spiderConfig.getDownloadPath(), filter);
 
-        File file = files.length > 0 ? files[0] : null;
+        File file = files != null && files.length > 0 ? files[0] : null;
 
         // File exist
         if (file != null && FileUtil.exist(file.getPath())) {
@@ -400,13 +407,20 @@ public class ScheduleTask {
         }
     }
 
+    /**
+     * Check if any file haven't been process
+     *
+     * @return
+     */
     private boolean checkVCDailySalesFileExist(){
 
         class MyFileFilter implements FileFilter {
 
             public boolean accept(File f) {
                 if (f.getName().contains(AMAZON_VC_DAILY_SALES_FILE_NAME) && !f.getName().contains("Daily")) {
-                    return true;
+                    if(FileUtils.getFileExtension(f.getName()).equalsIgnoreCase("csv")){
+                        return true;
+                    }
                 }
                 return false;
             }
@@ -416,7 +430,7 @@ public class ScheduleTask {
 
         File[] files = FileUtils.getFileFromDir(spiderConfig.getDownloadPath(), filter);
 
-        File file = files.length > 0 ? files[0] : null;
+        File file = files != null && files.length > 0 ? files[0] : null;
 
         // File exist
         if (file != null && FileUtil.exist(file.getPath())) {

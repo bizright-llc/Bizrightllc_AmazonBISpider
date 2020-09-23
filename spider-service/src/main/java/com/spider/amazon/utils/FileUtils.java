@@ -1,5 +1,6 @@
 package com.spider.amazon.utils;
 
+import com.google.common.io.Files;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,6 +101,10 @@ public class FileUtils {
         }
 
         return files;
+    }
+
+    public static String getFileExtension(String filename){
+        return Files.getFileExtension(filename);
     }
 
 }
