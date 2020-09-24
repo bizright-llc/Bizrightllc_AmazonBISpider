@@ -32,7 +32,7 @@ import static java.lang.Thread.sleep;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(SpringExtension.class)
-@SpringBootTest(classes= SpiderServiceApplication.class)
+@SpringBootTest(classes = SpiderServiceApplication.class)
 class WebDriverUtilsTest {
 
     Logger log = LoggerFactory.getLogger(WebDriverUtilsTest.class);
@@ -53,7 +53,7 @@ class WebDriverUtilsTest {
     private String datePickerLeftDayXPathFormat = "/html/body/div[4]/div/div[2]/div[2]//div[(@aria-label='day-%d')]";
 
     @Test
-    public void TestOS(){
+    public void TestOS() {
         WebDriver driver = WebDriverUtils.getWebDriver("/Users/shaochinlin/Downloads/BZR-BI");
 
         driver.get("http://ipv4.download.thinkbroadband.com/50MB.zip");
@@ -63,7 +63,7 @@ class WebDriverUtilsTest {
      * Download all history inventory health sourcing file
      */
     @Test
-    public void downloadAmazonVCInventoryHealthSourcingFile(){
+    public void downloadAmazonVCInventoryHealthSourcingFile() {
 
         // 1.建立WebDriver
         System.setProperty("webdriver.chrome.driver", spiderConfig.getChromeDriverPath());
@@ -75,13 +75,14 @@ class WebDriverUtilsTest {
         try {
 
             LocalDate lastDate = LocalDate.of(2019, 9, 1);
-            LocalDate preDate = LocalDate.of(2020, 8, 30);;
+            LocalDate preDate = LocalDate.of(2020, 8, 30);
+            ;
             LocalDate currentDate = preDate.minusDays(1);
             boolean apply = false;
 
-            while(!lastDate.isEqual(currentDate) && lastDate.compareTo(currentDate) < 0){
+            while (!lastDate.isEqual(currentDate) && lastDate.compareTo(currentDate) < 0) {
                 WebDriver driver = WebDriverUtils.getWebDriver(downloadFilePath, false);
-                try{
+                try {
 
                     WebDriverWait wait = new WebDriverWait(driver, 60);
 
@@ -99,7 +100,7 @@ class WebDriverUtilsTest {
                     WebDriverUtils.addSeleniumCookies(driver, savedCookies);
 
                     // cookies are not valid
-                    if(!WebDriverUtils.checkAmazonVCCookiesValid(driver)){
+                    if (!WebDriverUtils.checkAmazonVCCookiesValid(driver)) {
                         driver.manage().deleteAllCookies();
                         WebDriverUtils.getAmazonVCCookies(driver);
 
@@ -148,20 +149,20 @@ class WebDriverUtilsTest {
                     }
                     WebDriverUtils.elementClick(distributeViewSelectElement);
 
-                    //4.3点击应用按钮
-                    sleep(7000);
-                    driver.manage().timeouts().pageLoadTimeout(7, TimeUnit.SECONDS); // 页面加载超时时间
-                    WebElement applyElement = WebDriverUtils.expWaitForElement(driver, By.xpath("//*[@id='dashboard-filter-applyCancel']/div/awsui-button[2]/button"), 10);
-                    WebDriverUtils.elementClick(applyElement);
-
-                    sleep(5000);
+//                    //4.3点击应用按钮
+//                    sleep(7000);
+//                    driver.manage().timeouts().pageLoadTimeout(7, TimeUnit.SECONDS); // 页面加载超时时间
+//                    WebElement applyElement = WebDriverUtils.expWaitForElement(driver, By.xpath("//*[@id='dashboard-filter-applyCancel']/div/awsui-button[2]/button"), 10);
+//                    WebDriverUtils.elementClick(applyElement);
+//
+//                    sleep(5000);
                     // all set
                     // select date
 
                     // click date picker end date
                     WebElement dateEndPicker = WebDriverUtils.expWaitForElement(driver, By.xpath(dateEndPickerXPath), 60);
                     WebDriverUtils.expWaitForElement(driver, By.xpath(dateEndPickerXPath), 60);
-                    if(dateEndPicker != null){
+                    if (dateEndPicker != null) {
                         dateEndPicker = wait.until(ExpectedConditions.elementToBeClickable(dateEndPicker));
                         WebDriverUtils.elementClick(dateEndPicker);
                     }
@@ -171,26 +172,38 @@ class WebDriverUtilsTest {
                     WebElement leftMonthEle = WebDriverUtils.expWaitForElement(driver, By.xpath(datePickerLeftMonthXPath), 60);
 
                     // check left month element
-                    if(leftMonthEle != null){
+                    if (leftMonthEle != null) {
 
                         String currentSelectedMonth = leftMonthEle.getText();
 
-                        while (!currentSelectedMonth.toLowerCase().contains(currentDate.getMonth().getDisplayName(TextStyle.FULL, Locale.ENGLISH)) && !currentSelectedMonth.contains(String.valueOf(currentDate.getYear()))){
+                        String currentDateMonth = currentDate.getMonth().getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+
+                        String currentDateYear = String.valueOf(currentDate.getYear());
+
+                        while (!currentSelectedMonth.toLowerCase().contains(currentDateMonth.toLowerCase()) || !currentSelectedMonth.contains(currentDateYear)) {
                             // click previous month
                             WebElement preMonthEle = WebDriverUtils.expWaitForElement(driver, By.xpath(datePickerPreviousMonthXPath), 60);
                             preMonthEle.click();
                             sleep(1000);
                             leftMonthEle = WebDriverUtils.expWaitForElement(driver, By.xpath(datePickerLeftMonthXPath), 60);
 
+                            currentSelectedMonth = leftMonthEle.getText();
+                            currentDateMonth = currentDate.getMonth().getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+                            currentDateYear = String.valueOf(currentDate.getYear());
+
                         }
 
-                    }else{
+                    } else {
                         throw new Exception("Didn't find left month element");
                     }
 
                     // click current date eletment
                     String dayXPath = String.format(datePickerLeftDayXPathFormat, currentDate.getDayOfMonth());
-                    WebElement currentDateEle = WebDriverUtils.expWaitForElement(driver, By.xpath(dayXPath), 60);
+                    List<WebElement> currentDateEles = WebDriverUtils.expWaitForElements(driver, By.xpath(dayXPath), 60);
+
+                    WebElement currentDateEle = currentDateEles.size() == 1 ? currentDateEles.get(0) :
+                            currentDate.getDayOfMonth() <= 7 ? currentDateEles.get(0) : currentDateEles.get(1);
+
                     WebDriverUtils.elementClick(currentDateEle);
                     sleep(1000);
 
@@ -236,11 +249,11 @@ class WebDriverUtilsTest {
                     currentDate = currentDate.minusDays(1);
 
                     apply = false;
-                }catch (Exception e){
+                } catch (Exception e) {
                     log.info("Get Date {} file failed", currentDate.toString(), e);
                     e.printStackTrace();
                     driver.quit();
-                }finally {
+                } finally {
                     driver.quit();
                 }
             }
@@ -260,7 +273,7 @@ class WebDriverUtilsTest {
      * Download all history inventory health manufacturing file
      */
     @Test
-    public void downloadAmazonVCInventoryHealthManufacturingFile(){
+    public void downloadAmazonVCInventoryHealthManufacturingFile() {
 
         // 1.建立WebDriver
         System.setProperty("webdriver.chrome.driver", spiderConfig.getChromeDriverPath());
@@ -276,9 +289,9 @@ class WebDriverUtilsTest {
             LocalDate currentDate = preDate.minusDays(1);
             boolean apply = false;
 
-            while(!lastDate.isEqual(currentDate) && lastDate.compareTo(currentDate) < 0){
+            while (!lastDate.isEqual(currentDate) && lastDate.compareTo(currentDate) < 0) {
                 WebDriver driver = WebDriverUtils.getWebDriver(downloadFilePath, false);
-                try{
+                try {
 
                     WebDriverWait wait = new WebDriverWait(driver, 60);
 
@@ -296,7 +309,7 @@ class WebDriverUtilsTest {
                     WebDriverUtils.addSeleniumCookies(driver, savedCookies);
 
                     // cookies are not valid
-                    if(!WebDriverUtils.checkAmazonVCCookiesValid(driver)){
+                    if (!WebDriverUtils.checkAmazonVCCookiesValid(driver)) {
                         driver.manage().deleteAllCookies();
                         WebDriverUtils.getAmazonVCCookies(driver);
 
@@ -345,21 +358,21 @@ class WebDriverUtilsTest {
                     }
                     WebDriverUtils.elementClick(distributeViewSelectElement);
 
-                    //4.3点击应用按钮
-                    sleep(7000);
-
-                    driver.manage().timeouts().pageLoadTimeout(7, TimeUnit.SECONDS); // 页面加载超时时间
-                    WebElement applyElement = WebDriverUtils.expWaitForElement(driver, By.xpath("//*[@id='dashboard-filter-applyCancel']/div/awsui-button[2]/button"), 10);
-                    WebDriverUtils.elementClick(applyElement);
-
-                    sleep(5000);
+//                    //4.3点击应用按钮
+//                    sleep(7000);
+//
+//                    driver.manage().timeouts().pageLoadTimeout(7, TimeUnit.SECONDS); // 页面加载超时时间
+//                    WebElement applyElement = WebDriverUtils.expWaitForElement(driver, By.xpath("//*[@id='dashboard-filter-applyCancel']/div/awsui-button[2]/button"), 10);
+//                    WebDriverUtils.elementClick(applyElement);
+//
+//                    sleep(5000);
                     // all set
                     // select date
 
                     // click date picker end date
                     WebElement dateEndPicker = WebDriverUtils.expWaitForElement(driver, By.xpath(dateEndPickerXPath), 60);
                     WebDriverUtils.expWaitForElement(driver, By.xpath(dateEndPickerXPath), 60);
-                    if(dateEndPicker != null){
+                    if (dateEndPicker != null) {
                         dateEndPicker = wait.until(ExpectedConditions.elementToBeClickable(dateEndPicker));
                         dateEndPicker.click();
                     }
@@ -369,26 +382,38 @@ class WebDriverUtilsTest {
                     WebElement leftMonthEle = WebDriverUtils.expWaitForElement(driver, By.xpath(datePickerLeftMonthXPath), 60);
 
                     // check left month element
-                    if(leftMonthEle != null){
+                    if (leftMonthEle != null) {
 
                         String currentSelectedMonth = leftMonthEle.getText();
 
-                        while (!currentSelectedMonth.toLowerCase().contains(currentDate.getMonth().getDisplayName(TextStyle.FULL, Locale.ENGLISH)) && !currentSelectedMonth.contains(String.valueOf(currentDate.getYear()))){
+                        String currentDateMonth = currentDate.getMonth().getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+
+                        String currentDateYear = String.valueOf(currentDate.getYear());
+
+                        while (!currentSelectedMonth.toLowerCase().contains(currentDateMonth.toLowerCase()) || !currentSelectedMonth.contains(currentDateYear)) {
                             // click previous month
                             WebElement preMonthEle = WebDriverUtils.expWaitForElement(driver, By.xpath(datePickerPreviousMonthXPath), 60);
                             preMonthEle.click();
                             sleep(1000);
                             leftMonthEle = WebDriverUtils.expWaitForElement(driver, By.xpath(datePickerLeftMonthXPath), 60);
 
+                            currentSelectedMonth = leftMonthEle.getText();
+                            currentDateMonth = currentDate.getMonth().getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+                            currentDateYear = String.valueOf(currentDate.getYear());
+
                         }
 
-                    }else{
+                    } else {
                         throw new Exception("Didn't find left month element");
                     }
 
                     // click current date eletment
                     String dayXPath = String.format(datePickerLeftDayXPathFormat, currentDate.getDayOfMonth());
-                    WebElement currentDateEle = WebDriverUtils.expWaitForElement(driver, By.xpath(dayXPath), 60);
+                    List<WebElement> currentDateEles = WebDriverUtils.expWaitForElements(driver, By.xpath(dayXPath), 60);
+
+                    WebElement currentDateEle = currentDateEles.size() == 1 ? currentDateEles.get(0) :
+                            currentDate.getDayOfMonth() <= 7 ? currentDateEles.get(0) : currentDateEles.get(1);
+
                     WebDriverUtils.elementClick(currentDateEle);
                     sleep(1000);
 
@@ -434,11 +459,11 @@ class WebDriverUtilsTest {
                     currentDate = currentDate.minusDays(1);
 
                     apply = false;
-                }catch (Exception e){
+                } catch (Exception e) {
                     log.info("Get Date {} file failed", currentDate.toString(), e);
                     e.printStackTrace();
                     driver.quit();
-                }finally {
+                } finally {
                     driver.quit();
                 }
             }
@@ -464,7 +489,7 @@ class WebDriverUtilsTest {
 
         sleep(3000);
 
-        if(!driver.getCurrentUrl().equals(SpiderUrl.AMAZON_VC_ANALYTICS_INVENTORY_HEALTH)){
+        if (!driver.getCurrentUrl().equals(SpiderUrl.AMAZON_VC_ANALYTICS_INVENTORY_HEALTH)) {
             // 4.重定向跳转
             driver.navigate().to(SpiderUrl.AMAZON_VC_DASHBOARD);
 
