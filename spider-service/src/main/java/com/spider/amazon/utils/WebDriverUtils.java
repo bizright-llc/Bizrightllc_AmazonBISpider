@@ -129,6 +129,24 @@ public class WebDriverUtils {
         return element;
     }
 
+    public static List<WebElement> expWaitForElements(WebDriver driver, By locator, int timeout) {
+        WebElement element = null;
+        List<WebElement> elements = null;
+        try {
+//            System.out.println(timeout + "秒之后出现");
+            WebDriverWait wait = new WebDriverWait(driver, timeout);
+            element = wait.until(ExpectedConditions
+                    .visibilityOfElementLocated(locator));
+            elements = driver.findElements(locator);
+//            System.out.println("元素出现了");
+        } catch (Exception e) {
+//            System.out.println("元素不存在");
+            e.printStackTrace();
+            return null;
+        }
+        return elements;
+    }
+
     /**
      * 在父元素查找元素是否存在
      *
