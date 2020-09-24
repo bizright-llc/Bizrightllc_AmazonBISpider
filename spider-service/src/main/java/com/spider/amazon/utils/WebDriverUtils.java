@@ -68,6 +68,36 @@ public class WebDriverUtils {
      * @param downloadPath the download file path
      * @return
      */
+    public static WebDriver getWebDriver(String driverPath, String downloadPath, boolean background){
+
+        ChromeOptions options = new ChromeOptions();
+
+        if(StringUtils.isNotEmpty(downloadPath)){
+            HashMap<String, Object> chromePrefs = new HashMap<String, Object>();
+            chromePrefs.put("profile.default_content_settings.popups", 0);
+            chromePrefs.put("download.default_directory", downloadPath);
+
+            options.setExperimentalOption("prefs", chromePrefs);
+        }
+
+        if(background){
+            // driver work at background
+            options.addArguments("--headless", "--disable-gpu", "--window-size=1920,1200","--ignore-certificate-errors", "--silent");
+        }
+
+        System.setProperty("webdriver.chrome.driver", driverPath);
+
+        WebDriver driver = new ChromeDriver(options);
+
+        return driver;
+    }
+
+    /**
+     * Get web driver
+     * @param background the web driver wont show the window
+     * @param downloadPath the download file path
+     * @return
+     */
     public static WebDriver getWebDriver(String downloadPath, boolean background){
 
         ChromeOptions options = new ChromeOptions();
