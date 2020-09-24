@@ -37,6 +37,9 @@ public class AmzVcDailySales implements Serializable {
     private String RepOOSofTotal;
     private String RepOOSPriorPeriod;
     private String LBBPrice;
+    private String reportingRange;
     private String viewingDate;
+    private String viewingDateEnd;
     private String distributorView;
+    private String salesView;
 }

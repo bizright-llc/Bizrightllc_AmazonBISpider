@@ -16,90 +16,16 @@
                                         "CustomerReturns", "FreeReplacements", "SubcategorySalesRank",
                                         "SubcategoryBetterWorse", "AverageSalesPrice", "AverageSalesPricePriorPeriod",
                                         "ChangeInGlanceViewPriorPeriod", "ChangeInGlanceViewLastYear", "RepOos",
-                                        "RepOosOfTotal", "RepOosPriorPeriod", "LbbPrice", "ViewingDate",
-                                        "DistributorView", "InsertedAt")
+                                        "RepOosOfTotal", "RepOosPriorPeriod", "LbbPrice", "ReportingRange", "ViewingDate", "ViewingDateEnd",
+                                        "DistributorView", "SalesView", "InsertedAt")
         values (#{asin},#{productTitle},#{shippedCogs},#{shippedCogsOfTotal},
                 #{shippedCogsPriorPeriod},#{shippedCogsLastYear},#{shippedUnits},
                 #{shippedUnitsOfTotal},#{shippedUnitsPriorPeriod},#{shippedUnitsLastYear},
                 #{customerReturns},#{freeReplacements},#{SubcategorySalesRank},
                 #{SubcategoryBetterWorse},#{AverageSalesPrice},#{AverageSalesPricePriorPeriod},
                 #{ChangeInGlanceViewPriorPeriod},#{ChangeInGVLastYear},#{RepOOS},
-                #{RepOOSofTotal},#{RepOOSPriorPeriod},#{LBBPrice},#{viewingDate},
-                #{distributorView}, getdate())
+                #{RepOOSofTotal},#{RepOOSPriorPeriod},#{LBBPrice},#{reportingRange},#{viewingDate}, #{viewingDateEnd},
+                #{distributorView}, #{salesView}, getdate())
     </update>
 
-    <!--    <update id="insert" parameterType="com.spider.amazon.entity.AmzVcDailySales">-->
-    <!--        insert into vendorSalesInfo (asin, product_title, shipped_cogs, shipped_cogs_of_total,-->
-    <!--                                     shipped_cogs_prior_period, shipped_cogs_last_year, shipped_units,-->
-    <!--                                     shipped_units_of_total, shipped_units_prior_period, shipped_units_last_year,-->
-    <!--                                     customer_returns, free_replacements,-->
-    <!--                                     subcategory_sales_rank, subcategory_better_worse, average_sales_price,-->
-    <!--                                     average_sales_price_prior_period, change_in_glance_view_prior_period,-->
-    <!--                                     change_in_glance_view_last_year, rep_oos, rep_oos_of_total, rep_oos_prior_period,-->
-    <!--                                     lbb_price, distributor_view, viewing_date,-->
-    <!--                                     insertTime)-->
-<!--            values (#{asin},#{productTitle},#{shippedCogs},#{shippedCogsOfTotal},-->
-<!--                    #{shippedCogsPriorPeriod},#{shippedCogsLastYear},#{shippedUnits},-->
-<!--                    #{shippedUnitsOfTotal},#{shippedUnitsPriorPeriod},#{shippedUnitsLastYear},-->
-<!--                    #{customerReturns},#{freeReplacements},-->
-<!--                    #{SubcategorySalesRank},#{SubcategoryBetterWorse},#{AverageSalesPrice},-->
-<!--                    #{AverageSalesPricePriorPeriod},#{ChangeInGlanceViewPriorPeriod},-->
-<!--                    #{ChangeInGVLastYear},#{RepOOS},#{RepOOSofTotal},#{RepOOSPriorPeriod},-->
-<!--                    #{LBBPrice},#{distributorView},#{viewingDate}, getdate())-->
-    <!--    </update>-->
-
-    <!--    <insert id="insertSelective" parameterType="com.spider.amazon.model.AmzVcDailySales">-->
-    <!--        insert into vendorSalesInfo-->
-    <!--        <trim prefix="(" suffix=")" suffixOverrides=",">-->
-    <!--            <if test="asin != null">-->
-    <!--                asin,-->
-    <!--            </if>-->
-    <!--            <if test="sku != null">-->
-    <!--                sku,-->
-    <!--            </if>-->
-    <!--            <if test="pm != null">-->
-    <!--                PM,-->
-    <!--            </if>-->
-    <!--            <if test="createdBy != null">-->
-    <!--                CreatedBy,-->
-    <!--            </if>-->
-    <!--            <if test="updatedBy != null">-->
-    <!--                UpdatedBy,-->
-    <!--            </if>-->
-    <!--            CreatedAt,-->
-    <!--            UpdatedAt-->
-    <!--        </trim>-->
-    <!--        <trim prefix="values (" suffix=")" suffixOverrides=",">-->
-    <!--            <if test="asin != null">-->
-    <!--                #{asin,jdbcType=VARCHAR},-->
-    <!--            </if>-->
-    <!--            <if test="sku != null">-->
-    <!--                #{sku,jdbcType=VARCHAR},-->
-    <!--            </if>-->
-    <!--            <if test="pm != null">-->
-    <!--                #{pm,jdbcType=VARCHAR},-->
-    <!--            </if>-->
-    <!--            <if test="createdBy != null">-->
-    <!--                #{CreatedBy,jdbcType=VARCHAR},-->
-    <!--            </if>-->
-    <!--            <if test="updatedBy != null">-->
-    <!--                #{UpdatedBy,jdbcType=VARCHAR},-->
-    <!--            </if>-->
-    <!--            getdate(),-->
-    <!--            getdate()-->
-    <!--        </trim>-->
-    <!--    </insert>-->
-    <!--    &lt;!&ndash;  <update id="update" parameterType="com.spider.amazon.model.AsinSkuMapDO">&ndash;&gt;-->
-    <!--    &lt;!&ndash;    update asin_sku_map&ndash;&gt;-->
-    <!--    &lt;!&ndash;  </update>&ndash;&gt;-->
-
-    <!--    &lt;!&ndash; 批量插入 &ndash;&gt;-->
-    <!--    <insert id="insertBatch" parameterType="java.util.List">-->
-    <!--        insert into vendorSalesInfo (<include refid="Base_Column_List"/>)-->
-    <!--        values-->
-    <!--        <foreach collection="list" item="item" index="index" separator=",">-->
-    <!--            (#{item.asin,jdbcType=VARCHAR}, #{item.sku,jdbcType=VARCHAR}, #{item.pm,jdbcType=VARCHAR},-->
-    <!--            #{item.createdBy,jdbcType=VARCHAR}, #{item.updatedBy,jdbcType=VARCHAR}, getdate(), getdate())-->
-    <!--        </foreach>-->
-    <!--    </insert>-->
 </mapper>

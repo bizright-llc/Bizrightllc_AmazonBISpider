@@ -23,17 +23,20 @@ public class CsvItemProcessorForAmzDailySales extends ValidatingItemProcessor<Am
 
     @Override
     public AmzVcDailySales process(AmzVcDailySales item) throws ValidationException {
-        // 执行super.process()才能调用自定义的校验器
-        log.info("processor start validating...");
         super.process(item);
 
         String viewingDate = paramMaps.get("viewingDate").toString();
+        String viewingDateEnd = paramMaps.get("viewingDateEnd").toString();
         String distributorView = paramMaps.get("distributorView").toString();
+        String salesView = paramMaps.get("salesView").toString();
+        String reportingRange = paramMaps.getOrDefault("reportingRange", "").toString();
 
+        item.setReportingRange(reportingRange);
         item.setViewingDate(viewingDate);
+        item.setViewingDateEnd(viewingDateEnd);
         item.setDistributorView(distributorView);
+        item.setSalesView(salesView);
 
-        log.info("processor end validating...");
         return item;
     }
 }

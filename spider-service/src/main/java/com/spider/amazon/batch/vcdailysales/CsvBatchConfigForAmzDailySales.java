@@ -445,25 +445,35 @@ public class CsvBatchConfigForAmzDailySales {
 
             // 获取报表维度及时间
             String distributorView = csvRowList.get(0).get(1);
-
-            distributorView = distributorView.substring(distributorView.indexOf("[") + 1, distributorView.indexOf("]"));
-
+            String salesView = csvRowList.get(0).get(2);
             String reportingRange = csvRowList.get(0).get(7);
             String viewing = csvRowList.get(0).get(8);
 
+            distributorView = distributorView.substring(distributorView.indexOf("[") + 1, distributorView.indexOf("]"));
+            salesView = salesView.substring(salesView.indexOf("[") + 1, salesView.indexOf("]"));
+
+            reportingRange = reportingRange.substring(reportingRange.indexOf("[") + 1, reportingRange.indexOf("]"));
+
             viewing = viewing.substring(viewing.indexOf("[") + 1, viewing.indexOf("]"));
 
-            String viewingDate = viewing.split("-")[0].trim();
-            viewingDate = DateUtil.format(DateUtil.parse(viewingDate, DateFormat.YEAR_MONTH_DAY_MMddyy1), DateFormat.YEAR_MONTH_DAY_MMddyyyy);
+            String viewingDateStart = viewing.split("-")[0].trim();
+            String viewingDateEnd = viewing.split("-")[1].trim();
+
+            viewingDateStart = DateUtil.format(DateUtil.parse(viewingDateStart, DateFormat.YEAR_MONTH_DAY_MMddyy1), DateFormat.YEAR_MONTH_DAY_MMddyyyy);
+            viewingDateEnd = DateUtil.format(DateUtil.parse(viewingDateEnd, DateFormat.YEAR_MONTH_DAY_MMddyy1), DateFormat.YEAR_MONTH_DAY_MMddyyyy);
 
             if (log.isInfoEnabled()) {
                 log.info("distributorView: " + distributorView);
                 log.info("reportingRange:" + reportingRange);
-                log.info("viewingDate:" + viewingDate);
+                log.info("viewingDate:" + viewingDateStart);
+                log.info("viewingDateEnd" + viewingDateEnd);
+                log.info("salesView", salesView);
             }
             resultMap.put("distributorView", distributorView);
-            resultMap.put("reportingRange", reportingRange.substring(reportingRange.indexOf("[") + 1, reportingRange.indexOf("]")));
-            resultMap.put("viewingDate", viewingDate);
+            resultMap.put("reportingRange", reportingRange);
+            resultMap.put("viewingDate", viewingDateStart);
+            resultMap.put("viewingDateEnd", viewingDateEnd);
+            resultMap.put("salesView", salesView);
 
             if (distributorView.equalsIgnoreCase("Sourcing") && distributorView.equalsIgnoreCase("Manufacturing")) {
                 log.info("File {} distributor view {} is not support", filePath, distributorView);
