@@ -30,7 +30,7 @@ public class CsvItemProcessorForAmzDailyInventory extends ValidatingItemProcesso
     @Override
     public AmzVcDailyInventory process(AmzVcDailyInventory item) throws ValidationException {
         // 执行super.process()才能调用自定义的校验器
-        log.info("processor start validating...");
+//        log.info("processor start validating...");
         super.process(item);
 
         String distributeView = paramMaps.get("distributeView").toString();
@@ -45,7 +45,7 @@ public class CsvItemProcessorForAmzDailyInventory extends ValidatingItemProcesso
 
         item.setViewingDate(viewingDate);
 
-        log.info("processor end validating...");
+//        log.info("processor end validating...");
         return item;
     }
 }
