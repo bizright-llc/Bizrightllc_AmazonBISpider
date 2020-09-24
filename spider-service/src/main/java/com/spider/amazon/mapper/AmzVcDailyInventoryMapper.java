@@ -1,5 +1,6 @@
 package com.spider.amazon.mapper;
 
+import com.spider.amazon.entity.AmzVcDailyInventory;
 import com.spider.amazon.entity.AmzVcDailySales;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
@@ -12,6 +13,6 @@ import org.springframework.stereotype.Repository;
 @Mapper
 public interface AmzVcDailyInventoryMapper {
 
-    void insert(AmzVcDailySales record);
+    void insert(AmzVcDailyInventory record);
 
 }

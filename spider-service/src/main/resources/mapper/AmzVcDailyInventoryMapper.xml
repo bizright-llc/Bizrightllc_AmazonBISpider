@@ -19,7 +19,7 @@
                                             "Aged90+DaysSellableInventoryTrailing30DayAverage",
                                             "Aged90+DaysSellableUnits", "ReplenishmentCategory", "AvailableInventory",
                                             "UnhealthyInventory",
-                                            "UnhealthyUnits", "DistributorView", "ViewingDate", "InsertedAt")
+                                            "UnhealthyUnits", "DistributorView", "ReportingRange", "ViewingDate", "ViewingDateEnd", "InsertedAt")
         values (#{asin}, #{productTitle}, #{netReceived}, #{netReceivedUnits},
                 #{sellThroughRate}, #{openPurchaseOrderQuantity}, #{sellableOnHandInventory},
                 #{sellableOnHandInventoryTrailing30DayAverage}, #{sellableOnHandUnits},
@@ -29,31 +29,8 @@
                 #{aged90DaysSellableInventoryTrailing30DayAverage},
                 #{aged90DaysSellableUnits}, #{replenishmentCategory}, #{availableInventory},
                 #{unhealthyInventory},
-                #{unhealthyUnits}, #{distributorView}, #{viewingDate}, getdate())
+                #{unhealthyUnits}, #{distributorView}, #{reportingRange}, #{viewingDate}, #{viewingDateEnd}, getdate())
     </update>
 
-<!--    <update id="insert" parameterType="com.spider.amazon.entity.AmzVcDailyInventory">-->
-<!--        insert into AmazonVCDailyInventory ("Asin", "ProductTitle", "NetReceived", "NetReceivedUnits",-->
-<!--                                            "SellThroughRate", "OpenPurchaseOrderQuantity", "SellableOnHandInventory",-->
-<!--                                            "SellableOnHandInventoryTrailing30DayAverage", "SellableOnHandUnits",-->
-<!--                                            "UnsellableOnHandInventory",-->
-<!--                                            "UnsellableOnHandInventoryTrailing30DayAverage", "UnsellableOnHandUnits",-->
-<!--                                            "Aged90+DaysSellableInventory",-->
-<!--                                            "Aged90+DaysSellableInventoryTrailing30DayAverage",-->
-<!--                                            "Aged90+DaysSellableUnits", "ReplenishmentCategory", "AvailableInventory",-->
-<!--                                            "UnhealthyInventory", "UnhealthyInventoryTrailing30DayAverage",-->
-<!--                                            "UnhealthyUnits", "DistributorView", "ViewingDate", "InsertedAt")-->
-<!--        values (#{asin}, #{productTitle}, #{netReceived}, #{netReceivedUnits},-->
-<!--                #{sellThroughRate}, #{openPurchaseOrderQuantity}, #{sellableOnHandInventory},-->
-<!--                #{sellableOnHandInventoryTrailing30DayAverage}, #{sellableOnHandUnits},-->
-<!--                #{unsellableOnHandInventory},-->
-<!--                #{unsellableOnHandInventoryTrailing30DayAverage}, #{unSellableOnHandUnits},-->
-<!--                #{aged90DaysSellableInventory},-->
-<!--                #{aged90DaysSellableInventoryTrailing30DayAverage},-->
-<!--                #{aged90DaysSellableUnits}, #{replenishmentCategory}, #{availableInventory},-->
-<!--                #{unhealthyInventory},-->
-<!--                #{unhealthyInventoryTrailing30DayAverage},-->
-<!--                #{unhealthyUnits}, #{distributorView}, #{viewingDate}, getdate())-->
-<!--    </update>-->
 
 </mapper>

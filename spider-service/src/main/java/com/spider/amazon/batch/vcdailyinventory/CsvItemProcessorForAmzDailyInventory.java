@@ -33,17 +33,22 @@ public class CsvItemProcessorForAmzDailyInventory extends ValidatingItemProcesso
 //        log.info("processor start validating...");
         super.process(item);
 
-        String distributeView = paramMaps.get("distributeView").toString();
+        String distributeView = paramMaps.getOrDefault("distributeView", "").toString();
+        String reportingRange = paramMaps.getOrDefault("reportingRange", "").toString();
         String viewingDate = paramMaps.get("viewingDate").toString();
+        String viewingDateEnd = paramMaps.get("viewingDateEnd").toString();
 
         viewingDate = DateUtil.format(DateUtil.parse(viewingDate, DateFormat.YEAR_MONTH_DAY_MMddyy1), DateFormat.YEAR_MONTH_DAY_MMddyyyy);
+        viewingDateEnd = DateUtil.format(DateUtil.parse(viewingDateEnd, DateFormat.YEAR_MONTH_DAY_MMddyy1), DateFormat.YEAR_MONTH_DAY_MMddyyyy);
 
         // availableInventory与sellableOnHandUnits一样
         item.setAvailableInventory(item.getSellableOnHandUnits());
 
         item.setDistributorView(distributeView);
 
+        item.setReportingRange(reportingRange);
         item.setViewingDate(viewingDate);
+        item.setViewingDateEnd(viewingDateEnd);
 
 //        log.info("processor end validating...");
         return item;

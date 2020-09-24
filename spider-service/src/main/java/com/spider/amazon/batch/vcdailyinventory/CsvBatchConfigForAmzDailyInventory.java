@@ -394,16 +394,18 @@ public class CsvBatchConfigForAmzDailyInventory {
 
             // date format is MM/dd/yy
             String viewingDate = viewing.split("-")[0].trim();
-//            viewingDate = DateUtil.format(DateUtil.parse(viewingDate, DateFormat.YEAR_MONTH_DAY_MMddyy1), DateFormat.YEAR_MONTH_DAY_MMddyyyy);
+            String viewingDateEnd = viewing.split("-")[1].trim();
 
             if (log.isInfoEnabled()) {
                 log.info("distributeView:" + distributeView);
                 log.info("reportingRange:" + reportingRange);
                 log.info("viewingDate:" + viewingDate);
+                log.info("viewingDateEnd:"+ viewingDateEnd);
             }
             resultMap.put("distributeView", distributeView);
             resultMap.put("reportingRange", reportingRange);
             resultMap.put("viewingDate", viewingDate);
+            resultMap.put("viewingDateEnd", viewingDateEnd);
 
             if (!distributeView.equalsIgnoreCase("Sourcing") &&
                     !distributeView.equalsIgnoreCase("Manufacturing")) {

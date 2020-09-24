@@ -47,9 +47,16 @@ public class AmzVcDailyInventory implements Serializable {
     private String unhealthyUnits;
 
     /**
+     * The record file is in range daily, weekly or monthly
+     */
+    private String reportingRange;
+
+    /**
      * File viewing date
      */
     private String viewingDate;
+
+    private String viewingDateEnd;
 
     /**
      * File distributor source, manufacturing or sourcing
