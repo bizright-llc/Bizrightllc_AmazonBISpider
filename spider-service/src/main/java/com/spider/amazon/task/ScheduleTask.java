@@ -20,7 +20,10 @@ import com.spider.amazon.webmagic.amz.AmazonAdConsumeProcessor;
 import com.spider.amazon.webmagic.amzvc.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 import org.springframework.stereotype.Component;
 import us.codecraft.webmagic.Spider;
 import us.codecraft.webmagic.downloader.HttpClientDownloader;
@@ -40,7 +43,6 @@ import static java.lang.Thread.sleep;
 @Component
 @Slf4j
 public class ScheduleTask {
-
 
     @Autowired
     private SpiderConfig spiderConfig;
@@ -102,10 +104,10 @@ public class ScheduleTask {
     /**
      * 测试配置文件加载
      */
-    @Scheduled(cron = "0/30 * * * * ?")
-    public void task02(){
-        log.info("test task02 run...");
-    }
+//    @Scheduled(cron = "0/30 * * * * ?")
+//    public void task02(){
+//        log.info("test task02 run...");
+//    }
 
     /**
      * 定时下载Amazon SC FBA INV数据
@@ -185,7 +187,7 @@ public class ScheduleTask {
     @Scheduled(cron = "0 0 3 * * ?")
     public void schedulerVcDailyInventorySourcing() {
         log.info("0.step64=>开始执行［schedulerVcDailyInventorySourcing］");
-        Spider spider = Spider.create(new AmazonVcDailyInventoryHealthSourcing(spiderConfig, commonSettingService));
+        Spider spider = Spider.create(new AmazonVcDailyInventoryHealth(spiderConfig, commonSettingService));
         spider.addUrl(spiderConfig.getSpiderIndex());
         spider.setExitWhenComplete(true);
         spider.run();
@@ -344,7 +346,6 @@ public class ScheduleTask {
         log.info("0.step233=>开始执行［schedulerScFbaInventoryDeal］");
         fbaInventoryReportDealService.dealFbaInventoryReport(StrUtil.concat(true,fbaInventoryFileName,"-",DateUtil.format(DateUtil.offsetDay(DateUtil.date(),offerSetDay), DateFormat.YEAR_MONTH_DAY),".csv"),filePath,offerSetDay);
     }
-
 
     /**
      * 定时消耗广告

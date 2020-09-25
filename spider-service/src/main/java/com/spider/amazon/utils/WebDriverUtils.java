@@ -2,6 +2,7 @@ package com.spider.amazon.utils;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.spider.amazon.entity.Cookie;
+import com.spider.amazon.remote.api.SpiderUrl;
 import com.spider.amazon.service.MailService;
 import com.spider.amazon.service.impl.MailServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -368,7 +369,33 @@ public class WebDriverUtils {
         }catch (Exception ex){
             return false;
         }
+    }
 
+    public static void addAmazonVCCookies(WebDriver driver, List<org.openqa.selenium.Cookie> cookies) throws InterruptedException {
+        if (driver == null){
+            throw new IllegalArgumentException("Add amazon cookies driver cannot be null");
+        }
+
+        driver.navigate().to(SpiderUrl.AMAZON_VC_INDEX);
+
+        sleep(1000);
+
+        addSeleniumCookies(driver, cookies);
+    }
+
+    public static void waitElementClickable(WebDriver driver, By locator, int timeout){
+
+        if (driver == null){
+            throw new IllegalArgumentException("[Wait element clickable cannot pass null driver]");
+        }
+
+        if(locator == null){
+            throw new IllegalArgumentException("[Wait element clickable cannot have null locator]");
+        }
+
+        WebDriverWait wait = new WebDriverWait(driver, timeout);
+
+        wait.until(ExpectedConditions.elementToBeClickable(locator));
     }
 
 }
