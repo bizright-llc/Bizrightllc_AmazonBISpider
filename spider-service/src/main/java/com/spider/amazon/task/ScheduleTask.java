@@ -179,7 +179,7 @@ public class ScheduleTask {
 //    }
 
     /**
-     * Download Amazon VC daily inventory sourcing view
+     * Download Amazon VC daily inventory files
      */
     @Scheduled(cron = "0 0 3 * * ?")
     public void schedulerVcDailyInventorySourcing() {
@@ -193,14 +193,14 @@ public class ScheduleTask {
     /**
      * Download Amazon VC daily inventory manufacturing view
      */
-    @Scheduled(cron = "0 10 3 * * ?")
-    public void schedulerVcDailyInventoryManufacturing() {
-        log.info("0.step64=>开始执行［schedulerVcDailyInventoryManufacturing］");
-        Spider spider = Spider.create(new AmazonVcDailyInventoryHealthManufacturing(spiderConfig, commonSettingService));
-        spider.addUrl(spiderConfig.getSpiderIndex());
-        spider.setExitWhenComplete(true);
-        spider.run();
-    }
+//    @Scheduled(cron = "0 10 3 * * ?")
+//    public void schedulerVcDailyInventoryManufacturing() {
+//        log.info("0.step64=>开始执行［schedulerVcDailyInventoryManufacturing］");
+//        Spider spider = Spider.create(new AmazonVcDailyInventoryHealthManufacturing(spiderConfig, commonSettingService));
+//        spider.addUrl(spiderConfig.getSpiderIndex());
+//        spider.setExitWhenComplete(true);
+//        spider.run();
+//    }
 
     /**
      * 定时下载Amazon VC Promotion info and Promotion product info
