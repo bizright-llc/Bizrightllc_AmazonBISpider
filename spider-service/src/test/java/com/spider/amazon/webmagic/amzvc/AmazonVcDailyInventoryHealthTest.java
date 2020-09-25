@@ -45,18 +45,18 @@ class AmazonVcDailyInventoryHealthTest {
         Thread.sleep(300000);
     }
 
-    @Test
-    public void testDownloadInventoryHealthManufacturingFile() throws InterruptedException {
-        // 3.调用爬虫
-        Spider spider= Spider.create(new AmazonVcDailyInventoryHealthManufacturing(spiderConfig, commonSettingService));
-        spider.thread(2);
-        Request request = new Request(spiderConfig.getSpiderIndex());
-
-        String crawId = DateUtil.format(DateUtil.date(), DateFormat.YEAR_MONTH_DAY_yyyyMMddHHmmss1);
-        request.putExtra("craw_id",crawId);
-        spider.addRequest(request);
-        spider.start();
-        Thread.sleep(300000);
-    }
+//    @Test
+//    public void testDownloadInventoryHealthManufacturingFile() throws InterruptedException {
+//        // 3.调用爬虫
+//        Spider spider= Spider.create(new AmazonVcDailyInventoryHealthManufacturing(spiderConfig, commonSettingService));
+//        spider.thread(2);
+//        Request request = new Request(spiderConfig.getSpiderIndex());
+//
+//        String crawId = DateUtil.format(DateUtil.date(), DateFormat.YEAR_MONTH_DAY_yyyyMMddHHmmss1);
+//        request.putExtra("craw_id",crawId);
+//        spider.addRequest(request);
+//        spider.start();
+//        Thread.sleep(300000);
+//    }
 
 }
