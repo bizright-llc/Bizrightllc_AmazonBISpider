@@ -135,6 +135,20 @@ public class WebDriverUtils {
         wait.until(pageLoadCondition);
     }
 
+    public static void waitAlert(WebDriver driver, int timeout){
+        try {
+//            System.out.println(timeout + "秒之后出现");
+            WebDriverWait wait = new WebDriverWait(driver, timeout);
+
+            wait.until(ExpectedConditions.alertIsPresent());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.info("[Alert wait {} seconds not present]", timeout, e);
+            throw e;
+        }
+    }
+
     /**
      * 超时等待元素时间,看元素是否出现
      *

@@ -19,8 +19,6 @@ import com.spider.amazon.webmagic.*;
 import com.spider.amazon.webmagic.amz.AmazonAdConsumeProcessor;
 import com.spider.amazon.webmagic.amzvc.*;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.batch.item.ExecutionContext;
-import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -31,10 +29,8 @@ import us.codecraft.webmagic.proxy.SimpleProxyProvider;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 import static java.lang.Thread.sleep;
 
@@ -144,32 +140,31 @@ public class ScheduleTask {
         log.info("0.step56=>开始执行［schedulerVcDailySales］");
 
         try{
-            Spider spider = Spider.create(new AmazonVcManufacturingDailySales(spiderConfig, commonSettingService));
+            Spider spider = Spider.create(new AmazonVcDailySales(spiderConfig, commonSettingService));
             spider.addUrl(spiderConfig.getSpiderIndex());
             spider.setExitWhenComplete(true);
             spider.run();
         }catch (Exception ex){
-            log.info("[schedulerVcDailySales] [manufacturing view] failed", ex);
+            log.info("[schedulerVcDailySales failed]", ex);
         }
     }
 
     /**
      * 定时下载Amazon VC daily sales sourcing view
      */
-    @Scheduled(cron = "0 20 2 * * ?")
-    public void schedulerVcDailySalesSourcing() throws InterruptedException {
-        log.info("0.step56=>开始执行［schedulerVcDailySalesSourcing］");
-
-        try{
-            Spider spider = Spider.create(new AmazonVcSourcingDailySales(spiderConfig, commonSettingService));
-            spider.addUrl(spiderConfig.getSpiderIndex());
-            spider.setExitWhenComplete(true);
-            spider.run();
-        }catch (Exception ex){
-            log.info("[schedulerVcDailySales] [sourcing view] failed", ex);
-        }
-
-    }
+//    @Scheduled(cron = "0 20 2 * * ?")
+//    public void schedulerVcDailySalesSourcing() throws InterruptedException {
+//        log.info("0.step56=>开始执行［schedulerVcDailySalesSourcing］");
+//
+//        try{
+//            Spider spider = Spider.create(new AmazonVcSourcingDailySales(spiderConfig, commonSettingService));
+//            spider.addUrl(spiderConfig.getSpiderIndex());
+//            spider.setExitWhenComplete(true);
+//            spider.run();
+//        }catch (Exception ex){
+//            log.info("[schedulerVcDailySales] [sourcing view] failed", ex);
+//        }
+//    }
 
 //      already scrap daily sales
 //    /**
@@ -290,7 +285,7 @@ public class ScheduleTask {
     /**
      * 定时处理Amazon VC 销量报表
      */
-    @Scheduled(fixedDelay = 60000)
+//    @Scheduled(fixedDelay = 60000)
     public void schedulerVcSalesDataDeal() {
         log.info("0.step112=>开始执行［schedulerVcSalesDataDeal］");
 
@@ -307,7 +302,7 @@ public class ScheduleTask {
      * schedulerVcDailyInventoryDataDeal
      * 定时处理Amazon VC 每日库存报表
      */
-    @Scheduled(fixedDelay = 60000)
+//    @Scheduled(fixedDelay = 60000)
     public void schedulerVcDailyInventoryDataDeal() {
         log.info("0.step112=>开始执行［schedulerVcDailyInventoryDataDeal］");
 

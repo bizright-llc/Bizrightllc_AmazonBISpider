@@ -7,13 +7,9 @@ import com.spider.amazon.cons.DateFormat;
 import com.spider.amazon.service.CommonSettingService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.testng.annotations.BeforeMethod;
 import us.codecraft.webmagic.Request;
 import us.codecraft.webmagic.Spider;
 
@@ -54,7 +50,7 @@ class AmazonVcDailySalesTest {
     public void TestDownloadDailySalesManufaturingFile() throws InterruptedException {
 
         // 3.调用爬虫
-        Spider spider= Spider.create(new AmazonVcManufacturingDailySales(spiderConfig, commonSettingService));
+        Spider spider= Spider.create(new AmazonVcDailySales(spiderConfig, commonSettingService));
         spider.thread(2);
         Request request = new Request(spiderConfig.getSpiderIndex());
 
