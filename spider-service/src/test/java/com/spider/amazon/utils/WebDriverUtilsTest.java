@@ -7,6 +7,7 @@ import com.spider.amazon.entity.Cookie;
 import com.spider.amazon.model.Consts;
 import com.spider.amazon.remote.api.SpiderUrl;
 import com.spider.amazon.service.CommonSettingService;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.*;
@@ -22,7 +23,9 @@ import java.time.LocalDate;
 import java.time.format.TextStyle;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static java.lang.Thread.sleep;
 
@@ -498,7 +501,7 @@ class WebDriverUtilsTest {
 
         while (!lastDate.isEqual(currentDate) && lastDate.compareTo(currentDate) < 0) {
 
-            WebDriver driver = WebDriverUtils.getWebDriver(downloadFilePath, false);
+            WebDriver driver = WebDriverUtils.getWebDriver(spiderConfig.getChromeDriverPath(), downloadFilePath, false);
 
             try {
 
@@ -523,6 +526,7 @@ class WebDriverUtilsTest {
                 // cookies are not valid
                 if (!WebDriverUtils.checkAmazonVCCookiesValid(driver)) {
                     driver.manage().deleteAllCookies();
+
                     WebDriverUtils.getAmazonVCCookies(driver);
 
                     List<Cookie> driverCookies = CookiesUtils.seleniumCookieToCookie(driver.manage().getCookies());
@@ -532,185 +536,329 @@ class WebDriverUtilsTest {
                     commonSettingService.setValue(Consts.AMAZON_VC_COOKIES, newCookiesStr, "system");
                 }
 
-                //4.1 navigate to sales daily page
-                navigateToDailySalesPage(driver, wait);
+                List<org.openqa.selenium.Cookie> driverCookies = driver.manage().getCookies().stream().collect(Collectors.toList());
 
-                //4.1点击日期选择按钮, Reporting range
-                WebElement reportingRangeButtonElement = WebDriverUtils.expWaitForElement(driver, By.xpath("//*[@id=\"dashboard-filter-reportingRange\"]//awsui-button-dropdown//awsui-button/button"), 10);
-                if (log.isInfoEnabled()) {
-                    log.info("1.step105=>reportingRangeButtonElement:" + reportingRangeButtonElement.toString());
-                }
-                WebDriverUtils.elementClick(reportingRangeButtonElement);
+                driver.quit();
 
-                //4.2点击选择daily
-                WebElement dailySelectElement = WebDriverUtils.expWaitForElement(driver, By.xpath("//*[@id=\"dashboard-filter-reportingRange\"]/div/awsui-button-dropdown//ul/li[contains(@data-testid, 'DAILY')]"), 10);
-                if (log.isInfoEnabled()) {
-                    log.info("2.step112=>dailySelectElement:" + dailySelectElement.toString());
-                }
-                dailySelectElement.click();
+                LocalDate sourcingCurrentDate = currentDate;
+                CompletableFuture<Void> sourcingCompletableFuture = CompletableFuture.runAsync(new Runnable() {
+                    @SneakyThrows
+                    @Override
+                    public void run() {
 
-                // 4.21 Choose DistributeView View
-                WebElement distributeViewViewButtonElement = WebDriverUtils.expWaitForElement(driver, By.xpath("//*[@id='dashboard-filter-distributorView']//awsui-button-dropdown//button"), 10);
-                if (log.isInfoEnabled()) {
-                    log.info("1.step105=>distributeViewViewButtonElement:" + distributeViewViewButtonElement.toString());
-                }
-                distributeViewViewButtonElement.click();
+                        WebDriver driver = WebDriverUtils.getWebDriver(spiderConfig.getChromeDriverPath(), downloadFilePath, false);
 
-                // 4.22点击选择View
-                if (log.isInfoEnabled()) {
-                    log.info("1.1.step137=>点击选择View");
-                }
-                WebElement distributeViewSelectElement = WebDriverUtils.expWaitForElement(driver, By.xpath(manufacturingViewXPath), 10);
-                if (log.isInfoEnabled()) {
-                    log.info("2.step112=>distributeViewSelectElement:" + distributeViewSelectElement.toString());
-                }
-                distributeViewSelectElement.click();
+                        WebDriverWait wait = new WebDriverWait(driver, 60);
 
-                // 4.21 Choose SalesView
-                WebElement salesViewButtonElement = WebDriverUtils.expWaitForElement(driver, By.xpath("//*[@id='dashboard-filter-viewFilter']//awsui-button-dropdown//button[1]"), 10);
-                if (log.isInfoEnabled()) {
-                    log.info("1.step105=>salesViewButtonElement:" + salesViewButtonElement.toString());
-                }
-                salesViewButtonElement.click();
+                        try{
 
-                // 4.22 Select Shipped COGS
-                if (log.isInfoEnabled()) {
-                    log.info("1.1.step137=>点击选择SalesView");
-                }
-                WebElement salesViewSelectElement = WebDriverUtils.expWaitForElement(driver, By.xpath(salesViewShippedCOGSLevelXPath), 10);
-                if (log.isInfoEnabled()) {
-                    log.info("2.step112=>salesViewSelectElement:" + salesViewSelectElement.toString());
-                }
-                salesViewSelectElement.click();
+                            driver.navigate().to(SpiderUrl.AMAZON_VC_INDEX);
 
-                // click date picker end date
-                WebElement dateEndPicker = WebDriverUtils.expWaitForElement(driver, By.xpath(dateEndPickerXPath), 60);
-                WebDriverUtils.expWaitForElement(driver, By.xpath(dateEndPickerXPath), 60);
-                if (dateEndPicker != null) {
-                    dateEndPicker = wait.until(ExpectedConditions.elementToBeClickable(dateEndPicker));
-                    dateEndPicker.click();
-                }
-                sleep(1000);
+                            WebDriverUtils.addSeleniumCookies(driver, driverCookies);
 
-                // check have to click previous month
-                WebElement leftMonthEle = WebDriverUtils.expWaitForElement(driver, By.xpath(datePickerLeftMonthXPath), 60);
+                            //4.1 navigate to sales daily page
+                            navigateToDailySalesPage(driver, wait);
 
-                // check left month container element
-                if (leftMonthEle != null) {
+                            //4.1点击日期选择按钮, Reporting range
+                            WebElement reportingRangeButtonElement = WebDriverUtils.expWaitForElement(driver, By.xpath("//*[@id=\"dashboard-filter-reportingRange\"]//awsui-button-dropdown//awsui-button/button"), 10);
+                            if (log.isInfoEnabled()) {
+                                log.info("1.step105=>reportingRangeButtonElement:" + reportingRangeButtonElement.toString());
+                            }
+                            WebDriverUtils.elementClick(reportingRangeButtonElement);
 
-                    String currentSelectedMonth = leftMonthEle.getText();
+                            //4.2点击选择daily
+                            WebElement dailySelectElement = WebDriverUtils.expWaitForElement(driver, By.xpath("//*[@id=\"dashboard-filter-reportingRange\"]/div/awsui-button-dropdown//ul/li[contains(@data-testid, 'DAILY')]"), 10);
+                            if (log.isInfoEnabled()) {
+                                log.info("2.step112=>dailySelectElement:" + dailySelectElement.toString());
+                            }
+                            dailySelectElement.click();
 
-                    String currentDateMonth = currentDate.getMonth().getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+                            // 4.21 Choose DistributeView View
+                            WebElement distributeViewViewButtonElement = WebDriverUtils.expWaitForElement(driver, By.xpath("//*[@id='dashboard-filter-distributorView']//awsui-button-dropdown//button"), 10);
+                            if (log.isInfoEnabled()) {
+                                log.info("1.step105=>distributeViewViewButtonElement:" + distributeViewViewButtonElement.toString());
+                            }
+                            distributeViewViewButtonElement.click();
 
-                    String currentDateYear = String.valueOf(currentDate.getYear());
+                            // 4.22点击选择View
+                            if (log.isInfoEnabled()) {
+                                log.info("1.1.step137=>点击选择View");
+                            }
+                            WebElement distributeViewSelectElement = WebDriverUtils.expWaitForElement(driver, By.xpath(sourcingViewXPath), 10);
+                            if (log.isInfoEnabled()) {
+                                log.info("[Select sourcing distribute view]" + distributeViewSelectElement.toString());
+                            }
+                            distributeViewSelectElement.click();
 
-                    // select the current date month
-                    while (!currentSelectedMonth.toLowerCase().contains(currentDateMonth.toLowerCase()) || !currentSelectedMonth.contains(currentDateYear)) {
-                        // click previous month
-                        WebElement preMonthEle = WebDriverUtils.expWaitForElement(driver, By.xpath(datePickerPreviousMonthXPath), 60);
-                        preMonthEle.click();
-                        sleep(1000);
-                        leftMonthEle = WebDriverUtils.expWaitForElement(driver, By.xpath(datePickerLeftMonthXPath), 60);
+                            // 4.21 Choose SalesView
+                            WebElement salesViewButtonElement = WebDriverUtils.expWaitForElement(driver, By.xpath("//*[@id='dashboard-filter-viewFilter']//awsui-button-dropdown//button[1]"), 10);
+                            if (log.isInfoEnabled()) {
+                                log.info("1.step105=>salesViewButtonElement:" + salesViewButtonElement.toString());
+                            }
+                            salesViewButtonElement.click();
 
-                        currentSelectedMonth = leftMonthEle.getText();
-                        currentDateMonth = currentDate.getMonth().getDisplayName(TextStyle.FULL, Locale.ENGLISH);
-                        currentDateYear = String.valueOf(currentDate.getYear());
+                            // 4.22 Select Shipped COGS
+                            if (log.isInfoEnabled()) {
+                                log.info("1.1.step137=>点击选择SalesView");
+                            }
+                            WebElement salesViewSelectElement = WebDriverUtils.expWaitForElement(driver, By.xpath(salesViewShippedCOGSLevelXPath), 10);
+                            if (log.isInfoEnabled()) {
+                                log.info("2.step112=>salesViewSelectElement:" + salesViewSelectElement.toString());
+                            }
+                            salesViewSelectElement.click();
+
+                            // click date picker end date
+                            WebElement dateEndPicker = WebDriverUtils.expWaitForElement(driver, By.xpath(dateEndPickerXPath), 60);
+                            WebDriverUtils.expWaitForElement(driver, By.xpath(dateEndPickerXPath), 60);
+                            if (dateEndPicker != null) {
+                                dateEndPicker = wait.until(ExpectedConditions.elementToBeClickable(dateEndPicker));
+                                dateEndPicker.click();
+                            }
+                            sleep(1000);
+
+                            // check have to click previous month
+                            WebElement leftMonthEle = WebDriverUtils.expWaitForElement(driver, By.xpath(datePickerLeftMonthXPath), 60);
+
+                            // check left month container element
+                            if (leftMonthEle != null) {
+
+                                String currentSelectedMonth = leftMonthEle.getText();
+
+                                String currentDateMonth = sourcingCurrentDate.getMonth().getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+
+                                String currentDateYear = String.valueOf(sourcingCurrentDate.getYear());
+
+                                // select the current date month
+                                while (!currentSelectedMonth.toLowerCase().contains(currentDateMonth.toLowerCase()) || !currentSelectedMonth.contains(currentDateYear)) {
+                                    // click previous month
+                                    WebElement preMonthEle = WebDriverUtils.expWaitForElement(driver, By.xpath(datePickerPreviousMonthXPath), 60);
+                                    preMonthEle.click();
+                                    sleep(1000);
+                                    leftMonthEle = WebDriverUtils.expWaitForElement(driver, By.xpath(datePickerLeftMonthXPath), 60);
+
+                                    currentSelectedMonth = leftMonthEle.getText();
+                                    currentDateMonth = sourcingCurrentDate.getMonth().getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+                                    currentDateYear = String.valueOf(sourcingCurrentDate.getYear());
+
+                                }
+
+                            } else {
+                                throw new Exception("Didn't find left month element");
+                            }
+
+                            // click current date eletment
+                            String dayXPath = String.format(datePickerLeftDayXPathFormat, sourcingCurrentDate.getDayOfMonth());
+                            List<WebElement> currentDateEles = WebDriverUtils.expWaitForElements(driver, By.xpath(dayXPath), 60);
+
+                            WebElement currentDateEle = currentDateEles.size() == 1 ? currentDateEles.get(0) :
+                                    sourcingCurrentDate.getDayOfMonth() <= 7 ? currentDateEles.get(0) : currentDateEles.get(1);
+
+                            WebDriverUtils.elementClick(currentDateEle);
+                            sleep(1000);
+
+                            //4.3点击应用按钮
+                            WebElement applyElement = WebDriverUtils.expWaitForElement(driver, By.xpath("//*[@id='dashboard-filter-applyCancel']/div/awsui-button[2]/button"), 10);
+                            applyElement.click();
+
+                            sleep(10000);
+
+                            // 6.抓取点击下载元素进行点击
+                            // 判断是否出现了Download按钮,未在规定时间内出现重新刷新页面
+                            WebElement downloadButtonElement = WebDriverUtils.expWaitForElement(driver, By.xpath("//*[@id='downloadButton']//button[1]"), 10);
+                            downloadButtonElement.click();
+
+                            // 7.抓取CSV元素生成并进行点击
+                            WebElement detailCsvDownloadButtonElement = WebDriverUtils.expWaitForElement(driver, By.xpath(detailCsvXPath), 10);
+                            detailCsvDownloadButtonElement.click();
+
+                            // 8.获取点击之后的弹出框点击确定
+                            if (log.isInfoEnabled()) {
+                                log.info("1.step132=>wait for alert is present");
+                            }
+
+                            wait.until(ExpectedConditions.alertIsPresent());
+                            if (log.isInfoEnabled()) {
+                                log.info("1.1.step137=>scrapy the alert");
+                            }
+                            Alert downloadAlertElement = driver.switchTo().alert();//获取弹出框
+                            log.info("alert text:" + downloadAlertElement.getText());//获取框中文本内容
+                            log.info("alert toString():" + downloadAlertElement.toString());
+                            downloadAlertElement.accept();
+
+                            sleep(3000);
+
+                        }catch (Exception e){
+                            e.printStackTrace();
+                            driver.quit();
+                            throw e;
+                        }finally {
+                            driver.quit();
+                        }
 
                     }
+                });
 
-                } else {
-                    throw new Exception("Didn't find left month element");
-                }
-
-                // click current date eletment
-                String dayXPath = String.format(datePickerLeftDayXPathFormat, currentDate.getDayOfMonth());
-                List<WebElement> currentDateEles = WebDriverUtils.expWaitForElements(driver, By.xpath(dayXPath), 60);
-
-                WebElement currentDateEle = currentDateEles.size() == 1 ? currentDateEles.get(0) :
-                        currentDate.getDayOfMonth() <= 7 ? currentDateEles.get(0) : currentDateEles.get(1);
-
-                WebDriverUtils.elementClick(currentDateEle);
                 sleep(1000);
 
-                //4.3点击应用按钮
-                WebElement applyElement = WebDriverUtils.expWaitForElement(driver, By.xpath("//*[@id='dashboard-filter-applyCancel']/div/awsui-button[2]/button"), 10);
-                applyElement.click();
+                LocalDate manufacturingCurrentDate = currentDate;
+                CompletableFuture<Void> manufacturingCompletableFuture = CompletableFuture.runAsync(new Runnable() {
+                    @SneakyThrows
+                    @Override
+                    public void run() {
 
-                sleep(10000);
+                        WebDriver driver = WebDriverUtils.getWebDriver(spiderConfig.getChromeDriverPath(), downloadFilePath, false);
 
-                // 6.抓取点击下载元素进行点击
-                // 判断是否出现了Download按钮,未在规定时间内出现重新刷新页面
-                WebElement downloadButtonElement = WebDriverUtils.expWaitForElement(driver, By.xpath("//*[@id='downloadButton']//button[1]"), 10);
-                downloadButtonElement.click();
+                        WebDriverWait wait = new WebDriverWait(driver, 60);
 
-                // 7.抓取CSV元素生成并进行点击
-                WebElement detailCsvDownloadButtonElement = WebDriverUtils.expWaitForElement(driver, By.xpath(detailCsvXPath), 10);
-                detailCsvDownloadButtonElement.click();
+                        try{
 
-                // 8.获取点击之后的弹出框点击确定
-                if (log.isInfoEnabled()) {
-                    log.info("1.step132=>wait for alert is present");
-                }
+                            driver.navigate().to(SpiderUrl.AMAZON_VC_INDEX);
 
-                wait.until(ExpectedConditions.alertIsPresent());
-                if (log.isInfoEnabled()) {
-                    log.info("1.1.step137=>scrapy the alert");
-                }
-                Alert downloadAlertElement = driver.switchTo().alert();//获取弹出框
-                log.info("alert text:" + downloadAlertElement.getText());//获取框中文本内容
-                log.info("alert toString():" + downloadAlertElement.toString());
-                downloadAlertElement.accept();
+                            WebDriverUtils.addSeleniumCookies(driver, driverCookies);
 
-                sleep(3000);
+                            //4.1 navigate to sales daily page
+                            navigateToDailySalesPage(driver, wait);
 
-                // Choose DistributeView View
-                distributeViewViewButtonElement = WebDriverUtils.expWaitForElement(driver, By.xpath("//*[@id='dashboard-filter-distributorView']//awsui-button-dropdown//button"), 10);
-                if (log.isInfoEnabled()) {
-                    log.info("1.step105=>distributeViewViewButtonElement:" + distributeViewViewButtonElement.toString());
-                }
-                distributeViewViewButtonElement.click();
+                            //4.1点击日期选择按钮, Reporting range
+                            WebElement reportingRangeButtonElement = WebDriverUtils.expWaitForElement(driver, By.xpath("//*[@id=\"dashboard-filter-reportingRange\"]//awsui-button-dropdown//awsui-button/button"), 10);
+                            if (log.isInfoEnabled()) {
+                                log.info("1.step105=>reportingRangeButtonElement:" + reportingRangeButtonElement.toString());
+                            }
+                            WebDriverUtils.elementClick(reportingRangeButtonElement);
 
-                // 4.22点击选择View
-                if (log.isInfoEnabled()) {
-                    log.info("1.1.step137=>点击选择View");
-                }
+                            //4.2点击选择daily
+                            WebElement dailySelectElement = WebDriverUtils.expWaitForElement(driver, By.xpath("//*[@id=\"dashboard-filter-reportingRange\"]/div/awsui-button-dropdown//ul/li[contains(@data-testid, 'DAILY')]"), 10);
+                            if (log.isInfoEnabled()) {
+                                log.info("2.step112=>dailySelectElement:" + dailySelectElement.toString());
+                            }
+                            dailySelectElement.click();
 
-                distributeViewSelectElement = WebDriverUtils.expWaitForElement(driver, By.xpath(sourcingViewXPath), 10);
-                if (log.isInfoEnabled()) {
-                    log.info("[Select sourcing distribute view]" + distributeViewSelectElement.toString());
-                }
-                distributeViewSelectElement.click();
+                            // 4.21 Choose DistributeView View
+                            WebElement distributeViewViewButtonElement = WebDriverUtils.expWaitForElement(driver, By.xpath("//*[@id='dashboard-filter-distributorView']//awsui-button-dropdown//button"), 10);
+                            if (log.isInfoEnabled()) {
+                                log.info("1.step105=>distributeViewViewButtonElement:" + distributeViewViewButtonElement.toString());
+                            }
+                            distributeViewViewButtonElement.click();
 
-                //4.3点击应用按钮
-                applyElement = WebDriverUtils.expWaitForElement(driver, By.xpath("//*[@id='dashboard-filter-applyCancel']/div/awsui-button[2]/button"), 10);
-                applyElement.click();
+                            // 4.22点击选择View
+                            if (log.isInfoEnabled()) {
+                                log.info("1.1.step137=>点击选择View");
+                            }
+                            WebElement distributeViewSelectElement = WebDriverUtils.expWaitForElement(driver, By.xpath(manufacturingViewXPath), 10);
+                            if (log.isInfoEnabled()) {
+                                log.info("2.step112=>distributeViewSelectElement:" + distributeViewSelectElement.toString());
+                            }
+                            distributeViewSelectElement.click();
 
-                sleep(10000);
+                            // 4.21 Choose SalesView
+                            WebElement salesViewButtonElement = WebDriverUtils.expWaitForElement(driver, By.xpath("//*[@id='dashboard-filter-viewFilter']//awsui-button-dropdown//button[1]"), 10);
+                            if (log.isInfoEnabled()) {
+                                log.info("1.step105=>salesViewButtonElement:" + salesViewButtonElement.toString());
+                            }
+                            salesViewButtonElement.click();
 
-                // 6.抓取点击下载元素进行点击
-                // 判断是否出现了Download按钮,未在规定时间内出现重新刷新页面
-                downloadButtonElement = WebDriverUtils.expWaitForElement(driver, By.xpath("//*[@id='downloadButton']//button[1]"), 10);
-                downloadButtonElement.click();
+                            // 4.22 Select Shipped COGS
+                            if (log.isInfoEnabled()) {
+                                log.info("1.1.step137=>点击选择SalesView");
+                            }
+                            WebElement salesViewSelectElement = WebDriverUtils.expWaitForElement(driver, By.xpath(salesViewShippedCOGSLevelXPath), 10);
+                            if (log.isInfoEnabled()) {
+                                log.info("2.step112=>salesViewSelectElement:" + salesViewSelectElement.toString());
+                            }
+                            salesViewSelectElement.click();
 
-                // 7.抓取CSV元素生成并进行点击
-                detailCsvDownloadButtonElement = WebDriverUtils.expWaitForElement(driver, By.xpath(detailCsvXPath), 10);
-                detailCsvDownloadButtonElement.click();
+                            // click date picker end date
+                            WebElement dateEndPicker = WebDriverUtils.expWaitForElement(driver, By.xpath(dateEndPickerXPath), 60);
+                            WebDriverUtils.expWaitForElement(driver, By.xpath(dateEndPickerXPath), 60);
+                            if (dateEndPicker != null) {
+                                dateEndPicker = wait.until(ExpectedConditions.elementToBeClickable(dateEndPicker));
+                                dateEndPicker.click();
+                            }
+                            sleep(5000);
 
-                // 8.获取点击之后的弹出框点击确定
-                if (log.isInfoEnabled()) {
-                    log.info("1.step132=>wait for alert is present");
-                }
+                            // check have to click previous month
+                            WebElement leftMonthEle = WebDriverUtils.expWaitForElement(driver, By.xpath(datePickerLeftMonthXPath), 60);
 
-                wait.until(ExpectedConditions.alertIsPresent());
-                if (log.isInfoEnabled()) {
-                    log.info("1.1.step137=>scrapy the alert");
-                }
-                downloadAlertElement = driver.switchTo().alert();//获取弹出框
-                log.info("alert text:" + downloadAlertElement.getText());//获取框中文本内容
-                log.info("alert toString():" + downloadAlertElement.toString());
-                downloadAlertElement.accept();
+                            // check left month container element
+                            if (leftMonthEle != null) {
 
-                sleep(3000);
+                                String currentSelectedMonth = leftMonthEle.getText();
+
+                                String currentDateMonth = manufacturingCurrentDate.getMonth().getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+
+                                String currentDateYear = String.valueOf(manufacturingCurrentDate.getYear());
+
+                                // select the current date month
+                                while (!currentSelectedMonth.toLowerCase().contains(currentDateMonth.toLowerCase()) || !currentSelectedMonth.contains(currentDateYear)) {
+                                    // click previous month
+                                    WebElement preMonthEle = WebDriverUtils.expWaitForElement(driver, By.xpath(datePickerPreviousMonthXPath), 60);
+                                    preMonthEle.click();
+                                    sleep(1000);
+                                    leftMonthEle = WebDriverUtils.expWaitForElement(driver, By.xpath(datePickerLeftMonthXPath), 60);
+
+                                    currentSelectedMonth = leftMonthEle.getText();
+                                    currentDateMonth = manufacturingCurrentDate.getMonth().getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+                                    currentDateYear = String.valueOf(manufacturingCurrentDate.getYear());
+
+                                }
+
+                            } else {
+                                throw new Exception("Didn't find left month element");
+                            }
+
+                            // click current date eletment
+                            String dayXPath = String.format(datePickerLeftDayXPathFormat, manufacturingCurrentDate.getDayOfMonth());
+                            List<WebElement> currentDateEles = WebDriverUtils.expWaitForElements(driver, By.xpath(dayXPath), 60);
+
+                            WebElement currentDateEle = currentDateEles.size() == 1 ? currentDateEles.get(0) :
+                                    manufacturingCurrentDate.getDayOfMonth() <= 7 ? currentDateEles.get(0) : currentDateEles.get(1);
+
+                            WebDriverUtils.elementClick(currentDateEle);
+                            sleep(1000);
+
+                            //4.3点击应用按钮
+                            WebElement applyElement = WebDriverUtils.expWaitForElement(driver, By.xpath("//*[@id='dashboard-filter-applyCancel']/div/awsui-button[2]/button"), 10);
+                            applyElement.click();
+
+                            sleep(10000);
+
+                            // 6.抓取点击下载元素进行点击
+                            // 判断是否出现了Download按钮,未在规定时间内出现重新刷新页面
+                            WebElement downloadButtonElement = WebDriverUtils.expWaitForElement(driver, By.xpath("//*[@id='downloadButton']//button[1]"), 10);
+                            downloadButtonElement.click();
+
+                            // 7.抓取CSV元素生成并进行点击
+                            WebElement detailCsvDownloadButtonElement = WebDriverUtils.expWaitForElement(driver, By.xpath(detailCsvXPath), 10);
+                            detailCsvDownloadButtonElement.click();
+
+                            // 8.获取点击之后的弹出框点击确定
+                            if (log.isInfoEnabled()) {
+                                log.info("1.step132=>wait for alert is present");
+                            }
+
+                            wait.until(ExpectedConditions.alertIsPresent());
+                            if (log.isInfoEnabled()) {
+                                log.info("1.1.step137=>scrapy the alert");
+                            }
+                            Alert downloadAlertElement = driver.switchTo().alert();//获取弹出框
+                            log.info("alert text:" + downloadAlertElement.getText());//获取框中文本内容
+                            log.info("alert toString():" + downloadAlertElement.toString());
+                            downloadAlertElement.accept();
+
+                            sleep(3000);
+
+                        }catch (Exception e){
+                            log.info("manufacturingCompletableFuture {} failed", manufacturingCurrentDate.toString(), e);
+                            e.printStackTrace();
+                            driver.quit();
+                            throw e;
+                        }finally {
+                            driver.quit();
+                        }
+                    }
+                });
+
+                CompletableFuture.allOf(manufacturingCompletableFuture, sourcingCompletableFuture).join();
 
                 // parse next day
                 preDate = currentDate;

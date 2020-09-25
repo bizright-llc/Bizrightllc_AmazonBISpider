@@ -2,7 +2,7 @@ package com.spider.amazon.webmagic.ippool;
 
 import cn.hutool.core.date.DateUtil;
 import com.common.exception.ServiceException;
-import com.spider.amazon.cons.DriverPathCons;
+import com.spider.amazon.config.SpiderConfig;
 import com.spider.amazon.cons.RespErrorEnum;
 import com.spider.amazon.model.IpPoolDO;
 import com.spider.amazon.remote.api.SpiderUrl;
@@ -13,6 +13,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Site;
@@ -35,6 +36,8 @@ import static java.lang.Thread.sleep;
 @Slf4j
 public class IpPoolProcessor implements PageProcessor {
 
+    private SpiderConfig spiderConfig;
+
     private Site site = Site
             .me()
             .setRetryTimes(3)
@@ -42,6 +45,11 @@ public class IpPoolProcessor implements PageProcessor {
             .setSleepTime(3000)
             .setUserAgent(
                     "User-Agent:Mozilla/5.0(Macintosh;IntelMacOSX10_7_0)AppleWebKit/535.11(KHTML,likeGecko)Chrome/17.0.963.56Safari/535.11");
+
+    @Autowired
+    public IpPoolProcessor(SpiderConfig spiderConfig) {
+        this.spiderConfig = spiderConfig;
+    }
 
     /**
      * 设置网站信息
@@ -69,7 +77,7 @@ public class IpPoolProcessor implements PageProcessor {
         Map<String,Object> params=new HashMap<>();
 
         // 1.建立WebDriver
-        System.setProperty("webdriver.chrome.driver", DriverPathCons.CHROME_DRIVER_PATH);
+        System.setProperty("webdriver.chrome.driver", spiderConfig.getChromeDriverPath());
         WebDriver driver = new ChromeDriver();
 
         try {

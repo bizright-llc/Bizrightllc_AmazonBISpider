@@ -19,8 +19,6 @@ import com.spider.amazon.webmagic.*;
 import com.spider.amazon.webmagic.amz.AmazonAdConsumeProcessor;
 import com.spider.amazon.webmagic.amzvc.*;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.batch.item.ExecutionContext;
-import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -31,10 +29,8 @@ import us.codecraft.webmagic.proxy.SimpleProxyProvider;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 import static java.lang.Thread.sleep;
 
@@ -44,7 +40,6 @@ import static java.lang.Thread.sleep;
 @Component
 @Slf4j
 public class ScheduleTask {
-
 
     @Autowired
     private SpiderConfig spiderConfig;
@@ -106,10 +101,10 @@ public class ScheduleTask {
     /**
      * 测试配置文件加载
      */
-    @Scheduled(cron = "0/30 * * * * ?")
-    public void task02(){
-        log.info("test task02 run...");
-    }
+//    @Scheduled(cron = "0/30 * * * * ?")
+//    public void task02(){
+//        log.info("test task02 run...");
+//    }
 
     /**
      * 定时下载Amazon SC FBA INV数据
@@ -144,32 +139,31 @@ public class ScheduleTask {
         log.info("0.step56=>开始执行［schedulerVcDailySales］");
 
         try{
-            Spider spider = Spider.create(new AmazonVcManufacturingDailySales(spiderConfig, commonSettingService));
+            Spider spider = Spider.create(new AmazonVcDailySales(spiderConfig, commonSettingService));
             spider.addUrl(spiderConfig.getSpiderIndex());
             spider.setExitWhenComplete(true);
             spider.run();
         }catch (Exception ex){
-            log.info("[schedulerVcDailySales] [manufacturing view] failed", ex);
+            log.info("[schedulerVcDailySales failed]", ex);
         }
     }
 
     /**
      * 定时下载Amazon VC daily sales sourcing view
      */
-    @Scheduled(cron = "0 20 2 * * ?")
-    public void schedulerVcDailySalesSourcing() throws InterruptedException {
-        log.info("0.step56=>开始执行［schedulerVcDailySalesSourcing］");
-
-        try{
-            Spider spider = Spider.create(new AmazonVcSourcingDailySales(spiderConfig, commonSettingService));
-            spider.addUrl(spiderConfig.getSpiderIndex());
-            spider.setExitWhenComplete(true);
-            spider.run();
-        }catch (Exception ex){
-            log.info("[schedulerVcDailySales] [sourcing view] failed", ex);
-        }
-
-    }
+//    @Scheduled(cron = "0 20 2 * * ?")
+//    public void schedulerVcDailySalesSourcing() throws InterruptedException {
+//        log.info("0.step56=>开始执行［schedulerVcDailySalesSourcing］");
+//
+//        try{
+//            Spider spider = Spider.create(new AmazonVcSourcingDailySales(spiderConfig, commonSettingService));
+//            spider.addUrl(spiderConfig.getSpiderIndex());
+//            spider.setExitWhenComplete(true);
+//            spider.run();
+//        }catch (Exception ex){
+//            log.info("[schedulerVcDailySales] [sourcing view] failed", ex);
+//        }
+//    }
 
 //      already scrap daily sales
 //    /**
@@ -190,7 +184,7 @@ public class ScheduleTask {
     @Scheduled(cron = "0 0 3 * * ?")
     public void schedulerVcDailyInventorySourcing() {
         log.info("0.step64=>开始执行［schedulerVcDailyInventorySourcing］");
-        Spider spider = Spider.create(new AmazonVcDailyInventoryHealthSourcing(spiderConfig, commonSettingService));
+        Spider spider = Spider.create(new AmazonVcDailyInventoryHealth(spiderConfig, commonSettingService));
         spider.addUrl(spiderConfig.getSpiderIndex());
         spider.setExitWhenComplete(true);
         spider.run();
@@ -290,7 +284,7 @@ public class ScheduleTask {
     /**
      * 定时处理Amazon VC 销量报表
      */
-    @Scheduled(fixedDelay = 60000)
+//    @Scheduled(fixedDelay = 60000)
     public void schedulerVcSalesDataDeal() {
         log.info("0.step112=>开始执行［schedulerVcSalesDataDeal］");
 
@@ -307,7 +301,7 @@ public class ScheduleTask {
      * schedulerVcDailyInventoryDataDeal
      * 定时处理Amazon VC 每日库存报表
      */
-    @Scheduled(fixedDelay = 60000)
+//    @Scheduled(fixedDelay = 60000)
     public void schedulerVcDailyInventoryDataDeal() {
         log.info("0.step112=>开始执行［schedulerVcDailyInventoryDataDeal］");
 
@@ -350,7 +344,6 @@ public class ScheduleTask {
         fbaInventoryReportDealService.dealFbaInventoryReport(StrUtil.concat(true,fbaInventoryFileName,"-",DateUtil.format(DateUtil.offsetDay(DateUtil.date(),offerSetDay), DateFormat.YEAR_MONTH_DAY),".csv"),filePath,offerSetDay);
     }
 
-
     /**
      * 定时消耗广告
      */
@@ -368,7 +361,7 @@ public class ScheduleTask {
         }
         httpClientDownloader.setProxyProvider(new SimpleProxyProvider(proxies));
 
-        Spider.create(new AmazonAdConsumeProcessor())
+        Spider.create(new AmazonAdConsumeProcessor(spiderConfig))
                 .addUrl(SpiderUrl.AMAZON_INDEX)
                 .setDownloader(httpClientDownloader)
                 .run();

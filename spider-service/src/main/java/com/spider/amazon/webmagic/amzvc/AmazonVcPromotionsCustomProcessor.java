@@ -6,7 +6,6 @@ import com.common.exception.ServiceException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.spider.amazon.config.SpiderConfig;
 import com.spider.amazon.cons.DateFormat;
-import com.spider.amazon.cons.DriverPathCons;
 import com.spider.amazon.cons.RespErrorEnum;
 import com.spider.amazon.entity.Cookie;
 import com.spider.amazon.mapper.VcPromotionInfoDOMapper;
@@ -299,8 +298,8 @@ public class AmazonVcPromotionsCustomProcessor implements PageProcessor {
         log.info("［processDetail］=> [{}]", page.getUrl());
 
         // 1.建立WebDriver
-        System.setProperty("webdriver.chrome.driver", DriverPathCons.CHROME_DRIVER_PATH);
-        WebDriver driver = WebDriverUtils.getBackgroudWebDriver();
+        System.setProperty("webdriver.chrome.driver", spiderConfig.getChromeDriverPath());
+        WebDriver driver = WebDriverUtils.getWebDriver(spiderConfig.getChromeDriverPath(), spiderConfig.getDownloadPath(), true);
 
         try {
 

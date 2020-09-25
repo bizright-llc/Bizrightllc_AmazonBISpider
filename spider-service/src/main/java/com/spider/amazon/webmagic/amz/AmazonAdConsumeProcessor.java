@@ -3,6 +3,7 @@ package com.spider.amazon.webmagic.amz;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.common.exception.ServiceException;
+import com.spider.amazon.config.SpiderConfig;
 import com.spider.amazon.cons.*;
 import com.spider.amazon.dto.AmazonAdIndexDTO;
 import com.spider.amazon.model.IpPoolDO;
@@ -14,6 +15,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Site;
@@ -81,6 +83,8 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
     public final static String SAME_PRODUCT_REDIRECT_XPATH=".//*[@id='sims-consolidated-2_feature_div']//ol"; // 同类型广告产品列表
     public final static String SAME_PRODUCT_TEXT_XPATH=".//*[@id='sims-consolidated-2_feature_div']//ol"; // 同类型广告产品列表
 
+    private SpiderConfig spiderConfig;
+
     private Site site = Site
             .me()
             .setRetryTimes(3)
@@ -88,6 +92,11 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
             .setSleepTime(3000)
             .setUserAgent(
                     "User-Agent:Mozilla/5.0(Macintosh;IntelMacOSX10_7_0)AppleWebKit/535.11(KHTML,likeGecko)Chrome/17.0.963.56Safari/535.11");
+
+    @Autowired
+    public AmazonAdConsumeProcessor(SpiderConfig spiderConfig) {
+        this.spiderConfig = spiderConfig;
+    }
 
     /**
      * 设置网站信息
@@ -113,7 +122,7 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
         Map<String,Object> params=new HashMap<>();
 
         // 1.建立WebDriver
-        System.setProperty("webdriver.chrome.driver", DriverPathCons.CHROME_DRIVER_PATH);
+        System.setProperty("webdriver.chrome.driver", spiderConfig.getChromeDriverPath());
         WebDriver driver = new ChromeDriver();
 
         try {
@@ -593,36 +602,6 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
             resultMap.put(strList[index],strList[index]);
         }
         return resultMap;
-    }
-
-
-
-    public static void main(String[] args) {
-        System.out.println("0.step67=>抓取程序开启。");
-        HttpClientDownloader httpClientDownloader = new HttpClientDownloader();
-
-
-
-//            调用api获取代理IP列表
-        List<IpPoolDO> proxyIPList = new ArrayList<>();
-        List<Proxy> proxies = null;
-        try {
-            proxies = buildProxyIP();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        if(!CollectionUtils.isEmpty(proxyIPList)) {
-            IpPoolDO ipPoolDO = proxyIPList.get(0);
-            httpClientDownloader.setProxyProvider(new SimpleProxyProvider(proxies));
-        }
-
-
-        Spider.create(new AmazonAdConsumeProcessor())
-                .addUrl(SpiderUrl.AMAZON_INDEX)
-                .setDownloader(httpClientDownloader)
-                .run();
-
-
     }
 
     /**

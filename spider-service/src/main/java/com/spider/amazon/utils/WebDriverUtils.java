@@ -2,6 +2,7 @@ package com.spider.amazon.utils;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.spider.amazon.entity.Cookie;
+import com.spider.amazon.remote.api.SpiderUrl;
 import com.spider.amazon.service.MailService;
 import com.spider.amazon.service.impl.MailServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -68,6 +69,36 @@ public class WebDriverUtils {
      * @param downloadPath the download file path
      * @return
      */
+    public static WebDriver getWebDriver(String driverPath, String downloadPath, boolean background){
+
+        ChromeOptions options = new ChromeOptions();
+
+        if(StringUtils.isNotEmpty(downloadPath)){
+            HashMap<String, Object> chromePrefs = new HashMap<String, Object>();
+            chromePrefs.put("profile.default_content_settings.popups", 0);
+            chromePrefs.put("download.default_directory", downloadPath);
+
+            options.setExperimentalOption("prefs", chromePrefs);
+        }
+
+        if(background){
+            // driver work at background
+            options.addArguments("--headless", "--disable-gpu", "--window-size=1920,1200","--ignore-certificate-errors", "--silent");
+        }
+
+        System.setProperty("webdriver.chrome.driver", driverPath);
+
+        WebDriver driver = new ChromeDriver(options);
+
+        return driver;
+    }
+
+    /**
+     * Get web driver
+     * @param background the web driver wont show the window
+     * @param downloadPath the download file path
+     * @return
+     */
     public static WebDriver getWebDriver(String downloadPath, boolean background){
 
         ChromeOptions options = new ChromeOptions();
@@ -103,6 +134,20 @@ public class WebDriverUtils {
                 };
         WebDriverWait wait = new WebDriverWait(driver, 30);
         wait.until(pageLoadCondition);
+    }
+
+    public static void waitAlert(WebDriver driver, int timeout){
+        try {
+//            System.out.println(timeout + "秒之后出现");
+            WebDriverWait wait = new WebDriverWait(driver, timeout);
+
+            wait.until(ExpectedConditions.alertIsPresent());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.info("[Alert wait {} seconds not present]", timeout, e);
+            throw e;
+        }
     }
 
     /**
@@ -324,7 +369,33 @@ public class WebDriverUtils {
         }catch (Exception ex){
             return false;
         }
+    }
 
+    public static void addAmazonVCCookies(WebDriver driver, List<org.openqa.selenium.Cookie> cookies) throws InterruptedException {
+        if (driver == null){
+            throw new IllegalArgumentException("Add amazon cookies driver cannot be null");
+        }
+
+        driver.navigate().to(SpiderUrl.AMAZON_VC_INDEX);
+
+        sleep(1000);
+
+        addSeleniumCookies(driver, cookies);
+    }
+
+    public static void waitElementClickable(WebDriver driver, By locator, int timeout){
+
+        if (driver == null){
+            throw new IllegalArgumentException("[Wait element clickable cannot pass null driver]");
+        }
+
+        if(locator == null){
+            throw new IllegalArgumentException("[Wait element clickable cannot have null locator]");
+        }
+
+        WebDriverWait wait = new WebDriverWait(driver, timeout);
+
+        wait.until(ExpectedConditions.elementToBeClickable(locator));
     }
 
 }

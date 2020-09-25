@@ -6,7 +6,7 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
 import com.common.exception.ServiceException;
-import com.spider.amazon.cons.DriverPathCons;
+import com.spider.amazon.config.SpiderConfig;
 import com.spider.amazon.cons.RespErrorEnum;
 import com.spider.amazon.model.HawSrapySkuInfoDO;
 import com.spider.amazon.model.HawSrapySkuPropertyInfoDO;
@@ -19,8 +19,8 @@ import org.jsoup.select.Elements;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Site;
@@ -51,6 +51,8 @@ public class HawProductInfoProcessor implements PageProcessor {
     public static final int SPECS_NUM = 9;
     private int dataCount = 0;
 
+    private SpiderConfig spiderConfig;
+
     private Site site = Site
             .me()
             .setRetryTimes(3)
@@ -58,6 +60,11 @@ public class HawProductInfoProcessor implements PageProcessor {
             .setSleepTime(3000)
             .setUserAgent(
                     "User-Agent:Mozilla/5.0(Macintosh;IntelMacOSX10_7_0)AppleWebKit/535.11(KHTML,likeGecko)Chrome/17.0.963.56Safari/535.11");
+
+    @Autowired
+    public HawProductInfoProcessor(SpiderConfig spiderConfig) {
+        this.spiderConfig = spiderConfig;
+    }
 
     /**
      * 设置网站信息
@@ -83,8 +90,8 @@ public class HawProductInfoProcessor implements PageProcessor {
         Map<String,Object> params=new HashMap<>();
 
         // 1.建立WebDriver
-        System.setProperty("webdriver.chrome.driver", DriverPathCons.CHROME_DRIVER_PATH);
-        WebDriver driver = new ChromeDriver();
+        System.setProperty("webdriver.chrome.driver", spiderConfig.getChromeDriverPath());
+        WebDriver driver = WebDriverUtils.getWebDriver(spiderConfig.getChromeDriverPath(), spiderConfig.getDownloadPath(), true);
 
         try {
 
