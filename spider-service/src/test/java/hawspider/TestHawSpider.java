@@ -23,7 +23,7 @@ class TestHawSpider {
     @Test
     void testHawSpider(){
         // 3.调用爬虫
-        Spider spider= Spider.create(new HawProductInfoProcessor());
+        Spider spider= Spider.create(new HawProductInfoProcessor(spiderConfig));
         spider.addPipeline(new HawProductInfoPipeline());
         Request request = new Request(spiderConfig.getSpiderHawIndex());
         request.putExtra(HawProductInfoProcessor.PRODUCT_ID_LIST,"HGC736472|HGC701265");

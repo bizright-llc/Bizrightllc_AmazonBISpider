@@ -20,10 +20,7 @@ import com.spider.amazon.webmagic.amz.AmazonAdConsumeProcessor;
 import com.spider.amazon.webmagic.amzvc.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 import org.springframework.stereotype.Component;
 import us.codecraft.webmagic.Spider;
 import us.codecraft.webmagic.downloader.HttpClientDownloader;
@@ -364,7 +361,7 @@ public class ScheduleTask {
         }
         httpClientDownloader.setProxyProvider(new SimpleProxyProvider(proxies));
 
-        Spider.create(new AmazonAdConsumeProcessor())
+        Spider.create(new AmazonAdConsumeProcessor(spiderConfig))
                 .addUrl(SpiderUrl.AMAZON_INDEX)
                 .setDownloader(httpClientDownloader)
                 .run();

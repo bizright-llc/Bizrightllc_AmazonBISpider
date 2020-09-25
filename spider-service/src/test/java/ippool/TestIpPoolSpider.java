@@ -25,7 +25,7 @@ class TestIpPoolSpider {
     void testHawSpider(){
 
         // 3.调用爬虫
-        Spider spider= Spider.create(new IpPoolProcessor());
+        Spider spider= Spider.create(new IpPoolProcessor(spiderConfig));
         PriorityScheduler scheduler = new PriorityScheduler();
         for (int index=1;index<=100;index++) {
             scheduler.push(new Request("http://www.89ip.cn/index_"+index+".html"),spider);

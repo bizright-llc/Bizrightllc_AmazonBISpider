@@ -6,14 +6,12 @@ import cn.hutool.core.util.StrUtil;
 import com.common.exception.ServiceException;
 import com.spider.amazon.config.SpiderConfig;
 import com.spider.amazon.cons.DateFormat;
-import com.spider.amazon.cons.DriverPathCons;
 import com.spider.amazon.cons.RespErrorEnum;
 import com.spider.amazon.entity.Cookie;
 import com.spider.amazon.remote.api.SpiderUrl;
 import com.spider.amazon.utils.JsonToListUtil;
 import com.spider.amazon.utils.WebDriverUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.SystemUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -96,12 +94,12 @@ public class AmazonScFbaInventory implements PageProcessor {
 
 
         // 1.建立WebDriver
-        System.setProperty("webdriver.chrome.driver", DriverPathCons.CHROME_DRIVER_PATH);
+        System.setProperty("webdriver.chrome.driver", spiderConfig.getChromeDriverPath());
         WebDriver driver = null;
 
         String filePath = spiderConfig.getDownloadPath();
 
-        driver = WebDriverUtils.getWebDriver(filePath);
+        driver = WebDriverUtils.getWebDriver(spiderConfig.getChromeDriverPath(), filePath, true);
 
         String filename = "";
 

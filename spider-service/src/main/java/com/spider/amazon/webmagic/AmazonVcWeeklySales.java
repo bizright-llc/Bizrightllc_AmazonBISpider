@@ -1,7 +1,7 @@
 package com.spider.amazon.webmagic;
 
 import com.common.exception.ServiceException;
-import com.spider.amazon.cons.DriverPathCons;
+import com.spider.amazon.config.SpiderConfig;
 import com.spider.amazon.cons.RespErrorEnum;
 import com.spider.amazon.entity.Cookie;
 import com.spider.amazon.utils.CookiesUtils;
@@ -12,15 +12,12 @@ import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Site;
-import us.codecraft.webmagic.Spider;
 import us.codecraft.webmagic.processor.PageProcessor;
 
 import java.util.List;
@@ -37,8 +34,10 @@ import static java.lang.Thread.sleep;
 @Slf4j
 public class AmazonVcWeeklySales implements PageProcessor {
 
-    @Autowired
-    private CookiesUtils cookiesUtils;
+//    @Autowired
+//    private CookiesUtils cookiesUtils;
+
+    private SpiderConfig spiderConfig;
 
     @Value("${amazon.vc.freelogin.cookies.name}")
     private String cookiesConfigName;
@@ -51,6 +50,10 @@ public class AmazonVcWeeklySales implements PageProcessor {
             .setUserAgent(
                     "User-Agent:Mozilla/5.0(Macintosh;IntelMacOSX10_7_0)AppleWebKit/535.11(KHTML,likeGecko)Chrome/17.0.963.56Safari/535.11");
 
+    public AmazonVcWeeklySales(SpiderConfig spiderConfig) {
+        this.spiderConfig = spiderConfig;
+    }
+
     /**
      * 设置网站信息
      *
@@ -58,7 +61,7 @@ public class AmazonVcWeeklySales implements PageProcessor {
      */
     public Site getSite() {
 //        Set<Cookie> cookies = cookiesUtils.keyValueCookies2CookiesSet(cookiesConfigName, ";", "=");
-        Set<Cookie> cookies = cookiesUtils.keyValueCookies2CookiesSet("amazon.vc.freelogin.cookies", ";", "=");
+        Set<Cookie> cookies = CookiesUtils.keyValueCookies2CookiesSet("amazon.vc.freelogin.cookies", ";", "=");
 
         for (Cookie cookie : cookies) {
             site.addCookie(cookie.getName().toString(), cookie.getValue().toString());
@@ -78,8 +81,8 @@ public class AmazonVcWeeklySales implements PageProcessor {
 
 
         // 1.建立WebDriver
-        System.setProperty("webdriver.chrome.driver", DriverPathCons.CHROME_DRIVER_PATH);
-        WebDriver driver = new ChromeDriver();
+        System.setProperty("webdriver.chrome.driver", spiderConfig.getChromeDriverPath());
+        WebDriver driver = WebDriverUtils.getWebDriver(spiderConfig.getChromeDriverPath(), spiderConfig.getDownloadPath(), true);
 
         try {
 
@@ -192,16 +195,16 @@ public class AmazonVcWeeklySales implements PageProcessor {
     }
 
 
-    public static void main(String[] args) {
-        System.out.println("0.step67=>抓取程序开启。");
-
-        Spider.create(new AmazonVcWeeklySales())
-                .addUrl("https://vendorcentral.amazon.com/analytics/dashboard/salesDiagnostic")
-                .run();
-
-        System.out.println("end.step93=>抓取程序结束。");
-
-    }
+//    public static void main(String[] args) {
+//        System.out.println("0.step67=>抓取程序开启。");
+//
+//        Spider.create(new AmazonVcWeeklySales(spiderConfig))
+//                .addUrl("https://vendorcentral.amazon.com/analytics/dashboard/salesDiagnostic")
+//                .run();
+//
+//        System.out.println("end.step93=>抓取程序结束。");
+//
+//    }
 
 
 }

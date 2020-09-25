@@ -3,11 +3,9 @@ package com.spider.amazon.webmagic.amzvc;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.common.exception.ServiceException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.spider.amazon.config.SpiderConfig;
 import com.spider.amazon.cons.DateFormat;
-import com.spider.amazon.cons.DriverPathCons;
 import com.spider.amazon.cons.RespErrorEnum;
 import com.spider.amazon.entity.Cookie;
 import com.spider.amazon.model.Consts;
@@ -17,7 +15,6 @@ import com.spider.amazon.remote.api.SpiderUrl;
 import com.spider.amazon.service.CommonSettingService;
 import com.spider.amazon.utils.ConvertUtils;
 import com.spider.amazon.utils.CookiesUtils;
-import com.spider.amazon.utils.JsonToListUtil;
 import com.spider.amazon.utils.WebDriverUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -31,16 +28,13 @@ import org.springframework.stereotype.Component;
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Request;
 import us.codecraft.webmagic.Site;
-import us.codecraft.webmagic.Spider;
 import us.codecraft.webmagic.processor.PageProcessor;
 
-import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import static cn.hutool.core.thread.ThreadUtil.sleep;
 
@@ -246,8 +240,8 @@ public class AmazonVcPromotionsProcessor implements PageProcessor {
         log.info("［processDetail］=> [{}]", page.getUrl());
 
         // 1.建立WebDriver
-        System.setProperty("webdriver.chrome.driver", DriverPathCons.CHROME_DRIVER_PATH);
-        WebDriver driver = WebDriverUtils.getBackgroudWebDriver();
+        System.setProperty("webdriver.chrome.driver", spiderConfig.getChromeDriverPath());
+        WebDriver driver = WebDriverUtils.getWebDriver(spiderConfig.getChromeDriverPath(), spiderConfig.getDownloadPath(), true);
 
         try {
 
