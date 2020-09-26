@@ -196,6 +196,7 @@
     </dependencies>
 
     <build>
+        <finalName>spider-service</finalName>
         <plugins>
             <plugin>
                 <configuration>
