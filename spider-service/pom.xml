@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.spider</groupId>
     <artifactId>spider-service</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1</version>
     <name>spider-service</name>
     <description>Demo project for Spring Boot</description>
 
@@ -198,6 +198,9 @@
     <build>
         <plugins>
             <plugin>
+                <configuration>
+                    <executable>true</executable>
+                </configuration>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
