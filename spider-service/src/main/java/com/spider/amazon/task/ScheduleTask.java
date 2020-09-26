@@ -83,7 +83,6 @@ public class ScheduleTask {
      * Fba库存日报处理属性
      */
     private final static String fbaInventoryFileName = "Fba_Inventory";
-    private static final String filePath = "C:\\Users\\paulin.f\\Downloads\\";
     private static final int offerSetDay = 0;
     private static final int invoiceOfferSetDay=0;
     private static final int poHeaderOfferSetDay=0;
@@ -284,7 +283,7 @@ public class ScheduleTask {
     /**
      * 定时处理Amazon VC 销量报表
      */
-//    @Scheduled(fixedDelay = 60000)
+    @Scheduled(fixedDelay = 60000)
     public void schedulerVcSalesDataDeal() {
         log.info("0.step112=>开始执行［schedulerVcSalesDataDeal］");
 
@@ -301,7 +300,7 @@ public class ScheduleTask {
      * schedulerVcDailyInventoryDataDeal
      * 定时处理Amazon VC 每日库存报表
      */
-//    @Scheduled(fixedDelay = 60000)
+    @Scheduled(fixedDelay = 60000)
     public void schedulerVcDailyInventoryDataDeal() {
         log.info("0.step112=>开始执行［schedulerVcDailyInventoryDataDeal］");
 
@@ -341,7 +340,7 @@ public class ScheduleTask {
     @Scheduled(cron = "0 20 7-12 * * ? ")
     public void schedulerScFbaInventoryDeal() {
         log.info("0.step233=>开始执行［schedulerScFbaInventoryDeal］");
-        fbaInventoryReportDealService.dealFbaInventoryReport(StrUtil.concat(true,fbaInventoryFileName,"-",DateUtil.format(DateUtil.offsetDay(DateUtil.date(),offerSetDay), DateFormat.YEAR_MONTH_DAY),".csv"),filePath,offerSetDay);
+        fbaInventoryReportDealService.dealFbaInventoryReport(StrUtil.concat(true,fbaInventoryFileName,"-",DateUtil.format(DateUtil.offsetDay(DateUtil.date(),offerSetDay), DateFormat.YEAR_MONTH_DAY),".csv"),spiderConfig.getDownloadPath(),offerSetDay);
     }
 
     /**
