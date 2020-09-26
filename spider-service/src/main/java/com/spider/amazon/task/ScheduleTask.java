@@ -284,7 +284,7 @@ public class ScheduleTask {
     /**
      * 定时处理Amazon VC 销量报表
      */
-//    @Scheduled(fixedDelay = 60000)
+    @Scheduled(fixedDelay = 60000)
     public void schedulerVcSalesDataDeal() {
         log.info("0.step112=>开始执行［schedulerVcSalesDataDeal］");
 
@@ -301,7 +301,7 @@ public class ScheduleTask {
      * schedulerVcDailyInventoryDataDeal
      * 定时处理Amazon VC 每日库存报表
      */
-//    @Scheduled(fixedDelay = 60000)
+    @Scheduled(fixedDelay = 60000)
     public void schedulerVcDailyInventoryDataDeal() {
         log.info("0.step112=>开始执行［schedulerVcDailyInventoryDataDeal］");
 
