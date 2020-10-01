@@ -40,6 +40,9 @@ public class SpiderConfig {
     @Value("${spider.download.buybox.path}")
     private String scBuyBoxDownloadPath;
 
+    @Value("${spider.download.fbainventory.path}")
+    private String scFBAInventoryDownloadPath;
+
     @Value("${spider.amazon.vc.cookie}")
     private String amzVcCookieFilepath;
 

@@ -1,4 +1,4 @@
-package com.spider.amazon.batch.vcdailysales;
+package com.spider.amazon.batch.vc.dailysales;
 
 import com.spider.amazon.entity.AmzVcDailySales;
 import lombok.extern.slf4j.Slf4j;

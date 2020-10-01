@@ -2,25 +2,27 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.spider.amazon.mapper.FBAInventoryInfoDOMapper">
   <resultMap id="BaseResultMap" type="com.spider.amazon.model.FBAInventoryInfoDO">
-    <result column="Merchant_SKU" jdbcType="VARCHAR" property="merchantSku" />
-    <result column="Fulfillment_Network_SKU" jdbcType="VARCHAR" property="fulfillmentNetworkSku" />
+    <result column="Id" jdbcType="BIGINTEGER" property="id"/>
+    <result column="MerchantSKU" jdbcType="VARCHAR" property="merchantSku" />
+    <result column="FulfillmentNetworkSKU" jdbcType="VARCHAR" property="fulfillmentNetworkSku" />
     <result column="ASIN" jdbcType="VARCHAR" property="asin" />
     <result column="Title" jdbcType="VARCHAR" property="title" />
     <result column="Condition" jdbcType="VARCHAR" property="condition" />
     <result column="Price" jdbcType="VARCHAR" property="price" />
-    <result column="MFN_Listing_Exists" jdbcType="VARCHAR" property="mfnListingExists" />
-    <result column="MFN_Fulfillable_Qty" jdbcType="VARCHAR" property="mfnFulfillableQty" />
-    <result column="AFN_Listing_Exists" jdbcType="VARCHAR" property="afnListingExists" />
-    <result column="AFN_Warehouse_Qty" jdbcType="VARCHAR" property="afnWarehouseQty" />
-    <result column="AFN_Fulfillable_Qty" jdbcType="VARCHAR" property="afnFulfillableQty" />
-    <result column="AFN_Unsellable_Qty" jdbcType="VARCHAR" property="afnUnsellableQty" />
-    <result column="AFN_Encumbered_Qty" jdbcType="VARCHAR" property="afnEncumberedQty" />
-    <result column="AFN_Total_Qty" jdbcType="VARCHAR" property="afnTotalQty" />
+    <result column="MFNListingExists" jdbcType="VARCHAR" property="mfnListingExists" />
+    <result column="MFNFulfillableQty" jdbcType="VARCHAR" property="mfnFulfillableQty" />
+    <result column="AFNListingExists" jdbcType="VARCHAR" property="afnListingExists" />
+    <result column="AFNWarehouseQty" jdbcType="VARCHAR" property="afnWarehouseQty" />
+    <result column="AFNFulfillableQty" jdbcType="VARCHAR" property="afnFulfillableQty" />
+    <result column="AFNUnsellable_Qty" jdbcType="VARCHAR" property="afnUnsellableQty" />
+    <result column="AFNEncumbered_Qty" jdbcType="VARCHAR" property="afnEncumberedQty" />
+    <result column="AFNTotalQty" jdbcType="VARCHAR" property="afnTotalQty" />
     <result column="Volume" jdbcType="VARCHAR" property="volume" />
-    <result column="AFN_Inbound_Working_Qty" jdbcType="VARCHAR" property="afnInboundWorkingQty" />
-    <result column="AFN_Inbound_Shipped_Qty" jdbcType="VARCHAR" property="afnInboundShippedQty" />
-    <result column="AFN_Inbound_Receiving_Qty" jdbcType="VARCHAR" property="afnInboundReceivingQty" />
-    <result column="insertTime" jdbcType="DATE" property="inserttime" />
+    <result column="AFNInboundWorkingQty" jdbcType="VARCHAR" property="afnInboundWorkingQty" />
+    <result column="AFNInboundShippedQty" jdbcType="VARCHAR" property="afnInboundShippedQty" />
+    <result column="AFNInboundReceivingQty" jdbcType="VARCHAR" property="afnInboundReceivingQty" />
+    <result column="InventoryDate" jdbcType="TIMESTAMP" property="inventoryDate" />
+    <result column="InsertedAt" jdbcType="DATE" property="insertedAt" />
   </resultMap>
   <sql id="Example_Where_Clause">
     <where>
@@ -51,27 +53,30 @@
       </foreach>
     </where>
   </sql>
-  <sql id="Base_Column_List">
-    Merchant_SKU, Fulfillment_Network_SKU, ASIN, Title, Condition, Price, MFN_Listing_Exists, 
-    MFN_Fulfillable_Qty, AFN_Listing_Exists, AFN_Warehouse_Qty, AFN_Fulfillable_Qty, 
-    AFN_Unsellable_Qty, AFN_Encumbered_Qty, AFN_Total_Qty, Volume, AFN_Inbound_Working_Qty, 
-    AFN_Inbound_Shipped_Qty, AFN_Inbound_Receiving_Qty, insertTime
+  <sql id="Base_Insert_Column_List">
+    MerchantSKU, FulfillmentNetworkSKU,
+      ASIN, Title, Condition,
+      Price, MFNListingExists, MFNFulfillableQty,
+      AFNListingExists, AFNWarehouseQty, AFNFulfillableQty,
+      AFNUnsellableQty, AFNEncumberedQty, AFNTotalQty,
+      Volume, AFNInboundWorkingQty, AFNInboundShippedQty,
+      AFNInboundReceivingQty, InventoryDate, InsertedAt
   </sql>
   <insert id="insert" parameterType="com.spider.amazon.model.FBAInventoryInfoDO">
-    insert into FBAInventoryInfo (Merchant_SKU, Fulfillment_Network_SKU, 
+    insert into FBAInventoryInfo (MerchantSKU, FulfillmentNetworkSKU,
       ASIN, Title, Condition, 
-      Price, MFN_Listing_Exists, MFN_Fulfillable_Qty, 
-      AFN_Listing_Exists, AFN_Warehouse_Qty, AFN_Fulfillable_Qty, 
-      AFN_Unsellable_Qty, AFN_Encumbered_Qty, AFN_Total_Qty, 
-      Volume, AFN_Inbound_Working_Qty, AFN_Inbound_Shipped_Qty, 
-      AFN_Inbound_Receiving_Qty, insertTime)
+      Price, MFNListingExists, MFNFulfillableQty,
+      AFNListingExists, AFNWarehouseQty, AFNFulfillableQty,
+      AFNUnsellableQty, AFNEncumberedQty, AFNTotalQty,
+      Volume, AFNInboundWorkingQty, AFNInboundShippedQty,
+      AFNInboundReceivingQty, InventoryDate, InsertedAt)
     values (#{merchantSku,jdbcType=VARCHAR}, #{fulfillmentNetworkSku,jdbcType=VARCHAR}, 
       #{asin,jdbcType=VARCHAR}, #{title,jdbcType=VARCHAR}, #{condition,jdbcType=VARCHAR}, 
       #{price,jdbcType=VARCHAR}, #{mfnListingExists,jdbcType=VARCHAR}, #{mfnFulfillableQty,jdbcType=VARCHAR}, 
       #{afnListingExists,jdbcType=VARCHAR}, #{afnWarehouseQty,jdbcType=VARCHAR}, #{afnFulfillableQty,jdbcType=VARCHAR}, 
       #{afnUnsellableQty,jdbcType=VARCHAR}, #{afnEncumberedQty,jdbcType=VARCHAR}, #{afnTotalQty,jdbcType=VARCHAR}, 
       #{volume,jdbcType=VARCHAR}, #{afnInboundWorkingQty,jdbcType=VARCHAR}, #{afnInboundShippedQty,jdbcType=VARCHAR}, 
-      #{afnInboundReceivingQty,jdbcType=VARCHAR}, #{inserttime,jdbcType=DATE})
+      #{afnInboundReceivingQty,jdbcType=VARCHAR}, #{inventoryDate}, getdate())
   </insert>
   <insert id="insertSelective" parameterType="com.spider.amazon.model.FBAInventoryInfoDO">
     insert into FBAInventoryInfo
@@ -195,11 +200,13 @@
     </trim>
   </insert>
   <select id="selectCountByDate" parameterType="Date" resultType="int">
-    select count(*) totnum from FBAInventoryInfo with(nolock) where insertTime=#{date}
+    select count(*) totnum
+    from FBAInventoryInfo with(nolock)
+    where InsertedAt=#{date}
   </select>
   <!-- 批量插入 -->
   <insert id="insertBatch" parameterType="java.util.List">
-    insert into FBAInventoryInfo (<include refid="Base_Column_List" />)
+    insert into FBAInventoryInfo (<include refid="Base_Insert_Column_List" />)
     values
     <foreach collection="list" item="item" index="index"  separator=",">
       (#{item.merchantSku,jdbcType=VARCHAR}, #{item.fulfillmentNetworkSku,jdbcType=VARCHAR},
@@ -208,7 +215,7 @@
       #{item.afnListingExists,jdbcType=VARCHAR}, #{item.afnWarehouseQty,jdbcType=VARCHAR}, #{item.afnFulfillableQty,jdbcType=VARCHAR},
       #{item.afnUnsellableQty,jdbcType=VARCHAR}, #{item.afnEncumberedQty,jdbcType=VARCHAR}, #{item.afnTotalQty,jdbcType=VARCHAR},
       #{item.volume,jdbcType=VARCHAR}, #{item.afnInboundWorkingQty,jdbcType=VARCHAR}, #{item.afnInboundShippedQty,jdbcType=VARCHAR},
-      #{item.afnInboundReceivingQty,jdbcType=VARCHAR}, #{item.inserttime,jdbcType=DATE})
+      #{item.afnInboundReceivingQty,jdbcType=VARCHAR}, #{item.inventoryDate}, getdate())
     </foreach>
   </insert>
 </mapper>

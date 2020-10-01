@@ -1,4 +1,4 @@
-package com.spider.amazon.batch.scbuyboxinfo;
+package com.spider.amazon.batch.vc.dailysales;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.JobExecution;
@@ -9,7 +9,7 @@ import org.springframework.batch.core.JobExecutionListener;
  * 监听Job执行情况，则定义一个类实现JobExecutorListener，并定义Job的Bean上绑定该监听器
  */
 @Slf4j
-public class CsvJobListenerForAmzScBuyBox implements JobExecutionListener {
+public class CsvJobListenerForAmzDailySales implements JobExecutionListener {
 
     private long startTime;
     private long endTime;

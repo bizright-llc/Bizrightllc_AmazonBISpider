@@ -3,11 +3,9 @@ package com.spider.amazon.task;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.StrUtil;
 import com.common.exception.ServiceException;
-import com.spider.amazon.batch.scbuyboxinfo.CsvBatchConfigForAmzScBuyBox;
+import com.spider.amazon.batch.sc.buyboxinfo.CsvBatchConfigForAmzScBuyBox;
 import com.spider.amazon.config.SpiderConfig;
-import com.spider.amazon.cons.DateFormat;
 import com.spider.amazon.cons.PageQryType;
 import com.spider.amazon.cons.RespErrorEnum;
 import com.spider.amazon.cons.SqlResult;
@@ -21,6 +19,7 @@ import com.spider.amazon.webmagic.amzsc.AmazonScBuyBox;
 import com.spider.amazon.webmagic.amzsc.AmazonScFbaInventory;
 import com.spider.amazon.webmagic.amzvc.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -68,7 +67,7 @@ public class ScheduleTask {
     private ISkuInfoService skuInfoService;
 
     @Autowired
-    private IFbaInventoryReportDealService fbaInventoryReportDealService;
+    private FbaInventoryReportDealService fbaInventoryReportDealService;
 
     @Autowired
     private IInvoiceService invoiceService;
@@ -117,7 +116,7 @@ public class ScheduleTask {
     @Scheduled(cron = "0 40 1 * * ?")
     public void schedulerScFbaInventory() {
         log.info("0.step56=>开始执行［schedulerScFbaInventory］");
-        Spider spider = Spider.create(new AmazonScFbaInventory(spiderConfig));
+        Spider spider = Spider.create(new AmazonScFbaInventory(spiderConfig, commonSettingService));
         spider.addUrl(spiderConfig.getSpiderIndex());
         spider.setExitWhenComplete(true);
         spider.run();
@@ -321,8 +320,11 @@ public class ScheduleTask {
 
     /**
      * 定时处理Amazon SC BuyBox报表
+     *
+     * deal every minute
+     *
      */
-    @Scheduled(cron = "0 10 7-12 * * ? ")
+    @Scheduled(fixedDelay = 60000)
     public void schedulerScBuyBoxDeal() {
         log.info("[schedulerScBuyBoxDeal] start schedule ");
 
@@ -351,11 +353,22 @@ public class ScheduleTask {
 
     /**
      * 定时处理FBA INV信息入库
+     * Deal Fba Inventory file
+     *
      */
-    @Scheduled(cron = "0 20 7-12 * * ? ")
+    @Scheduled(fixedDelay = 60000)
     public void schedulerScFbaInventoryDeal() {
-        log.info("0.step233=>开始执行［schedulerScFbaInventoryDeal］");
-        fbaInventoryReportDealService.dealFbaInventoryReport(StrUtil.concat(true,fbaInventoryFileName,"-",DateUtil.format(DateUtil.offsetDay(DateUtil.date(),offerSetDay), DateFormat.YEAR_MONTH_DAY),".csv"),spiderConfig.getDownloadPath(),offerSetDay);
+        log.info("[schedulerScFbaInventoryDeal] start process");
+
+        String filenameExist = checkSCFBAInventoryFileExist();
+
+        if(StringUtils.isNotEmpty(filenameExist)){
+
+            fbaInventoryReportDealService.dealFbaInventoryReport(filenameExist, spiderConfig.getScFBAInventoryDownloadPath(),offerSetDay);
+
+        }else{
+            log.info("[schedulerScFbaInventoryDeal] no file found to process");
+        }
     }
 
     /**
@@ -486,6 +499,49 @@ public class ScheduleTask {
             return true;
         } else {
             return false;
+        }
+    }
+
+    /**
+     * Check if there are any file not process
+     * return first find file name if exist
+     * ruturn empty string if no file exist
+     * @return
+     */
+    private String checkSCFBAInventoryFileExist(){
+
+        class MyFileFilter implements FileFilter {
+
+            public boolean accept(File f) {
+
+                final String regex = String.format("%s-\\d{8}.csv", AmazonScFbaInventory.FILE_RENAME);
+
+                final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
+
+                String fileName = f.getName();
+
+                Matcher matcher = pattern.matcher(fileName);
+
+                if (f.getName().contains(AMAZON_SC_BUY_BOX_FILE_NAME) && !f.getName().contains(CsvBatchConfigForAmzScBuyBox.COMPLETE_MARK) && matcher.find()) {
+                    if(FileUtils.getFileExtension(f.getName()).equalsIgnoreCase("csv")){
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }
+
+        MyFileFilter filter = new MyFileFilter();
+
+        File[] files = FileUtils.getFileFromDir(spiderConfig.getVcDailySalesDownloadPath(), filter);
+
+        File file = files != null && files.length > 0 ? files[0] : null;
+
+        // File exist
+        if (file != null && FileUtil.exist(file.getPath())) {
+            return file.getName();
+        } else {
+            return "";
         }
     }
 

@@ -1,4 +1,4 @@
-package com.spider.amazon.batch.scbuyboxinfo;
+package com.spider.amazon.batch.sc.buyboxinfo;
 
 import cn.hutool.core.date.DateUtil;
 import com.spider.amazon.cons.DateFormat;

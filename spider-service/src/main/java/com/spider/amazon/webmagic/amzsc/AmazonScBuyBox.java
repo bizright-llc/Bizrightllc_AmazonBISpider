@@ -4,7 +4,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.common.exception.ServiceException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.spider.amazon.batch.scbuyboxinfo.CsvBatchConfigForAmzScBuyBox;
+import com.spider.amazon.batch.sc.buyboxinfo.CsvBatchConfigForAmzScBuyBox;
 import com.spider.amazon.config.SpiderConfig;
 import com.spider.amazon.cons.DateFormat;
 import com.spider.amazon.cons.RespErrorEnum;
@@ -144,14 +144,14 @@ public class AmazonScBuyBox implements PageProcessor {
             // 4.重定向跳转
             // download the day before yesterday data
 //             构造查询日期数据，获取上一个自然周的数据
-            String dayBeforeYesterdayStr = parseDate.format(DateTimeFormatter.ofPattern(DateFormat.YEAR_MONTH_DAY_MMddyyyy));
+            String parseDateStr = parseDate.format(DateTimeFormatter.ofPattern(DateFormat.YEAR_MONTH_DAY_MMddyyyy));
 
-            String filterFromDate = dayBeforeYesterdayStr;
-            String filterToDate = dayBeforeYesterdayStr;
+            String filterFromDate = parseDateStr;
+            String filterToDate = parseDateStr;
             final String redirectUrl = SpiderUrl.SPIDER_SC_BUYBOX.replace("{filterFromDate}", filterFromDate)
                     .replace("{filterToDate}", filterToDate)
-                    .replace("{fromDate}", dayBeforeYesterdayStr)
-                    .replace("{toDate}", dayBeforeYesterdayStr);
+                    .replace("{fromDate}", parseDateStr)
+                    .replace("{toDate}", parseDateStr);
             driver.navigate().to(redirectUrl);
 
             sleep(10000);
@@ -184,7 +184,7 @@ public class AmazonScBuyBox implements PageProcessor {
             File downloadFile = FileUtils.getLatestFileWithNameFromDir(downloadDir, CsvBatchConfigForAmzScBuyBox.FILE_NAME);
             Path oldFilePath = Paths.get(downloadFile.getPath());
 
-            String fileDateStr = DateUtil.format(DateUtil.parse(dayBeforeYesterdayStr, DateFormat.YEAR_MONTH_DAY_MMddyyyy), DateFormat.YEAR_MONTH_DAY);
+            String fileDateStr = DateUtil.format(DateUtil.parse(parseDateStr, DateFormat.YEAR_MONTH_DAY_MMddyyyy), DateFormat.YEAR_MONTH_DAY);
 
             String newFileName = StrUtil.concat(true, CsvBatchConfigForAmzScBuyBox.FILE_NAME, "-", fileDateStr);
 

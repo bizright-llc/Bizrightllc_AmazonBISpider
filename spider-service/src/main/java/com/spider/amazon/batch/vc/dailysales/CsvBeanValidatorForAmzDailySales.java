@@ -1,4 +1,4 @@
-package com.spider.amazon.batch.vcdailysales;
+package com.spider.amazon.batch.vc.dailysales;
 
 import org.springframework.batch.item.validator.Validator;
 import org.springframework.beans.factory.InitializingBean;

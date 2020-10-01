@@ -4,7 +4,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.spider.SpiderServiceApplication;
 import com.spider.amazon.cons.DateFormat;
-import com.spider.amazon.service.IFbaInventoryReportDealService;
+import com.spider.amazon.service.FbaInventoryReportDealService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 class TestScFBAInventory {
 
     @Autowired
-    private IFbaInventoryReportDealService  fbaInventoryReportDealService;
+    private FbaInventoryReportDealService fbaInventoryReportDealService;
 
     /**
      * Fba库存日报处理属性
