@@ -4,10 +4,11 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.common.exception.ServiceException;
+import com.spider.amazon.cons.DateFormat;
 import com.spider.amazon.cons.RespErrorEnum;
 import com.spider.amazon.mapper.FBAInventoryInfoDOMapper;
 import com.spider.amazon.model.FBAInventoryInfoDO;
-import com.spider.amazon.service.IFbaInventoryReportDealService;
+import com.spider.amazon.service.FbaInventoryReportDealService;
 import com.spider.amazon.utils.CSVUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.session.ExecutorType;
@@ -16,6 +17,9 @@ import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -26,8 +30,7 @@ import java.util.List;
  */
 @Service
 @Slf4j
-public class FbaInventoryReportDealServiceImpl implements IFbaInventoryReportDealService {
-
+public class FbaInventoryReportDealServiceImpl implements FbaInventoryReportDealService {
 
     @Autowired
     private FBAInventoryInfoDOMapper fbaInventoryInfoDOMapper;
@@ -66,6 +69,41 @@ public class FbaInventoryReportDealServiceImpl implements IFbaInventoryReportDea
         List<List<String>> csvRowList = CSVUtils.readCSVAdv(filePath+fileName, startrow, endrow, colnum);
         dealResult(transResVo2ResDo(csvRowList,date));
 
+    }
+
+    /**
+     * Process file data to DB
+     * @param fileName
+     * @param filePath
+     */
+    @Override
+    public void dealFbaInventoryReport(String fileName, String filePath)  {
+
+        // 0.检查文件是否存在
+        if (!FileUtil.exist(filePath+fileName)) {
+            log.error("[dealFbaInventoryReport] file not exist dir: {}, name: {}", filePath, fileName);
+            throw new ServiceException(RespErrorEnum.FILE_NOT_EXIT.getSubStatusCode(), RespErrorEnum.FILE_NOT_EXIT.getSubStatusMsg());
+        }
+
+//         1.检查当日入库文件是否存在,存在则直接返回，否则进行入库
+//        Date date=DateUtil.offsetDay(DateUtil.date(),offerSetDay);
+//        int totNum=fbaInventoryInfoDOMapper.selectCountByDate(date);
+//        if (totNum!=0) {
+//            if (log.isInfoEnabled()) {
+//                log.info("step42=>已经存在当日文件");
+//            }
+//            return;
+//        }
+
+        String inventoryDateStr = fileName.substring(fileName.indexOf("-")+1, fileName.indexOf("."));
+
+        Date inventoryDate = DateUtil.parse(inventoryDateStr, DateFormat.YEAR_MONTH_DAY_yyyyMMdd);
+
+        LocalDate inventoryLocalDate = inventoryDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+
+        // 2.入库处理
+        List<List<String>> csvRowList = CSVUtils.readCSVAdv(filePath+fileName, startrow, endrow, colnum);
+        dealResult(transResVo2ResDo(csvRowList,inventoryLocalDate));
 
     }
 
@@ -147,6 +185,8 @@ public class FbaInventoryReportDealServiceImpl implements IFbaInventoryReportDea
     public List<FBAInventoryInfoDO> transResVo2ResDo(List<List<String>> csvRowList,Date date) {
         List<FBAInventoryInfoDO> reulstList = new ArrayList<>();
 
+        LocalDateTime insertedAt = LocalDateTime.now();
+
         for(int index=0; index<csvRowList.size();++index) {
             List<String> resultData=csvRowList.get(index);
             log.info("resultData:"+resultData.toString());
@@ -168,7 +208,78 @@ public class FbaInventoryReportDealServiceImpl implements IFbaInventoryReportDea
                     .afnInboundWorkingQty(resultData.get(15))
                     .afnInboundShippedQty(resultData.get(16))
                     .afnInboundReceivingQty(resultData.get(17))
-                    .inserttime(date).build());
+                    .insertedAt(insertedAt).build());
+        }
+
+        return reulstList;
+    }
+
+    /**
+     * 转换列表对象
+     * @param csvRowList
+     * @return
+     */
+    public List<FBAInventoryInfoDO> transResVo2ResDo(List<List<String>> csvRowList) {
+        List<FBAInventoryInfoDO> reulstList = new ArrayList<>();
+
+        LocalDateTime insertedAt = LocalDateTime.now();
+
+        for(int index=0; index<csvRowList.size();++index) {
+            List<String> resultData=csvRowList.get(index);
+            log.info("resultData:"+resultData.toString());
+            reulstList.add(FBAInventoryInfoDO.builder().merchantSku(resultData.get(0))
+                    .fulfillmentNetworkSku(resultData.get(1))
+                    .asin(resultData.get(2))
+                    .title(resultData.get(3))
+                    .condition(resultData.get(4))
+                    .price(resultData.get(5))
+                    .mfnListingExists(resultData.get(6))
+                    .mfnFulfillableQty(resultData.get(7))
+                    .afnListingExists(resultData.get(8))
+                    .afnWarehouseQty(resultData.get(9))
+                    .afnFulfillableQty(resultData.get(10))
+                    .afnUnsellableQty(resultData.get(11))
+                    .afnEncumberedQty(resultData.get(12))
+                    .afnTotalQty(resultData.get(13))
+                    .volume(resultData.get(14))
+                    .afnInboundWorkingQty(resultData.get(15))
+                    .afnInboundShippedQty(resultData.get(16))
+                    .afnInboundReceivingQty(resultData.get(17))
+                    .insertedAt(insertedAt).build());
+        }
+
+        return reulstList;
+    }
+
+
+    public List<FBAInventoryInfoDO> transResVo2ResDo(List<List<String>> csvRowList, LocalDate inventoryDate) {
+        List<FBAInventoryInfoDO> reulstList = new ArrayList<>();
+
+        LocalDateTime insertedAt = LocalDateTime.now();
+
+        for(int index=0; index<csvRowList.size();++index) {
+            List<String> resultData=csvRowList.get(index);
+            log.info("resultData:"+resultData.toString());
+            reulstList.add(FBAInventoryInfoDO.builder().merchantSku(resultData.get(0))
+                    .fulfillmentNetworkSku(resultData.get(1))
+                    .asin(resultData.get(2))
+                    .title(resultData.get(3))
+                    .condition(resultData.get(4))
+                    .price(resultData.get(5))
+                    .mfnListingExists(resultData.get(6))
+                    .mfnFulfillableQty(resultData.get(7))
+                    .afnListingExists(resultData.get(8))
+                    .afnWarehouseQty(resultData.get(9))
+                    .afnFulfillableQty(resultData.get(10))
+                    .afnUnsellableQty(resultData.get(11))
+                    .afnEncumberedQty(resultData.get(12))
+                    .afnTotalQty(resultData.get(13))
+                    .volume(resultData.get(14))
+                    .afnInboundWorkingQty(resultData.get(15))
+                    .afnInboundShippedQty(resultData.get(16))
+                    .afnInboundReceivingQty(resultData.get(17))
+                    .inventoryDate(inventoryDate)
+                    .insertedAt(insertedAt).build());
         }
 
         return reulstList;

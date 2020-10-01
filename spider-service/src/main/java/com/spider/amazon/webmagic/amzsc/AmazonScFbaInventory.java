@@ -4,12 +4,16 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import com.common.exception.ServiceException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.spider.amazon.config.SpiderConfig;
 import com.spider.amazon.cons.DateFormat;
 import com.spider.amazon.cons.RespErrorEnum;
 import com.spider.amazon.entity.Cookie;
+import com.spider.amazon.model.Consts;
 import com.spider.amazon.remote.api.SpiderUrl;
-import com.spider.amazon.utils.JsonToListUtil;
+import com.spider.amazon.service.CommonSettingService;
+import com.spider.amazon.utils.CookiesUtils;
+import com.spider.amazon.utils.FileUtils;
 import com.spider.amazon.utils.WebDriverUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
@@ -21,10 +25,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Site;
-import us.codecraft.webmagic.Spider;
 import us.codecraft.webmagic.processor.PageProcessor;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -48,13 +56,16 @@ public class AmazonScFbaInventory implements PageProcessor {
 //    private static final String filePath = "/Users/shaochinlin/Downloads/bizright-spider/";
 //    private static final String filePath = "/Users/shaochinlin/Downloads/";
 
-    private static final String newFileName = "Fba_Inventory";
+    public static final String FILE_RENAME = "FbaInventory";
 
     private SpiderConfig spiderConfig;
 
+    private CommonSettingService commonSettingService;
+
     @Autowired
-    public AmazonScFbaInventory(SpiderConfig spiderConfig) {
+    public AmazonScFbaInventory(SpiderConfig spiderConfig, CommonSettingService commonSettingService) {
         this.spiderConfig = spiderConfig;
+        this.commonSettingService = commonSettingService;
     }
 
 //    @Autowired
@@ -92,37 +103,47 @@ public class AmazonScFbaInventory implements PageProcessor {
             log.info("0.step21=>进入抓取");
         }
 
+        ObjectMapper objectMapper = new ObjectMapper();
 
         // 1.建立WebDriver
         System.setProperty("webdriver.chrome.driver", spiderConfig.getChromeDriverPath());
         WebDriver driver = null;
 
-        String filePath = spiderConfig.getDownloadPath();
+        String downloadPath = spiderConfig.getScFBAInventoryDownloadPath();
 
-        driver = WebDriverUtils.getWebDriver(spiderConfig.getChromeDriverPath(), filePath, true);
+        driver = WebDriverUtils.getWebDriver(spiderConfig.getChromeDriverPath(), downloadPath, true);
+
+        WebDriverWait wait = new WebDriverWait(driver, 60);
 
         String filename = "";
 
         try {
 
-            // 1.0隐式等待对象声明
-            WebDriverWait wait = new WebDriverWait(driver, 30);
+            driver.manage().deleteAllCookies();
 
             // 1.1设置页面超时等待时间,20S
             driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
 
             // 2.初始打开页面
-            driver.get(SpiderUrl.SPIDER_SC_INDEX);
+            driver.navigate().to(SpiderUrl.AMAZON_SC_404);
 
             // 3.add Cookies 在工具类中解析json
+            List<Cookie> cookies = commonSettingService.getAmazonSCCookies();
+
+            List<org.openqa.selenium.Cookie> sCookies = CookiesUtils.cookiesToSeleniumCookies(cookies);
+
             driver.manage().deleteAllCookies();
-            List<Cookie> listCookies = JsonToListUtil.amazonSourceCookieList2CookieList(JsonToListUtil.getListByPath(spiderConfig.getAmzScCookieFilepath()));
-            for (Cookie cookie : listCookies) {
-                // Cookie(String name, String value, String domain, String path, Date expiry, boolean isSecure, boolean isHttpOnly)
-                if (!cookie.getName().equals("__Host-mons-selections") && !cookie.getName().equals("__Host-mselc")) {
-                    driver.manage().addCookie(new org.openqa.selenium.Cookie(cookie.getName(), cookie.getValue(), cookie.getDomain(),
-                            cookie.getPath(), cookie.getExpiry(), cookie.getIsSecure(), cookie.getIsHttpOnly()));
-                }
+            WebDriverUtils.addSeleniumCookies(driver, sCookies);
+
+            if(!WebDriverUtils.checkAmazonSCCookiesValid(driver)){
+                driver.manage().deleteAllCookies();
+                WebDriverUtils.getAmazonSCCookies(driver);
+
+                List<Cookie> driverCookies = CookiesUtils.seleniumCookieToCookie(driver.manage().getCookies());
+
+                String newCookiesStr = objectMapper.writeValueAsString(driverCookies);
+
+                commonSettingService.setValue(Consts.AMAZON_SC_COOKIES, newCookiesStr, "system");
             }
 
 
@@ -162,12 +183,30 @@ public class AmazonScFbaInventory implements PageProcessor {
             log.info("reportPath:" + reportPath + " filename:" + filename);
             downloadButtonElement.click();
 
+            sleep(10000);
+
+            // 8. rename download file
+            File downloadFile = FileUtils.getFileFromDirWithName(spiderConfig.getScFBAInventoryDownloadPath(), filename)[0];
+            Path oldFilePath = Paths.get(downloadFile.getPath());
+
+            String downloadDateStr = LocalDateTime.now().format(DateTimeFormatter.ofPattern(DateFormat.YEAR_MONTH_DAY));
+
+            String newFileName = StrUtil.concat(true, FILE_RENAME, "-", downloadDateStr + ".csv");
+
+            Files.move(oldFilePath, oldFilePath.resolveSibling(newFileName));
+
+            log.info("[process] File rename to: {}", newFileName);
+
             try {
                 sleep(30000);
             } catch (InterruptedException e) {
                 throw new ServiceException(RespErrorEnum.SPIDER_EXEC.getSubStatusCode(), RespErrorEnum.SPIDER_EXEC.getSubStatusMsg());
             }
         } catch (Exception e) {
+            driver.quit();
+
+            log.error("[AmazonScFbaInventory] [process] failed", e);
+
             e.printStackTrace();
             throw new ServiceException(RespErrorEnum.SPIDER_EXEC.getSubStatusCode(), RespErrorEnum.SPIDER_EXEC.getSubStatusMsg());
         } finally {
@@ -175,7 +214,7 @@ public class AmazonScFbaInventory implements PageProcessor {
         }
 
         // 更新下载文件名
-        FileUtil.rename(new File(filePath + filename + ".csv"), StrUtil.concat(true, newFileName, "-", DateUtil.format(DateUtil.offsetDay(DateUtil.date(), offerSetDay), DateFormat.YEAR_MONTH_DAY)), true, true);
+        FileUtil.rename(new File(downloadPath + filename + ".csv"), StrUtil.concat(true, AmazonScFbaInventory.FILE_RENAME, "-", DateUtil.format(DateUtil.offsetDay(DateUtil.date(), offerSetDay), DateFormat.YEAR_MONTH_DAY)), true, true);
 
         if (log.isInfoEnabled()) {
             log.info("1.step84=>抓取结束");
@@ -183,16 +222,16 @@ public class AmazonScFbaInventory implements PageProcessor {
 
     }
 
-    public static void main(String[] args) {
-        System.out.println("0.step67=>抓取程序开启。");
-
-        Spider.create(new AmazonScFbaInventory(null))
-                .addUrl(SpiderUrl.SPIDER_SC_INDEX)
-                .run();
-
-        System.out.println("end.step93=>抓取程序结束。");
-
-    }
+//    public static void main(String[] args) {
+//        System.out.println("0.step67=>抓取程序开启。");
+//
+//        Spider.create(new AmazonScFbaInventory(null, commonSettingService))
+//                .addUrl(SpiderUrl.SPIDER_SC_INDEX)
+//                .run();
+//
+//        System.out.println("end.step93=>抓取程序结束。");
+//
+//    }
 
 }
 

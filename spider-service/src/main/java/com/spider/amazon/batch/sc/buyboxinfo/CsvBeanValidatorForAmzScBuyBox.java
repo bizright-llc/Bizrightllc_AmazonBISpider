@@ -1,4 +1,4 @@
-package com.spider.amazon.batch.scbuyboxinfo;
+package com.spider.amazon.batch.sc.buyboxinfo;
 
 import org.springframework.batch.item.validator.Validator;
 import org.springframework.beans.factory.InitializingBean;

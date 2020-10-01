@@ -1,4 +1,4 @@
-package com.spider.amazon.batch.scbuyboxinfo;
+package com.spider.amazon.batch.sc.buyboxinfo;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.IdUtil;

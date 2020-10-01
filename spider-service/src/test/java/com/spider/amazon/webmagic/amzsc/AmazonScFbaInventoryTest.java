@@ -1,38 +1,37 @@
 package com.spider.amazon.webmagic.amzsc;
 
+import com.spider.SpiderServiceApplication;
 import com.spider.amazon.config.SpiderConfig;
-import com.spider.amazon.webmagic.amzsc.AmazonScFbaInventory;
+import com.spider.amazon.service.CommonSettingService;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testng.annotations.BeforeMethod;
 import us.codecraft.webmagic.Request;
 import us.codecraft.webmagic.Spider;
 
 import static org.mockito.Mockito.spy;
 
+@ExtendWith(SpringExtension.class)
+@SpringBootTest(classes= SpiderServiceApplication.class)
 class AmazonScFbaInventoryTest {
 
-    @Spy
+    @Autowired
     private SpiderConfig spiderConfig;
 
-    @BeforeMethod
-    public void initMocks(){
-        MockitoAnnotations.initMocks(this);
-    }
+    @Autowired
+    private CommonSettingService commonSettingService;
 
     @Test
-    public void TestAmazonScButBoxDownloadFile() throws InterruptedException {
-
-        spiderConfig = spy(new SpiderConfig());
-
-        Mockito.doReturn("/Users/shaochinlin/Documents/Bizright/BI/BiSpider").when(spiderConfig).getDownloadPath();
-        Mockito.doReturn("/Users/shaochinlin/Documents/Bizright/BI/BiSpider/cookieSc.json").when(spiderConfig).getAmzScCookieFilepath();
-        Mockito.doReturn("https://www.google.com/").when(spiderConfig).getSpiderIndex();
+    public void testAmazonScFbaInventoryDownloadFile() throws InterruptedException {
 
         // 3.调用爬虫
-        Spider spider= Spider.create(new AmazonScFbaInventory(spiderConfig));
+        Spider spider= Spider.create(new AmazonScFbaInventory(spiderConfig, commonSettingService));
         spider.thread(2);
         Request request = new Request(spiderConfig.getSpiderIndex());
 
@@ -40,7 +39,6 @@ class AmazonScFbaInventoryTest {
         spider.addRequest(request);
         spider.start();
         Thread.sleep(300000);
-
 
     }
 

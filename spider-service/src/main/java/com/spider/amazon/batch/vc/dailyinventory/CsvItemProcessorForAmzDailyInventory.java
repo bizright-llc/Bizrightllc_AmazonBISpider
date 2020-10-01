@@ -1,4 +1,4 @@
-package com.spider.amazon.batch.vcdailyinventory;
+package com.spider.amazon.batch.vc.dailyinventory;
 
 import cn.hutool.core.date.DateUtil;
 import com.spider.amazon.cons.DateFormat;
