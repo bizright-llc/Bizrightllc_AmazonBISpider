@@ -136,7 +136,7 @@ public class AmazonVcPromotionsProcessor implements PageProcessor {
 
             // 2.初始打开页面
             driver.manage().timeouts().pageLoadTimeout(20, TimeUnit.SECONDS); // 页面加载超时时间
-            driver.navigate().to(SpiderUrl.AMAZON_VC_INDEX);
+            driver.navigate().to(SpiderUrl.AMAZON_VC_404);
 
             // 3.add Cookies from database
             driver.manage().deleteAllCookies();
@@ -253,7 +253,7 @@ public class AmazonVcPromotionsProcessor implements PageProcessor {
 
             // 2.初始打开页面
             driver.manage().timeouts().pageLoadTimeout(20, TimeUnit.SECONDS); // 页面加载超时时间
-            driver.get(SpiderUrl.AMAZON_VC_INDEX);
+            driver.get(SpiderUrl.AMAZON_VC_404);
 
             // 3.add Cookies 在工具类中解析json
             driver.manage().deleteAllCookies();

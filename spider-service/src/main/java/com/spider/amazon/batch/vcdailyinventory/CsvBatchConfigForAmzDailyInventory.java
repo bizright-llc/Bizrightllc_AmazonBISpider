@@ -10,7 +10,6 @@ import com.spider.amazon.config.SpiderConfig;
 import com.spider.amazon.cons.DateFormat;
 import com.spider.amazon.cons.RespErrorEnum;
 import com.spider.amazon.entity.AmzVcDailyInventory;
-import com.spider.amazon.entity.AmzVcDailySales;
 import com.spider.amazon.utils.CSVUtils;
 import com.spider.amazon.utils.FileUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -32,8 +31,6 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider;
-import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.LineMapper;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
@@ -58,6 +55,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -82,7 +80,8 @@ import java.util.Map;
 @Slf4j
 public class CsvBatchConfigForAmzDailyInventory {
 
-//    private Map<String, Object> paramMaps;
+    public final static String CONTEXT_FILEPATH = "filepath";
+    public final static String CONTEXT_PARAM_MAPS = "paramMaps";
 
     //    private final static String filePath = "C:\\Users\\paulin.f\\Downloads\\Inventory Health_US.csv";
     private final static String fileName = "Inventory Health_US";
@@ -104,8 +103,7 @@ public class CsvBatchConfigForAmzDailyInventory {
      */
     @Bean
     @StepScope
-    public FlatFileItemReader<AmzVcDailyInventory> readerForAmzDailyInventory(@Value("#{jobExecutionContext[filepath]}") String filepath,
-                                                                              @Value("#{jobExecutionContext[paramMaps]}") Map<String, Object> paramMaps) throws IOException {
+    public FlatFileItemReader<AmzVcDailyInventory> readerForAmzDailyInventory(@Value("#{jobExecutionContext[filepath]}") String filepath) throws IOException {
 
         return fileReader(filepath);
 
@@ -315,21 +313,37 @@ public class CsvBatchConfigForAmzDailyInventory {
                     // 获取前面Steps参数
                     ExecutionContext jobContext = context.getStepContext().getStepExecution().getJobExecution().getExecutionContext();
 
-                    String filePath = jobContext.get("filepath").toString();
-
                     //Gets the data here
-                    Map<String, Object> paramMaps = (Map<String, Object>) jobContext.get("paramMaps");
-
-                    String reportingRange = paramMaps.get("reportingRange").toString();
-
+                    //Gets the data here
+                    Map<String, Object> paramMaps = (Map<String, Object>) jobContext.get(CONTEXT_PARAM_MAPS);
+                    String filePath = jobContext.get(CONTEXT_FILEPATH).toString();
                     String viewingDate = paramMaps.get("viewingDate").toString();
-                    viewingDate = DateUtil.format(DateUtil.parse(viewingDate, DateFormat.YEAR_MONTH_DAY_MMddyy1), DateFormat.YEAR_MONTH_DAY_yyyyMMdd);
-
+                    String reportingRange = paramMaps.get("reportingRange").toString();
                     String distributeView = paramMaps.get("distributeView").toString();
+                    viewingDate = DateUtil.format(DateUtil.parse(viewingDate, DateFormat.YEAR_MONTH_DAY_MMddyyyy), DateFormat.YEAR_MONTH_DAY_yyyyMMdd);
 
                     // 文件重命名
-                    FileUtil.rename(new File(filePath), StrUtil.concat(true, fileName, "-", reportingRange, "-", viewingDate, "-", distributeView, "-", IdUtil.simpleUUID()), true, false);
-                    log.info("[stepForAmzDailyInventoryDealFile] params: {}", paramMaps.toString());
+                    // 周销量报表和日销量报表名字区别
+                    if (FileUtil.exist(filePath)) {
+
+                        File finishedFile = new File(filePath);
+
+                        Path oldFilePath = Paths.get(finishedFile.getPath());
+
+                        try {
+
+                            String newFileName = StrUtil.concat(true, fileName, "-", distributeView, "-" , reportingRange, "-", viewingDate, "-", IdUtil.simpleUUID());
+
+                            //make sure file path doesn't have '/'
+                            Files.move(oldFilePath, oldFilePath.resolveSibling(newFileName + ".csv"));
+
+                            log.info("File rename {}", newFileName);
+
+                        } catch (Exception ex) {
+                            log.info("File {} rename failed", oldFilePath, ex);
+                        }
+
+                    }
                     return RepeatStatus.FINISHED;
                 }).build();
     }
@@ -352,7 +366,7 @@ public class CsvBatchConfigForAmzDailyInventory {
 
                     MyFileFilter filter = new MyFileFilter();
 
-                    File[] files = FileUtils.getFileFromDir(spiderConfig.getDownloadPath(), filter);
+                    File[] files = FileUtils.getFileFromDir(spiderConfig.getVcHealthInventoryDownloadPath(), filter);
 
                     File file = files.length > 0 ? files[0] : null;
 
@@ -362,7 +376,7 @@ public class CsvBatchConfigForAmzDailyInventory {
                         String fp = file.getPath();
                         Map<String, Object> paramMaps = stepForAmzDailyInventoryPrepare(fp);
                         ExecutionContext jobContext = context.getStepContext().getStepExecution().getJobExecution().getExecutionContext();
-                        jobContext.put("paramMaps", paramMaps);
+                        jobContext.put(CONTEXT_PARAM_MAPS, paramMaps);
                         jobContext.put("filepath", file.getPath());
 
                         return RepeatStatus.FINISHED;

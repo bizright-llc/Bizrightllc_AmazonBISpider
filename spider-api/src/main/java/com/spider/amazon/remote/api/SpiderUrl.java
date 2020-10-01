@@ -14,6 +14,11 @@ public class SpiderUrl {
     // SC主页
     public static final String SPIDER_SC_INDEX = "https://sellercentral.amazon.com/";
 
+    // SC page to add cookie
+    public static final String AMAZON_SC_404 = "https://sellercentral.amazon.com/404page";
+
+    public static final String AMAZON_SC_CHECK = "https://sellercentral.amazon.com/checkcookies";
+
     // SC Buy Box 报表url
     public static final String SPIDER_SC_BUYBOX = "https://sellercentral.amazon.com/gp/site-metrics/report.html#&cols=/c0/c1/c2/c3/c4/c5/c6/c7/c8/c9/c10/c11/c12/c13/c14/c15&sortColumn=16&filterFromDate={filterFromDate}&filterToDate={filterToDate}&fromDate={fromDate}&toDate={toDate}&reportID=102:DetailSalesTrafficByChildItem&sortIsAscending=0&currentPage=0&dateUnit=1&viewDateUnits=ALL&runDate=";
 
@@ -26,11 +31,15 @@ public class SpiderUrl {
     // IP池主页
     public static final String IP_POOL_INDEX = "https://www.kuaidaili.com";
 
+    public static final String AMAZON_VC_INDEX = "https://vendorcentral.amazon.com";
+
     /**
      * This page let system add cookies to browser
      */
     // Amazon VC index 頁面
-    public static final String AMAZON_VC_INDEX = "https://vendorcentral.amazon.com/404page";
+    public static final String AMAZON_VC_404 = "https://vendorcentral.amazon.com/404page";
+
+    public static final String AMAZON_VC_SIGNIN = "https://vendorcentral.amazon.com/gp/vendor/sign-in";
 
     public static final String AMAZON_VC_DASHBOARD = "https://vendorcentral.amazon.com/analytics/dashboard";
 

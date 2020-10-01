@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spider.amazon.mapper.AmzScBuyBoxMapper">
+    <resultMap id="BaseResultMap" type="com.spider.amazon.entity.AmzScBuyBox">
+        <result column="Asin" jdbcType="VARCHAR" property="asin"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        *
+    </sql>
+
+    <update id="insert" parameterType="com.spider.amazon.entity.AmzScBuyBox">
+        insert into AmazonSCDetailSalesAndTrafficReport ("ParentAsin", "ChildAsin", "Title",
+                                                        "Sessions", "SessionPercentage", "PageViews", "PageViewsPercentage",
+                                                        "BuyBoxPercentage", "UnitsOrdered", "UnitsOrderedB2B", "UnitSessionPercentage",
+                                                        "UnitSessionPercentageB2B", "OrderedProductSales", "OrderedProductSalesB2B",
+                                                        "TotalOrderItems", "TotalOrderItemsB2B", FromDate, ToDate, "InsertedAt")
+        values (#{parentAsin}, #{childAsin}, #{title}, #{sessions},
+                #{sessionPercentage}, #{pageViews}, #{pageViewsPercentage},
+                #{buyBoxPercentage}, #{unitsOrdered},
+                #{unitsOrderedB2B},
+                #{unitSessionPercentage}, #{unitSessionPercentageB2B},
+                #{orderedProductSales},
+                #{orderedProductSalesB2B},
+                #{totalOrderItems}, #{totalOrderItemsB2B}, #{fromDate},
+                #{toDate},getdate())
+    </update>
+
+</mapper>

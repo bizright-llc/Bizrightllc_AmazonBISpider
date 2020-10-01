@@ -1,20 +1,22 @@
 package com.spider.amazon.batch.scbuyboxinfo;
 
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import com.spider.amazon.config.DruidConfiguration;
-import com.spider.amazon.cons.DateFormat;
+import com.spider.amazon.config.SpiderConfig;
 import com.spider.amazon.entity.AmzScBuyBox;
-import com.spider.amazon.utils.UsDateUtils;
+import com.spider.amazon.utils.FileUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.mybatis.spring.batch.MyBatisBatchItemWriter;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
@@ -23,15 +25,14 @@ import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
-import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider;
-import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
+import org.springframework.batch.item.file.LineMapper;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
 import org.springframework.batch.item.file.mapping.DefaultLineMapper;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -43,9 +44,19 @@ import org.springframework.transaction.interceptor.DefaultTransactionAttribute;
 
 import javax.sql.DataSource;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 /**
@@ -65,14 +76,23 @@ import java.util.Map;
 @Slf4j
 public class CsvBatchConfigForAmzScBuyBox {
 
-    private Map<String, Object> paramMaps;
+    public final static String FILE_PATH_CONTEXT = "filepath";
+    public final static String PARAM_MAPS_CONTEXT = "paramMaps";
+    public final static String PARAM_MAPS_VIEWING_DATE = "viewingDate";
+    public final static String FILE_NAME = "BusinessReport";
+    public final static String COMPLETE_MARK = "Processed";
 
-    private final static String filePath = "C:\\Users\\paulin.f\\Downloads\\BusinessReport";
-    private final static String fileName = "BusinessReport";
+//    private final static String filePath = "C:\\Users\\paulin.f\\Downloads\\BusinessReport";
     private final static int OFF_SET = 0;
 
     @Autowired
     private StepBuilderFactory stepBuilderFactory;
+
+    @Autowired
+    private SpiderConfig spiderConfig;
+
+    @Autowired
+    private SqlSessionFactory sqlSessionFactory;
 
 
     /**
@@ -80,38 +100,104 @@ public class CsvBatchConfigForAmzScBuyBox {
      *
      * @return
      */
-    @Bean
-    public ItemReader<AmzScBuyBox> readerForAmzScBuyBox() {
-        // 使用FlatFileItemReader去读cvs文件，一行即一条数据
-        FlatFileItemReader<AmzScBuyBox> reader = new FlatFileItemReader<>();
-        // 设置文件处在路径
-        // reader.setResource(new ClassPathResource("Inventory Health_US.csv"));
-        // 文件路径 示例：BusinessReport-11-20-19 今天下载文件名日期是上一天的日期
-        String fullFilePath=StrUtil.concat(true,filePath,"-", DateUtil.format(DateUtil.offsetDay(DateUtil.date(),OFF_SET), DateFormat.YEAR_MONTH_DAY_Mdyy),".csv");
-        reader.setResource(new FileSystemResource(fullFilePath));
-        reader.setLinesToSkip(1); // 跳过头两行
-        // entity与csv数据做映射
-        reader.setLineMapper(new DefaultLineMapper<AmzScBuyBox>() {
-            {
-                setLineTokenizer(new DelimitedLineTokenizer() {
-                    {
-                        // availableInventory与sellableOnHandUnits一样
-                        setNames(new String[]{"parentAsin", "childAsin", "title", "sessions", "sessionPercentage",
-                                "pageViews", "pageViewsPercentage", "buyBoxPercentage",
-                                "unitsOrdered", "unitsOrderedB2B", "unitSessionPercentage",
-                                "unitSessionPercentageB2B", "orderedProductSales", "orderedProductSalesB2B",
-                                "totalOrderItems", "totalOrderItemsB2B"});
-                    }
+//    @Bean
+//    public ItemReader<AmzScBuyBox> readerForAmzScBuyBox() {
+//        // 使用FlatFileItemReader去读cvs文件，一行即一条数据
+//        FlatFileItemReader<AmzScBuyBox> reader = new FlatFileItemReader<>();
+//        // 设置文件处在路径
+//        // reader.setResource(new ClassPathResource("Inventory Health_US.csv"));
+//        // 文件路径 示例：BusinessReport-11-20-19 今天下载文件名日期是上一天的日期
+//        String fullFilePath=StrUtil.concat(true,filePath,"-", DateUtil.format(DateUtil.offsetDay(DateUtil.date(),OFF_SET), DateFormat.YEAR_MONTH_DAY_Mdyy),".csv");
+//        reader.setResource(new FileSystemResource(fullFilePath));
+//        reader.setLinesToSkip(1); // 跳过头两行
+//        // entity与csv数据做映射
+//        reader.setLineMapper(new DefaultLineMapper<AmzScBuyBox>() {
+//            {
+//                setLineTokenizer(new DelimitedLineTokenizer() {
+//                    {
+//                        // availableInventory与sellableOnHandUnits一样
+//                        setNames(new String[]{"parentAsin", "childAsin", "title", "sessions", "sessionPercentage",
+//                                "pageViews", "pageViewsPercentage", "buyBoxPercentage",
+//                                "unitsOrdered", "unitsOrderedB2B", "unitSessionPercentage",
+//                                "unitSessionPercentageB2B", "orderedProductSales", "orderedProductSalesB2B",
+//                                "totalOrderItems", "totalOrderItemsB2B"});
+//                    }
+//
+//                });
+//                setFieldSetMapper(new BeanWrapperFieldSetMapper<AmzScBuyBox>() {
+//                    {
+//                        setTargetType(AmzScBuyBox.class);
+//                    }
+//                });
+//            }
+//        });
+//        return reader;
+//    }
 
-                });
-                setFieldSetMapper(new BeanWrapperFieldSetMapper<AmzScBuyBox>() {
-                    {
-                        setTargetType(AmzScBuyBox.class);
-                    }
-                });
+    @Bean
+    @StepScope
+    public FlatFileItemReader<AmzScBuyBox> readerForAmzScBuyBox(@Value("#{jobExecutionContext[filepath]}") String filepath,
+                                                                              @Value("#{jobExecutionContext[paramMaps]}") Map<String, Object> paramMaps) throws IOException {
+
+        return fileReader(filepath);
+
+    }
+
+    private FlatFileItemReader<AmzScBuyBox> fileReader(String filePath) throws IOException {
+        FlatFileItemReader<AmzScBuyBox> itemReader = new FlatFileItemReader<>();
+
+        String tableHeader = Files.readAllLines(Paths.get(filePath)).get(0);
+
+        itemReader.setResource(new FileSystemResource(filePath));
+        itemReader.setLineMapper(lineMapper(tableHeader));
+        itemReader.setLinesToSkip(1);
+        itemReader.setStrict(true);
+
+        return itemReader;
+    }
+
+    private LineMapper<AmzScBuyBox> lineMapper(String head) {
+
+        DefaultLineMapper<AmzScBuyBox> lineMapper = new DefaultLineMapper<>();
+        DelimitedLineTokenizer lineTokenizer = new DelimitedLineTokenizer();
+        lineTokenizer.setDelimiter(",");
+        lineTokenizer.setStrict(true);
+
+        head = head.replaceAll("[^a-zA-Z0-9,]", "");
+
+        String[] heads = head.split(",");
+        List<String> names = new ArrayList<>();
+
+        for (String h : heads) {
+
+            String clearH = h.trim();
+
+            String propertyName = null;
+
+            for (Field f : AmzScBuyBox.class.getDeclaredFields()) {
+                if (f.getName().equalsIgnoreCase(clearH)) {
+                    propertyName = f.getName();
+                }
             }
-        });
-        return reader;
+
+            if (propertyName == null) {
+                log.info("Property name not found for header {}", clearH);
+            } else {
+                names.add(propertyName);
+            }
+        }
+
+        String[] namesArr = new String[names.size()];
+
+        lineTokenizer.setNames(names.toArray(namesArr));
+
+        lineMapper.setLineTokenizer(lineTokenizer);
+
+        lineMapper.setFieldSetMapper(new BeanWrapperFieldSetMapper<AmzScBuyBox>() {{
+            setTargetType(AmzScBuyBox.class);
+        }});
+
+        return lineMapper;
     }
 
 
@@ -121,8 +207,9 @@ public class CsvBatchConfigForAmzScBuyBox {
      * @return
      */
     @Bean
-    public ItemProcessor<AmzScBuyBox, AmzScBuyBox> processorForAmzScBuyBox() {
-        CsvItemProcessorForAmzScBuyBox csvItemProcessorForAmzScBuyBox = new CsvItemProcessorForAmzScBuyBox();
+    @StepScope
+    public ItemProcessor<AmzScBuyBox, AmzScBuyBox> processorForAmzScBuyBox(@Value("#{jobExecutionContext[paramMaps]}") Map<String, Object> paramMaps) {
+        CsvItemProcessorForAmzScBuyBox csvItemProcessorForAmzScBuyBox = new CsvItemProcessorForAmzScBuyBox(paramMaps);
         // 设置校验器
         csvItemProcessorForAmzScBuyBox.setValidator(csvBeanValidatorForAmzScBuyBox());
         return csvItemProcessorForAmzScBuyBox;
@@ -144,37 +231,52 @@ public class CsvBatchConfigForAmzScBuyBox {
      * @param dataSource
      * @return
      */
+//    @Bean
+//    public ItemWriter<AmzScBuyBox> writerForAmzScBuyBox(DataSource dataSource) {
+//        // 使用jdbcBcatchItemWrite写数据到数据库中
+//        JdbcBatchItemWriter<AmzScBuyBox> writer = new JdbcBatchItemWriter<>();
+//        // 设置有参数的sql语句
+//        writer.setItemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<AmzScBuyBox>());
+//        // 预处理头部数据
+////        String fullFilePath=StrUtil.concat(true,filePath,"-", DateUtil.format(DateUtil.offsetDay(DateUtil.date(),OFF_SET), DateFormat.YEAR_MONTH_DAY_Mdyy),".csv");
+//        // 起始结束日期
+//        String fromDate = DateUtil.format(UsDateUtils.beginOfWeek(DateUtil.lastWeek()), DateFormat.YEAR_MONTH_DAY_yyyyMMdd);
+//        String toDate = DateUtil.format(UsDateUtils.endOfWeek(DateUtil.lastWeek()), DateFormat.YEAR_MONTH_DAY_yyyyMMdd);
+//        String sql = "";
+//        if (FileUtil.exist(fullFilePath)) {
+//            // 每日库存报表插入sql
+//            sql = "INSERT INTO [dbo].[BusinessReport]([parent_asin], [child_asin], [title]," +
+//                    " [sessions], [session_percentage], [page_views], " +
+//                    "[page_views_percentage], [buy_box_percentage], [units_ordered], " +
+//                    "[units_ordered-B2B], [unit_session_percentage], [unit_session_percentage-B2B], " +
+//                    "[ordered_product_sales], [ordered_product_sales-B2B], [total_order_items], " +
+//                    "[total_order_items-B2B], [date_from], [date_to]) " +
+//                    "VALUES (:parentAsin, :childAsin, :title, " +
+//                    ":sessions, :sessionPercentage, :pageViews, " +
+//                    ":pageViewsPercentage, :buyBoxPercentage, :unitsOrdered, " +
+//                    ":unitsOrderedB2B, :unitSessionPercentage, :unitSessionPercentageB2B, " +
+//                    ":orderedProductSales, :orderedProductSalesB2B, :totalOrderItems, " +
+//                    ":totalOrderItemsB2B,'"+fromDate+"','"+toDate+"');";
+//        } else {
+//            sql = "INSERT INTO [dbo].[BATCH_JOB_EXEC](EXEC_ID) VALUES (:child_asin)";
+//        }
+//        writer.setSql(sql);
+//        writer.setDataSource(dataSource);
+//
+//        return writer;
+//    }
+
+    /**
+     * MyBatis batch writer
+     *
+     * @return
+     */
     @Bean
-    public ItemWriter<AmzScBuyBox> writerForAmzScBuyBox(DataSource dataSource) {
-        // 使用jdbcBcatchItemWrite写数据到数据库中
-        JdbcBatchItemWriter<AmzScBuyBox> writer = new JdbcBatchItemWriter<>();
-        // 设置有参数的sql语句
-        writer.setItemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<AmzScBuyBox>());
-        // 预处理头部数据
-        String fullFilePath=StrUtil.concat(true,filePath,"-", DateUtil.format(DateUtil.offsetDay(DateUtil.date(),OFF_SET), DateFormat.YEAR_MONTH_DAY_Mdyy),".csv");
-        // 起始结束日期
-        String fromDate = DateUtil.format(UsDateUtils.beginOfWeek(DateUtil.lastWeek()), DateFormat.YEAR_MONTH_DAY_yyyyMMdd);
-        String toDate = DateUtil.format(UsDateUtils.endOfWeek(DateUtil.lastWeek()), DateFormat.YEAR_MONTH_DAY_yyyyMMdd);
-        String sql = "";
-        if (FileUtil.exist(fullFilePath)) {
-            // 每日库存报表插入sql
-            sql = "INSERT INTO [dbo].[BusinessReport]([parent_asin], [child_asin], [title]," +
-                    " [sessions], [session_percentage], [page_views], " +
-                    "[page_views_percentage], [buy_box_percentage], [units_ordered], " +
-                    "[units_ordered-B2B], [unit_session_percentage], [unit_session_percentage-B2B], " +
-                    "[ordered_product_sales], [ordered_product_sales-B2B], [total_order_items], " +
-                    "[total_order_items-B2B], [date_from], [date_to]) " +
-                    "VALUES (:parentAsin, :childAsin, :title, " +
-                    ":sessions, :sessionPercentage, :pageViews, " +
-                    ":pageViewsPercentage, :buyBoxPercentage, :unitsOrdered, " +
-                    ":unitsOrderedB2B, :unitSessionPercentage, :unitSessionPercentageB2B, " +
-                    ":orderedProductSales, :orderedProductSalesB2B, :totalOrderItems, " +
-                    ":totalOrderItemsB2B,'"+fromDate+"','"+toDate+"');";
-        } else {
-            sql = "INSERT INTO [dbo].[BATCH_JOB_EXEC](EXEC_ID) VALUES (:child_asin)";
-        }
-        writer.setSql(sql);
-        writer.setDataSource(dataSource);
+    public MyBatisBatchItemWriter<AmzScBuyBox> AmzScBuyBoxBatchItemWriter() {
+        final MyBatisBatchItemWriter<AmzScBuyBox> writer = new MyBatisBatchItemWriter<>();
+
+        writer.setSqlSessionFactory(this.sqlSessionFactory);
+        writer.setStatementId("com.spider.amazon.mapper.AmzScBuyBoxMapper.insert");
 
         return writer;
     }
@@ -250,13 +352,13 @@ public class CsvBatchConfigForAmzScBuyBox {
      *
      * @param stepBuilderFactoryForAmzScBuyBox
      * @param readerForAmzScBuyBox
-     * @param writerForAmzScBuyBox
+     * @param AmzScBuyBoxBatchItemWriter
      * @param processorForAmzScBuyBox
      * @return
      */
     @Bean
     public Step stepForAmzScBuyBox(StepBuilderFactory stepBuilderFactoryForAmzScBuyBox, ItemReader<AmzScBuyBox> readerForAmzScBuyBox,
-                                         ItemWriter<AmzScBuyBox> writerForAmzScBuyBox, ItemProcessor<AmzScBuyBox, AmzScBuyBox> processorForAmzScBuyBox) {
+                                   MyBatisBatchItemWriter<AmzScBuyBox> AmzScBuyBoxBatchItemWriter, ItemProcessor<AmzScBuyBox, AmzScBuyBox> processorForAmzScBuyBox) {
         DefaultTransactionAttribute attribute = new DefaultTransactionAttribute();
         attribute.setPropagationBehavior(Propagation.REQUIRED.value());
         attribute.setIsolationLevel(Isolation.DEFAULT.value());
@@ -266,43 +368,97 @@ public class CsvBatchConfigForAmzScBuyBox {
                 .<AmzScBuyBox, AmzScBuyBox>chunk(10000) // Chunk的机制(即每次读取一条数据，再处理一条数据，累积到一定数量后再一次性交给writer进行写入操作)
                 .reader(readerForAmzScBuyBox)
                 .processor(processorForAmzScBuyBox)
-                .writer(writerForAmzScBuyBox)
+                .writer(AmzScBuyBoxBatchItemWriter)
                 .transactionAttribute(attribute)
                 .build();
     }
 
+    /**
+     * Change file name after dealing with the file
+     * @return
+     */
     @Bean
     public Step stepForAmzScBuyBoxDealFile() {
         return stepBuilderFactory.get("stepForAmzScBuyBoxDealFile")
                 .tasklet((contribution, context) -> {
+
                     // 获取前面Steps参数
                     ExecutionContext jobContext = context.getStepContext().getStepExecution().getJobExecution().getExecutionContext();
+
+                    String filepath = jobContext.get(FILE_PATH_CONTEXT).toString();
+
+                    Path oldFilepath = Paths.get(filepath);
+
                     //Gets the data here
                     Map<String, Object> paramMaps = (Map<String, Object>) jobContext.get("paramMaps");
+
+                    String reportDateStr = paramMaps.get(PARAM_MAPS_VIEWING_DATE).toString();
+
                     // 文件重命名
-                    String fullFilePath=StrUtil.concat(true,filePath,"-", DateUtil.format(DateUtil.offsetDay(DateUtil.date(),OFF_SET), DateFormat.YEAR_MONTH_DAY_Mdyy),".csv");
-                    FileUtil.rename(new File(fullFilePath), StrUtil.concat(true, fileName, "-", DateUtil.format(DateUtil.offsetDay(DateUtil.date(),OFF_SET), DateFormat.YEAR_MONTH_DAY_Mdyy), "-", IdUtil.simpleUUID()), true, false);
-                    log.info("stepForAmzScBuyBoxDealFile params: "+paramMaps.toString());
+                    String newFilename = StrUtil.concat(true,FILE_NAME,"-", reportDateStr, "-", COMPLETE_MARK, "-", IdUtil.simpleUUID());
+                    Files.move(oldFilepath, oldFilepath.resolveSibling(newFilename+".csv"));
+                    log.info("[stepForAmzScBuyBoxDealFile] Rename file: {} to file name: {}", filepath, newFilename);
                     return RepeatStatus.FINISHED;
                 }).build();
     }
 
+    /**
+     * Check the file existed or not
+     * @return
+     */
     @Bean
     public Step stepForAmzScBuyBoxCheckFile() {
         return stepBuilderFactory.get("stepForAmzScBuyBoxCheckFile")
                 .tasklet((StepContribution contribution, ChunkContext context) -> {
-                    String fullFilePath=StrUtil.concat(true,filePath,"-", DateUtil.format(DateUtil.offsetDay(DateUtil.date(),OFF_SET), DateFormat.YEAR_MONTH_DAY_Mdyy),".csv");
+
+                    class MyFileFilter implements FileFilter {
+
+                        public boolean accept(File f) {
+
+                            final String regex = "BusinessReport-\\d{8}.csv";
+
+                            final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
+
+                            String fileName = f.getName();
+
+                            Matcher matcher = pattern.matcher(fileName);
+
+                            if (f.getName().contains(FILE_NAME) && !f.getName().contains(COMPLETE_MARK) && matcher.find()) {
+                                return true;
+                            }
+                            return false;
+                        }
+                    }
+
+                    MyFileFilter filter = new MyFileFilter();
+
+                    File[] files = FileUtils.getFileFromDir(spiderConfig.getScBuyBoxDownloadPath(), filter);
+
+                    File file = files.length > 0 ? files[0] : null;
+
                     // 文件存在检查
-                    if (FileUtil.exist(fullFilePath)) {
+                    if (file != null && FileUtil.exist(file.getPath())) {
+
+                        log.info("[Pre handle file information]");
+
                         // 文件头预处理
                         Map<String, Object> paramMaps = new HashMap<>();
                         ExecutionContext jobContext = context.getStepContext().getStepExecution().getJobExecution().getExecutionContext();
-                        paramMaps.put("fullFilePath",fullFilePath);
-                        jobContext.put("paramMaps", paramMaps);
+
+                        String orgFilename = file.getName();
+
+                        // file date is the report date
+                        String viewingDate = orgFilename.substring(orgFilename.indexOf("-")+1, orgFilename.indexOf("."));
+
+                        paramMaps.put(PARAM_MAPS_VIEWING_DATE, viewingDate);
+
+                        jobContext.put(PARAM_MAPS_CONTEXT, paramMaps);
+
+                        jobContext.put(FILE_PATH_CONTEXT, file.getPath());
 
                         return RepeatStatus.FINISHED;
                     } else {
-                        throw new FileNotFoundException("File Not Found : " + fullFilePath);
+                        throw new FileNotFoundException("File Not Found : " + file.getPath());
                     }
                 }).build();
     }

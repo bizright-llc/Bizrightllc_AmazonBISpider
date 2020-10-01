@@ -1,29 +1,18 @@
-package com.spider.amazon.webmagic;
+package com.spider.amazon.webmagic.amzsc;
 
-import com.spider.SpiderServiceApplication;
 import com.spider.amazon.config.SpiderConfig;
-import com.spider.amazon.webmagic.amzvc.AmazonVcPromotionsPipeline;
-import com.spider.amazon.webmagic.amzvc.AmazonVcPromotionsProcessor;
-import org.junit.Assert;
+import com.spider.amazon.webmagic.amzsc.AmazonScFbaInventory;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testng.annotations.BeforeMethod;
 import us.codecraft.webmagic.Request;
 import us.codecraft.webmagic.Spider;
 
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.spy;
 
-@ExtendWith(SpringExtension.class)
-//@SpringBootTest(classes= SpiderServiceApplication.class)
-class AmazonScBuyBoxTest {
+class AmazonScFbaInventoryTest {
 
     @Spy
     private SpiderConfig spiderConfig;
@@ -43,7 +32,7 @@ class AmazonScBuyBoxTest {
         Mockito.doReturn("https://www.google.com/").when(spiderConfig).getSpiderIndex();
 
         // 3.调用爬虫
-        Spider spider= Spider.create(new AmazonScBuyBox(spiderConfig));
+        Spider spider= Spider.create(new AmazonScFbaInventory(spiderConfig));
         spider.thread(2);
         Request request = new Request(spiderConfig.getSpiderIndex());
 

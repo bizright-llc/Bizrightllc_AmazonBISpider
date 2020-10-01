@@ -1,4 +1,4 @@
-package com.spider.amazon.webmagic;
+package com.spider.amazon.webmagic.amzsc;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
