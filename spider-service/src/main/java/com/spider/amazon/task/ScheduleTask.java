@@ -42,8 +42,7 @@ import static java.lang.Thread.sleep;
 /**
  * 定时任务列表
  */
-// Comment when testing
-//@Component
+@Component
 @Slf4j
 public class ScheduleTask {
 
