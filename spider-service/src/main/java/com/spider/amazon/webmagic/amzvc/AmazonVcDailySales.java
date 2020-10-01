@@ -98,11 +98,10 @@ public class AmazonVcDailySales implements PageProcessor {
             log.info("0.step21=>进入抓取");
         }
 
-
         // 1.建立WebDriver
         System.setProperty("webdriver.chrome.driver", spiderConfig.getChromeDriverPath());
 
-        String downloadFilePath = spiderConfig.getDownloadPath();
+        String downloadFilePath = spiderConfig.getVcDailySalesDownloadPath();
 
         WebDriver driver = WebDriverUtils.getWebDriver(downloadFilePath, true);
 
@@ -117,7 +116,7 @@ public class AmazonVcDailySales implements PageProcessor {
 
             // 2.初始打开页面
             driver.manage().timeouts().pageLoadTimeout(20, TimeUnit.SECONDS); // 页面加载超时时间
-            driver.get(SpiderUrl.AMAZON_VC_INDEX);
+            driver.get(SpiderUrl.AMAZON_VC_404);
 
             // Set cookie
             driver.manage().deleteAllCookies();
@@ -146,11 +145,11 @@ public class AmazonVcDailySales implements PageProcessor {
                 @SneakyThrows
                 @Override
                 public void run() {
-                    WebDriver manuDriver = WebDriverUtils.getWebDriver(spiderConfig.getDownloadPath(), false);
+                    WebDriver manuDriver = WebDriverUtils.getWebDriver(downloadFilePath, false);
 
                     try{
 
-                        manuDriver.navigate().to(SpiderUrl.AMAZON_VC_INDEX);
+                        manuDriver.navigate().to(SpiderUrl.AMAZON_VC_404);
 
                         WebDriverUtils.addSeleniumCookies(manuDriver, latestVCCookies);
 
@@ -254,11 +253,11 @@ public class AmazonVcDailySales implements PageProcessor {
                 @SneakyThrows
                 @Override
                 public void run() {
-                    WebDriver sourcingDriver = WebDriverUtils.getWebDriver(spiderConfig.getDownloadPath(), false);
+                    WebDriver sourcingDriver = WebDriverUtils.getWebDriver(downloadFilePath, false);
                     WebDriverWait sourcingWait =  new WebDriverWait(sourcingDriver, 60);
 
                     try{
-                        sourcingDriver.navigate().to(SpiderUrl.AMAZON_VC_INDEX);
+                        sourcingDriver.navigate().to(SpiderUrl.AMAZON_VC_404);
 
                         WebDriverUtils.addSeleniumCookies(sourcingDriver, latestVCCookies);
 

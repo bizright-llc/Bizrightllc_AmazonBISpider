@@ -100,4 +100,26 @@ public class CommonSettingServiceImpl implements CommonSettingService {
 
         return cookies;
     }
+
+    @Override
+    public List<Cookie> getAmazonSCCookies() {
+        String cookiesStr = getValue(Consts.AMAZON_SC_COOKIES);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        List<Cookie> cookies = new ArrayList<>();
+
+        if(cookiesStr == null || StringUtils.isEmpty(cookiesStr)){
+            return cookies;
+        }
+
+        try{
+            cookies = objectMapper.readValue(cookiesStr, new TypeReference<List<Cookie>>() {});
+        }catch (Exception ex){
+            log.info("[Parse amazon vc cookies failed]");
+            log.info(ex.getLocalizedMessage());
+        }
+
+        return cookies;
+    }
 }

@@ -1,26 +1,34 @@
-package com.spider.amazon.webmagic;
+package com.spider.amazon.webmagic.amzsc;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
 import com.common.exception.ServiceException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.spider.amazon.batch.scbuyboxinfo.CsvBatchConfigForAmzScBuyBox;
 import com.spider.amazon.config.SpiderConfig;
 import com.spider.amazon.cons.DateFormat;
 import com.spider.amazon.cons.RespErrorEnum;
 import com.spider.amazon.entity.Cookie;
+import com.spider.amazon.model.Consts;
 import com.spider.amazon.remote.api.SpiderUrl;
-import com.spider.amazon.utils.JsonToListUtil;
-import com.spider.amazon.utils.UsDateUtils;
-import com.spider.amazon.utils.WebDriverUtils;
+import com.spider.amazon.service.CommonSettingService;
+import com.spider.amazon.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.processor.PageProcessor;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -28,6 +36,8 @@ import static java.lang.Thread.sleep;
 
 /**
  * Amazon卖家中心每周BuyBox数据抓取
+ *
+ * Download the data of the dat two days ago
  */
 @Component
 @Slf4j
@@ -39,21 +49,24 @@ public class AmazonScBuyBox implements PageProcessor {
 
     private SpiderConfig spiderConfig;
 
+    private CommonSettingService commonSettingService;
+
+    // parse date default be two days ago
+    private LocalDate parseDate = LocalDate.now().minusDays(2);
+
     @Autowired
-    public AmazonScBuyBox(SpiderConfig spiderConfig) {
+    public AmazonScBuyBox(SpiderConfig spiderConfig, CommonSettingService commonSettingService) {
         this.spiderConfig = spiderConfig;
+        this.commonSettingService = commonSettingService;
     }
 
 //    @Autowired
 //    private CookiesUtils cookiesUtils;
 
-    @Value("${amazon.sc.freelogin.cookies.name}")
-    private String cookiesConfigName;
-
     private Site site = Site
             .me()
             .setRetryTimes(3)
-            .setDomain(SpiderUrl.SPIDER_SC_INDEX)
+            .setDomain(SpiderUrl.SPIDER_INDEX)
             .setSleepTime(3000)
             .setUserAgent(
                     "User-Agent:Mozilla/5.0(Macintosh;IntelMacOSX10_7_0)AppleWebKit/535.11(KHTML,likeGecko)Chrome/17.0.963.56Safari/535.11");
@@ -67,6 +80,21 @@ public class AmazonScBuyBox implements PageProcessor {
         return site;
     }
 
+    public void setParseDate(LocalDate date){
+        if(date != null){
+
+            if(date.compareTo(LocalDate.now().minusDays(2)) > 0){
+                log.info("[AmazonScBuyBox] [setParseDate] cannot set parse date after two days before");
+                parseDate = LocalDate.now().minusDays(2);
+            }else{
+                parseDate = date;
+            }
+
+        }else{
+            parseDate = LocalDate.now().minusDays(2);
+        }
+    }
+
     /**
      * 页面抓取过程
      *
@@ -77,59 +105,54 @@ public class AmazonScBuyBox implements PageProcessor {
             log.info("0.step21=>进入抓取");
         }
 
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        String downloadDir = spiderConfig.getScBuyBoxDownloadPath();
 
         // 1.建立WebDriver
-        System.setProperty("webdriver.chrome.driver", spiderConfig.getChromeDriverPath());
-
-//        String downloadFilepath = "/Users/shaochinlin/Documents/Bizright";
-//        HashMap<String, Object> chromePrefs = new HashMap<String, Object>();
-//        chromePrefs.put("profile.default_content_settings.popups", 0);
-//        chromePrefs.put("download.default_directory", downloadFilepath);
-//
-//        ChromeOptions chromeOptions = new ChromeOptions();
-//        chromeOptions.setExperimentalOption("prefs", chromePrefs);
-//
-//        DesiredCapabilities cap = DesiredCapabilities.chrome();
-//        cap.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);
-//        cap.setCapability(ChromeOptions.CAPABILITY, chromeOptions);
-
-        WebDriver driver = WebDriverUtils.getWebDriver(spiderConfig.getDownloadPath());
+        WebDriver driver = WebDriverUtils.getWebDriver(spiderConfig.getChromeDriverPath(), downloadDir, false);
 
         try {
+
+            driver.manage().deleteAllCookies();
 
             // 1.1设置页面超时等待时间,20S
             driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
 
             // 2.初始打开页面
-//            driver.get(SpiderUrl.SPIDER_SC_INDEX);
-            driver.get(SpiderUrl.SPIDER_INDEX);
+            driver.navigate().to(SpiderUrl.AMAZON_SC_404);
 
             // 3.add Cookies 在工具类中解析json
+            List<Cookie> cookies = commonSettingService.getAmazonSCCookies();
+
+            List<org.openqa.selenium.Cookie> sCookies = CookiesUtils.cookiesToSeleniumCookies(cookies);
+
             driver.manage().deleteAllCookies();
-            List<Cookie> listCookies = JsonToListUtil.amazonSourceCookieList2CookieList(JsonToListUtil.getListByPath(spiderConfig.getAmzScCookieFilepath()));
-            for (Cookie cookie : listCookies) {
+            WebDriverUtils.addSeleniumCookies(driver, sCookies);
 
-                System.out.println(cookie.getName() + ":" + cookie.getDomain());
+            if(!WebDriverUtils.checkAmazonSCCookiesValid(driver)){
+                driver.manage().deleteAllCookies();
+                WebDriverUtils.getAmazonSCCookies(driver);
 
-                // Cookie(String name, String value, String domain, String path, Date expiry, boolean isSecure, boolean isHttpOnly)
-                // Havn't know why cannot add this cookie
-                if (!cookie.getName().equals("__Host-mons-selections") && !cookie.getName().equals("__Host-mselc")) {
-                    driver.manage().addCookie(new org.openqa.selenium.Cookie(cookie.getName(), cookie.getValue(), cookie.getDomain(),
-                            cookie.getPath(), cookie.getExpiry(), cookie.getIsSecure(), cookie.getIsHttpOnly()));
-                }
+                List<Cookie> driverCookies = CookiesUtils.seleniumCookieToCookie(driver.manage().getCookies());
+
+                String newCookiesStr = objectMapper.writeValueAsString(driverCookies);
+
+                commonSettingService.setValue(Consts.AMAZON_SC_COOKIES, newCookiesStr, "system");
             }
 
             // 4.重定向跳转
-            // 构造查询日期数据，获取上一个自然周的数据
-            String fromDate = DateUtil.format(UsDateUtils.beginOfWeek(DateUtil.lastWeek()), DateFormat.YEAR_MONTH_DAY_MMddyyyy);
-            String toDate = DateUtil.format(UsDateUtils.endOfWeek(DateUtil.lastWeek()), DateFormat.YEAR_MONTH_DAY_MMddyyyy);
-            String filterFromDate = fromDate;
-            String filterToDate = toDate;
+            // download the day before yesterday data
+//             构造查询日期数据，获取上一个自然周的数据
+            String dayBeforeYesterdayStr = parseDate.format(DateTimeFormatter.ofPattern(DateFormat.YEAR_MONTH_DAY_MMddyyyy));
+
+            String filterFromDate = dayBeforeYesterdayStr;
+            String filterToDate = dayBeforeYesterdayStr;
             final String redirectUrl = SpiderUrl.SPIDER_SC_BUYBOX.replace("{filterFromDate}", filterFromDate)
                     .replace("{filterToDate}", filterToDate)
-                    .replace("{fromDate}", fromDate)
-                    .replace("{toDate}", toDate);
-            driver.get(redirectUrl);
+                    .replace("{fromDate}", dayBeforeYesterdayStr)
+                    .replace("{toDate}", dayBeforeYesterdayStr);
+            driver.navigate().to(redirectUrl);
 
             sleep(10000);
 
@@ -152,11 +175,25 @@ public class AmazonScBuyBox implements PageProcessor {
             detailCsvDownloadButtonElement.click();
 
             try {
-                sleep(30000);
+                sleep(10000);
             } catch (InterruptedException e) {
                 throw new ServiceException(RespErrorEnum.SPIDER_EXEC.getSubStatusCode(), RespErrorEnum.SPIDER_EXEC.getSubStatusMsg());
             }
+
+            // 8. Change the last download filename
+            File downloadFile = FileUtils.getLatestFileWithNameFromDir(downloadDir, CsvBatchConfigForAmzScBuyBox.FILE_NAME);
+            Path oldFilePath = Paths.get(downloadFile.getPath());
+
+            String fileDateStr = DateUtil.format(DateUtil.parse(dayBeforeYesterdayStr, DateFormat.YEAR_MONTH_DAY_MMddyyyy), DateFormat.YEAR_MONTH_DAY);
+
+            String newFileName = StrUtil.concat(true, CsvBatchConfigForAmzScBuyBox.FILE_NAME, "-", fileDateStr);
+
+            Files.move(oldFilePath, oldFilePath.resolveSibling(newFileName + ".csv"));
+
+
         } catch (Exception e) {
+            log.info("[AmazonScBuyBox download data process failed]", e);
+            driver.quit();
             e.printStackTrace();
             throw new ServiceException(RespErrorEnum.SPIDER_EXEC.getSubStatusCode(), RespErrorEnum.SPIDER_EXEC.getSubStatusMsg());
         } finally {

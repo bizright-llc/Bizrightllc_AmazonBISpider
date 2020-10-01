@@ -403,7 +403,7 @@ public class CsvBatchConfigForAmzDailySales {
 
                     MyFileFilter filter = new MyFileFilter();
 
-                    File[] files = FileUtils.getFileFromDir(spiderConfig.getDownloadPath(), filter);
+                    File[] files = FileUtils.getFileFromDir(spiderConfig.getVcDailySalesDownloadPath(), filter);
 
                     if (files == null || files.length == 0) {
                         log.info("No daily sales file to process");

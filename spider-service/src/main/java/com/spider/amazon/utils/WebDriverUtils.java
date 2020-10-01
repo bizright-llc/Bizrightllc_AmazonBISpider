@@ -21,7 +21,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Random;
 
 import static java.lang.Thread.sleep;
 
@@ -234,27 +234,28 @@ public class WebDriverUtils {
 
     public static void addCookies(WebDriver driver, List<Cookie> listCookies) {
         if(driver == null){
-            return;
+            throw new IllegalArgumentException("Cannot add cookies to null driver");
         }
 
         for (Cookie cookie : listCookies) {
-            if(cookie.getDomain() == null){
-                driver.manage().addCookie(new org.openqa.selenium.Cookie(cookie.getName(), cookie.getValue()));
-            }else{
-                driver.manage().addCookie(new org.openqa.selenium.Cookie(cookie.getName(), cookie.getValue(), cookie.getDomain(),
-                        cookie.getPath(), cookie.getExpiry(), cookie.getIsSecure(), cookie.getIsHttpOnly()));
-            }
+            driver.manage().addCookie(new org.openqa.selenium.Cookie(cookie.getName(), cookie.getValue()));
         }
     }
 
     public static void addSeleniumCookies(WebDriver driver, List<org.openqa.selenium.Cookie> listCookies) {
         if(driver == null){
-            return;
+            throw new IllegalArgumentException("Cannot add cookies to null driver");
         }
+        JavascriptExecutor javascript = (JavascriptExecutor) driver;
+        String DomainUsingJS=(String)javascript.executeScript("return document.domain");
 
         for (org.openqa.selenium.Cookie cookie : listCookies) {
             // Haven't Know the reason cannot add these token
-            driver.manage().addCookie(cookie);
+            try{
+                driver.manage().addCookie(cookie);
+            }catch (Exception ex){
+                log.error("[WebDriverUtils][addSeleniumCookies]", ex);
+            }
         }
     }
 
@@ -330,6 +331,89 @@ public class WebDriverUtils {
 
     }
 
+    public static void getAmazonSCCookies(WebDriver driver){
+
+        String loginBtnXPath = "//*[@id=\"wp-content\"]/div[1]/div/div/div/div[2]/div/div[2]/div[1]/div[1]/div";
+
+        try{
+
+            driver.manage().deleteAllCookies();
+
+            driver.navigate().to(SpiderUrl.SPIDER_SC_INDEX);
+
+            WebElement signInBtnEle = expWaitForElement(driver, By.xpath(loginBtnXPath), 5);
+            elementClick(signInBtnEle);
+
+            WebElement emailInputEle = expWaitForElement(driver, By.name("email"), 5);
+            emailInputEle.sendKeys("james.l@bzrthinc.com");
+
+            randomSleep();
+
+            WebElement passwordInputEle = expWaitForElement(driver, By.name("password"), 5);
+            passwordInputEle.sendKeys("Lovebizright");
+
+            randomSleep();
+
+            WebElement rememberMeCheckBoxEle = expWaitForElement(driver, By.name("rememberMe"), 5);
+            elementClick(rememberMeCheckBoxEle);
+
+            randomSleep();
+
+            WebElement loginBtnEle = expWaitForElement(driver, By.id("signInSubmit"), 5);
+            elementClick(loginBtnEle);
+
+            randomSleep();
+
+            WebElement authSendCodeBtnEle = expWaitForElement(driver, By.id("auth-send-code"), 5);
+
+            if (authSendCodeBtnEle != null)
+            {
+                elementClick(authSendCodeBtnEle);
+            }
+
+            MailService mailService = new MailServiceImpl();
+            mailService.login("bizright.spider@gmail.com", "Lovebizright");
+
+            String otpCode = "";
+            for (int i=0; i<5; i++){
+                otpCode = mailService.getLastAmazonVCOTP();
+                if(StringUtils.isNotEmpty(otpCode)){
+                    break;
+                }
+            }
+
+            WebElement otpCodeInputEle = expWaitForElement(driver, By.id("auth-mfa-otpcode"), 5);
+            otpCodeInputEle.sendKeys(otpCode);
+
+            randomSleep();
+
+            WebElement otpRememberCheckBoxEle = expWaitForElement(driver, By.id("auth-mfa-remember-device"), 5);
+            elementClick(otpRememberCheckBoxEle);
+
+            randomSleep();
+
+            WebElement otpSignInBtnEle = expWaitForElement(driver, By.id("auth-signin-button"), 5);
+            elementClick(otpSignInBtnEle);
+
+            randomSleep();
+
+        }catch (Exception ex){
+            log.info("[getAmazonVCCookies] throw exception");
+            log.info(ex.getLocalizedMessage());
+        }
+    }
+
+    /**
+     * Click element and wait
+     * @param element
+     * @throws InterruptedException
+     */
+    public void elementClickAndWait(WebElement element) throws InterruptedException {
+        elementClick(element);
+
+        randomSleep();
+    }
+
     /**
      * Check web driver amazon vendor central cookies valid or not
      *
@@ -345,7 +429,7 @@ public class WebDriverUtils {
         }
 
         try{
-            driver.navigate().to("https://vendorcentral.amazon.com/hz/vendor/members/home/check");
+            driver.navigate().to(SpiderUrl.AMAZON_VC_404);
 
             sleep(1000);
 
@@ -371,12 +455,65 @@ public class WebDriverUtils {
         }
     }
 
+    /**
+     * Check web driver amazon seller central cookies valid or not
+     *
+     * @param driver
+     * @return
+     */
+    public static boolean checkAmazonSCCookiesValid(WebDriver driver) throws InterruptedException {
+
+        log.info("[checkAmazonSCCookiesValid] check web driver amazon sc cookies");
+
+        if(driver == null){
+            throw new IllegalArgumentException("Web driver cannot be null");
+        }
+
+        try{
+            driver.navigate().to(SpiderUrl.AMAZON_SC_CHECK);
+
+            sleep(1000);
+
+            WebElement regionFlag = expWaitForElement(driver, By.xpath("//*[@id=\"sc-mkt-switcher-form\"]/img"), 10);
+
+            WebElement settingMenuEle = expWaitForElement(driver, By.id("sc-quicklink-settings"), 10);
+
+            if(regionFlag != null && settingMenuEle != null){
+                return true;
+            }
+
+            return false;
+        }catch (Exception ex){
+            return false;
+        }
+    }
+
+    public static void randomSleep() throws InterruptedException {
+        Random rand = new Random();
+
+        int low = 500;
+        int high = 1500;
+
+        randomSleepBetween(low, high);
+    }
+
+    public static void randomSleepBetween(int l, int h) throws InterruptedException {
+
+        Random rand = new Random();
+
+        int low = Math.min(l,h);
+        int high = Math.max(l,h);
+
+        int random = rand.nextInt(high - low) + low;
+        sleep(random);
+    }
+
     public static void addAmazonVCCookies(WebDriver driver, List<org.openqa.selenium.Cookie> cookies) throws InterruptedException {
         if (driver == null){
             throw new IllegalArgumentException("Add amazon cookies driver cannot be null");
         }
 
-        driver.navigate().to(SpiderUrl.AMAZON_VC_INDEX);
+        driver.navigate().to(SpiderUrl.AMAZON_VC_404);
 
         sleep(1000);
 

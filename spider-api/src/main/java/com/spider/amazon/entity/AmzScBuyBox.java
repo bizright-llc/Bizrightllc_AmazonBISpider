@@ -29,4 +29,8 @@ public class AmzScBuyBox implements Serializable {
     private String totalOrderItems;
     private String totalOrderItemsB2B;
 
+    // file information
+    private String fromDate;
+    private String toDate;
+
 }

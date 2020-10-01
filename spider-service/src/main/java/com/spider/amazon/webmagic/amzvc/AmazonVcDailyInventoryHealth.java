@@ -16,7 +16,6 @@ import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -133,19 +132,17 @@ public class AmazonVcDailyInventoryHealth implements PageProcessor {
      */
     private void getFiles(SpiderConfig spiderConfig, int webDriverWaitSecond) {
 
-        String downloadFilePath = spiderConfig.getDownloadPath();
+        String downloadFilePath = spiderConfig.getVcHealthInventoryDownloadPath();
 
-        WebDriver driver = WebDriverUtils.getWebDriver(downloadFilePath, true);
+        WebDriver driver = WebDriverUtils.getWebDriver(downloadFilePath, false);
 
         ObjectMapper objectMapper = new ObjectMapper();
 
         try {
 
-            WebDriverWait wait = new WebDriverWait(driver, webDriverWaitSecond);
-
             // 2.初始打开页面
             driver.manage().timeouts().pageLoadTimeout(20, TimeUnit.SECONDS); // 页面加载超时时间
-            driver.get(SpiderUrl.AMAZON_VC_INDEX);
+            driver.navigate().to(SpiderUrl.AMAZON_VC_404);
 
             // 3.Set cookie
             driver.manage().deleteAllCookies();
@@ -178,7 +175,7 @@ public class AmazonVcDailyInventoryHealth implements PageProcessor {
                 @Override
                 public void run() {
 
-                    WebDriver sourcingDriver = WebDriverUtils.getWebDriver(spiderConfig.getDownloadPath(), false);
+                    WebDriver sourcingDriver = WebDriverUtils.getWebDriver(downloadFilePath, false);
 
                     try{
 
@@ -276,7 +273,7 @@ public class AmazonVcDailyInventoryHealth implements PageProcessor {
                 @SneakyThrows
                 @Override
                 public void run() {
-                    WebDriver manufacturingDriver = WebDriverUtils.getWebDriver(spiderConfig.getDownloadPath(), false);
+                    WebDriver manufacturingDriver = WebDriverUtils.getWebDriver(downloadFilePath, false);
 
                     try{
 

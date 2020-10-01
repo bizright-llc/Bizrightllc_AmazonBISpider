@@ -5,6 +5,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import com.common.exception.ServiceException;
+import com.spider.amazon.batch.scbuyboxinfo.CsvBatchConfigForAmzScBuyBox;
 import com.spider.amazon.config.SpiderConfig;
 import com.spider.amazon.cons.DateFormat;
 import com.spider.amazon.cons.PageQryType;
@@ -15,13 +16,15 @@ import com.spider.amazon.remote.api.SpiderUrl;
 import com.spider.amazon.service.*;
 import com.spider.amazon.service.impl.SpringBatchCallServiceImpl;
 import com.spider.amazon.utils.FileUtils;
-import com.spider.amazon.webmagic.*;
 import com.spider.amazon.webmagic.amz.AmazonAdConsumeProcessor;
+import com.spider.amazon.webmagic.amzsc.AmazonScBuyBox;
+import com.spider.amazon.webmagic.amzsc.AmazonScFbaInventory;
 import com.spider.amazon.webmagic.amzvc.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import us.codecraft.webmagic.Spider;
 import us.codecraft.webmagic.downloader.HttpClientDownloader;
 import us.codecraft.webmagic.proxy.Proxy;
@@ -31,13 +34,16 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static java.lang.Thread.sleep;
 
 /**
  * 定时任务列表
  */
-@Component
+// Comment when testing
+//@Component
 @Slf4j
 public class ScheduleTask {
 
@@ -78,6 +84,7 @@ public class ScheduleTask {
 
     private final static String AMAZON_VC_INVENTORY_HEALTH_FILE_NAME = "Inventory Health_US";
     private final static String AMAZON_VC_DAILY_SALES_FILE_NAME = "Sales Diagnostic_Detail View_US";
+    private final static String AMAZON_SC_BUY_BOX_FILE_NAME = "BusinessReport";
 
     /**
      * Fba库存日报处理属性
@@ -89,13 +96,13 @@ public class ScheduleTask {
     private static final int vendorPoOfferSetDay=0;
 
 
-//    /**
-//     * 测试定时任务
-//     */
-//    @Scheduled(cron = "*/60 * * * * ?")
-//    public void task01(){
-//        System.out.println("task01 run...");
-//    }
+    /**
+     * 测试定时任务
+     */
+    @Scheduled(cron = "0 0 0 */1 * *")
+    public void task01(){
+        System.out.println("task01 run...");
+    }
 
     /**
      * 测试配置文件加载
@@ -124,7 +131,7 @@ public class ScheduleTask {
     @Scheduled(cron = "0 50 1 * * 1")
     public void schedulerScBuyBox() {
         log.info("0.step56=>开始执行［schedulerScBuyBox］");
-        Spider spider = Spider.create(new AmazonScBuyBox(spiderConfig));
+        Spider spider = Spider.create(new AmazonScBuyBox(spiderConfig, commonSettingService));
         spider.addUrl(spiderConfig.getSpiderIndex());
         spider.setExitWhenComplete(true);
         spider.run();
@@ -283,7 +290,7 @@ public class ScheduleTask {
     /**
      * 定时处理Amazon VC 销量报表
      */
-    @Scheduled(fixedDelay = 60000)
+//    @Scheduled(fixedDelay = 60000)
     public void schedulerVcSalesDataDeal() {
         log.info("0.step112=>开始执行［schedulerVcSalesDataDeal］");
 
@@ -318,8 +325,17 @@ public class ScheduleTask {
      */
     @Scheduled(cron = "0 10 7-12 * * ? ")
     public void schedulerScBuyBoxDeal() {
-        log.info("0.step112=>开始执行［schedulerScBuyBoxDeal］");
-        springBatchCallServiceImpl.callScBuyBoxReportDataDeal();
+        log.info("[schedulerScBuyBoxDeal] start schedule ");
+
+        if(checkSCBuyBoxFileExist()){
+            log.info("[schedulerScBuyBoxDeal] Find the file, start process");
+            springBatchCallServiceImpl.callScBuyBoxReportDataDeal();
+        }else{
+            log.info("[schedulerScBuyBoxDeal] Did not find any file to process");
+        }
+
+        log.info("[schedulerScBuyBoxDeal] Complete");
+
     }
 
     /**
@@ -366,6 +382,11 @@ public class ScheduleTask {
                 .run();
     }
 
+    @ExceptionHandler
+    public void handle(Exception e){
+        log.error("[schedule failed]", e);
+    }
+
     /**
      * Check if any file haven't been process
      *
@@ -387,7 +408,7 @@ public class ScheduleTask {
 
         MyFileFilter filter = new MyFileFilter();
 
-        File[] files = FileUtils.getFileFromDir(spiderConfig.getDownloadPath(), filter);
+        File[] files = FileUtils.getFileFromDir(spiderConfig.getVcHealthInventoryDownloadPath(), filter);
 
         File file = files != null && files.length > 0 ? files[0] : null;
 
@@ -420,7 +441,44 @@ public class ScheduleTask {
 
         MyFileFilter filter = new MyFileFilter();
 
-        File[] files = FileUtils.getFileFromDir(spiderConfig.getDownloadPath(), filter);
+        File[] files = FileUtils.getFileFromDir(spiderConfig.getVcDailySalesDownloadPath(), filter);
+
+        File file = files != null && files.length > 0 ? files[0] : null;
+
+        // File exist
+        if (file != null && FileUtil.exist(file.getPath())) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private boolean checkSCBuyBoxFileExist(){
+
+        class MyFileFilter implements FileFilter {
+
+            public boolean accept(File f) {
+
+                final String regex = "BusinessReport-\\d{8}.csv";
+
+                final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
+
+                String fileName = f.getName();
+
+                Matcher matcher = pattern.matcher(fileName);
+
+                if (f.getName().contains(AMAZON_SC_BUY_BOX_FILE_NAME) && !f.getName().contains(CsvBatchConfigForAmzScBuyBox.COMPLETE_MARK) && matcher.find()) {
+                    if(FileUtils.getFileExtension(f.getName()).equalsIgnoreCase("csv")){
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }
+
+        MyFileFilter filter = new MyFileFilter();
+
+        File[] files = FileUtils.getFileFromDir(spiderConfig.getVcDailySalesDownloadPath(), filter);
 
         File file = files != null && files.length > 0 ? files[0] : null;
 

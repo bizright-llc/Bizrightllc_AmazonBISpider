@@ -30,4 +30,6 @@ public interface CommonSettingService {
 
     List<Cookie> getAmazonVCCookies();
 
+    List<Cookie> getAmazonSCCookies();
+
 }
