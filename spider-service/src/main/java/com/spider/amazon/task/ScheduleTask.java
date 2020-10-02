@@ -418,7 +418,7 @@ public class ScheduleTask {
         class MyFileFilter implements FileFilter {
 
             public boolean accept(File f) {
-                if (f.getName().contains(AMAZON_VC_DAILY_SALES_FILE_NAME) && !f.getName().contains("Daily")) {
+                if (f.getName().contains(AMAZON_VC_DAILY_SALES_FILE_NAME) && !f.getName().toLowerCase().contains("Daily".toLowerCase())) {
                     if(FileUtils.getFileExtension(f.getName()).equalsIgnoreCase("csv")){
                         return true;
                     }

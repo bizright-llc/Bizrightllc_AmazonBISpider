@@ -386,7 +386,7 @@ public class CsvBatchConfigForAmzDailySales {
 
                         public boolean accept(File f) {
                             // Check if the file name doesn't have the finished tag
-                            if (f.getName().contains(fileName) && !f.getName().contains("FINISHED")) {
+                            if (f.getName().contains(fileName) && !f.getName().toLowerCase().contains("Daily".toLowerCase())) {
                                 return true;
                             }
                             return false;
