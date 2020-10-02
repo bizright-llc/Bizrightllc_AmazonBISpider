@@ -212,11 +212,11 @@ public class AmazonVcDailySales implements PageProcessor {
 
                         // 6.抓取点击下载元素进行点击
                         // 判断是否出现了Download按钮,未在规定时间内出现重新刷新页面
-                        WebElement downloadButtonElement = WebDriverUtils.expWaitForElement(manuDriver, By.xpath("//*[@id='downloadButton']//button[1]"), 10);
+                        WebElement downloadButtonElement = WebDriverUtils.expWaitForElement(manuDriver, By.xpath("//*[@id='downloadButton']//button[1]"), 30);
                         downloadButtonElement.click();
 
                         // 7.抓取CSV元素生成并进行点击
-                        WebElement detailCsvDownloadButtonElement = WebDriverUtils.expWaitForElement(manuDriver, By.xpath(detailCsvXPath), 10);
+                        WebElement detailCsvDownloadButtonElement = WebDriverUtils.expWaitForElement(manuDriver, By.xpath(detailCsvXPath), 30);
                         detailCsvDownloadButtonElement.click();
 
                         // 8.获取点击之后的弹出框点击确定
@@ -347,7 +347,7 @@ public class AmazonVcDailySales implements PageProcessor {
 
                     }catch (Exception e){
                         sourcingDriver.quit();
-                        log.info("[Get sourcing view failed]", e);
+                        log.error("[Get sourcing view failed]", e);
                         throw e;
                     }finally {
                         sourcingDriver.quit();
