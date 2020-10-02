@@ -72,15 +72,6 @@ public class AmazonVcPromotionsProcessor implements PageProcessor {
      * @return
      */
     public Site getSite() {
-
-//        List<Cookie> listCookies = JsonToListUtil.amazonSourceCookieList2CookieList(JsonToListUtil.getListByPath(spiderConfig.getAmzVcCookieFilepath()));
-
-        List<Cookie> cookies = commonSettingService.getAmazonVCCookies();
-
-        for (Cookie cookie : cookies) {
-            site.addCookie(cookie.getName(), cookie.getValue());
-        }
-
         return site;
     }
 

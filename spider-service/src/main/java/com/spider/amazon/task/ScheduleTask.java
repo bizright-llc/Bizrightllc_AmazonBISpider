@@ -21,6 +21,7 @@ import com.spider.amazon.webmagic.amzvc.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -127,6 +128,7 @@ public class ScheduleTask {
      * 定时下载Amazon SC Buy Box数据
      */
     @Scheduled(cron = "0 50 1 * * 1")
+    @Retryable(value = Exception.class, maxAttempts = 3)
     public void schedulerScBuyBox() {
         log.info("0.step56=>开始执行［schedulerScBuyBox］");
         Spider spider = Spider.create(new AmazonScBuyBox(spiderConfig, commonSettingService));
@@ -139,6 +141,7 @@ public class ScheduleTask {
      * 定时下载Amazon VC daily sales manufacturing view
      */
     @Scheduled(cron = "0 10 2 * * ?")
+    @Retryable(value = Exception.class, maxAttempts = 3)
     public void schedulerVcDailySales() throws InterruptedException {
         log.info("0.step56=>开始执行［schedulerVcDailySales］");
 
@@ -148,44 +151,16 @@ public class ScheduleTask {
             spider.setExitWhenComplete(true);
             spider.run();
         }catch (Exception ex){
-            log.info("[schedulerVcDailySales failed]", ex);
+            log.error("[schedulerVcDailySales] failed", ex);
+            throw ex;
         }
     }
-
-    /**
-     * 定时下载Amazon VC daily sales sourcing view
-     */
-//    @Scheduled(cron = "0 20 2 * * ?")
-//    public void schedulerVcDailySalesSourcing() throws InterruptedException {
-//        log.info("0.step56=>开始执行［schedulerVcDailySalesSourcing］");
-//
-//        try{
-//            Spider spider = Spider.create(new AmazonVcSourcingDailySales(spiderConfig, commonSettingService));
-//            spider.addUrl(spiderConfig.getSpiderIndex());
-//            spider.setExitWhenComplete(true);
-//            spider.run();
-//        }catch (Exception ex){
-//            log.info("[schedulerVcDailySales] [sourcing view] failed", ex);
-//        }
-//    }
-
-//      already scrap daily sales
-//    /**
-//     * 定时下载Amazon VC 每周销量报表
-//     */
-//    @Scheduled(cron = "0 0 4 * * 1")
-//    public void schedulerVcWeeklySales() {
-//        log.info("0.step56=>开始执行［schedulerVcWeeklySales］");
-//        Spider spider = Spider.create(new AmazonVcWeeklySales());
-//        spider.addUrl(spiderConfig.getSpiderIndex());
-//        spider.setExitWhenComplete(true);
-//        spider.run();
-//    }
 
     /**
      * Download Amazon VC daily inventory files
      */
     @Scheduled(cron = "0 0 3 * * ?")
+    @Retryable(value = Exception.class, maxAttempts = 3)
     public void schedulerVcDailyInventorySourcing() {
         log.info("0.step64=>开始执行［schedulerVcDailyInventorySourcing］");
         Spider spider = Spider.create(new AmazonVcDailyInventoryHealth(spiderConfig, commonSettingService));
@@ -211,6 +186,7 @@ public class ScheduleTask {
      * Run at every monday
      */
     @Scheduled(cron = "0 0 4 * * ?")
+    @Retryable(Exception.class)
     public void schedulerVcDailyPromotionInfo() {
         log.info("0.step234=>开始执行［schedulerVcDailyPromotionInfo］");
         Spider spider = Spider.create(new AmazonVcPromotionsProcessor(spiderConfig, commonSettingService));
@@ -250,13 +226,14 @@ public class ScheduleTask {
 
     /**
      * 定时下载BOPAPI LA_PO信息
+     * TODO: Need to refactor
      */
-    @Scheduled(cron = "0 50 3 * * ?")
-    public void schedulerGetPOHeader() {
-        log.info("0.step130=>开始执行［schedulerGetPOHeader］");
-        poHeaderService.getPOHeader(GetPOHeaderDTO.builder()
-                .pageNo(pageNo).pageSize(pageSize).asin("").poDate(DateUtil.format(DateUtil.offset(DateUtil.date(), DateField.DAY_OF_MONTH, poHeaderOfferSetDay), "yyyyMMdd")).build());
-    }
+//    @Scheduled(cron = "0 50 3 * * ?")
+//    public void schedulerGetPOHeader() {
+//        log.info("0.step130=>开始执行［schedulerGetPOHeader］");
+//        poHeaderService.getPOHeader(GetPOHeaderDTO.builder()
+//                .pageNo(pageNo).pageSize(pageSize).asin("").poDate(DateUtil.format(DateUtil.offset(DateUtil.date(), DateField.DAY_OF_MONTH, poHeaderOfferSetDay), "yyyyMMdd")).build());
+//    }
 
     /**
      * 定时下载BOPAPI LA_INV信息
@@ -298,7 +275,6 @@ public class ScheduleTask {
         }else{
             log.info("No Amazon VC Daily Sales file");
         }
-
     }
 
     /**
@@ -394,10 +370,10 @@ public class ScheduleTask {
                 .run();
     }
 
-    @ExceptionHandler
-    public void handle(Exception e){
-        log.error("[schedule failed]", e);
-    }
+//    @ExceptionHandler
+//    public void handle(Exception e){
+//        log.error("[schedule failed]", e);
+//    }
 
     /**
      * Check if any file haven't been process
