@@ -346,6 +346,7 @@ public class CsvBatchConfigForAmzDailySales {
                     String filePath = jobContext.get("filePath").toString();
                     String viewingDate = paramMaps.get("viewingDate").toString();
                     String reportingRange = paramMaps.get("reportingRange").toString();
+                    String distributorView = paramMaps.get("distributorView").toString();
                     viewingDate = DateUtil.format(DateUtil.parse(viewingDate, DateFormat.YEAR_MONTH_DAY_MMddyyyy), DateFormat.YEAR_MONTH_DAY_yyyyMMdd);
 
                     // 文件重命名
@@ -358,7 +359,7 @@ public class CsvBatchConfigForAmzDailySales {
 
                         try {
 
-                            String newFileName = StrUtil.concat(true, fileName, "-", reportingRange, "-", viewingDate, "-", IdUtil.simpleUUID());
+                            String newFileName = StrUtil.concat(true, fileName, "-", reportingRange, "-", viewingDate, "-", distributorView, "-", IdUtil.simpleUUID());
 
                             //make sure file path doesn't have '/'
                             Files.move(oldFilePath, oldFilePath.resolveSibling(newFileName + ".csv"));
