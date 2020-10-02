@@ -102,7 +102,7 @@ public class AmazonScBuyBox implements PageProcessor {
      */
     public void process(Page page) {
         if (log.isInfoEnabled()) {
-            log.info("0.step21=>进入抓取");
+            log.info("[process] 0.step21=>进入抓取");
         }
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -130,6 +130,8 @@ public class AmazonScBuyBox implements PageProcessor {
             driver.manage().deleteAllCookies();
             WebDriverUtils.addSeleniumCookies(driver, sCookies);
 
+            WebDriverUtils.randomSleep();
+
             if(!WebDriverUtils.checkAmazonSCCookiesValid(driver)){
                 driver.manage().deleteAllCookies();
                 WebDriverUtils.getAmazonSCCookies(driver);
@@ -155,15 +157,6 @@ public class AmazonScBuyBox implements PageProcessor {
             driver.navigate().to(redirectUrl);
 
             sleep(10000);
-
-//            // 获得cookie
-//            Set<org.openqa.selenium.Cookie> coo = driver.manage().getCookies();
-//            System.out.println(coo);
-
-
-            // 5.进行操作点击下载Excel,抓取标题
-//            WebElement titleElement = driver.findElement(By.xpath("//title"));
-//            String title = titleElement.getAttribute("text");
 
             // 6.抓取点击下载元素进行点击
             // 判断是否出现了Download按钮,未在规定时间内出现重新刷新页面
