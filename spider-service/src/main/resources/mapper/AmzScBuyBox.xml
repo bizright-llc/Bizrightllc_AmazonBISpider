@@ -14,16 +14,28 @@
                                                         "Sessions", "SessionPercentage", "PageViews", "PageViewsPercentage",
                                                         "BuyBoxPercentage", "UnitsOrdered", "UnitsOrderedB2B", "UnitSessionPercentage",
                                                         "UnitSessionPercentageB2B", "OrderedProductSales", "OrderedProductSalesB2B",
-                                                        "TotalOrderItems", "TotalOrderItemsB2B", FromDate, ToDate, "InsertedAt")
-        values (#{parentAsin}, #{childAsin}, #{title}, #{sessions},
-                #{sessionPercentage}, #{pageViews}, #{pageViewsPercentage},
+                                                        "TotalOrderItems", "TotalOrderItemsB2B",
+                                                         "SessionsNum", "SessionPercentageNum", "PageViewsNum", "PageViewsPercentageNum",
+                                                         "BuyBoxPercentageNum", "UnitsOrderedNum", "UnitsOrderedB2BNum", "UnitSessionPercentageNum",
+                                                         "UnitSessionPercentageB2BNum", "OrderedProductSalesNum", "OrderedProductSalesB2BNum",
+                                                         "TotalOrderItemsNum", "TotalOrderItemsB2BNum",
+                                                         FromDate, ToDate, "InsertedAt")
+        values (#{parentAsin}, #{childAsin}, #{title},
+                #{sessions},#{sessionPercentage}, #{pageViews}, #{pageViewsPercentage},
                 #{buyBoxPercentage}, #{unitsOrdered},
                 #{unitsOrderedB2B},
                 #{unitSessionPercentage}, #{unitSessionPercentageB2B},
                 #{orderedProductSales},
                 #{orderedProductSalesB2B},
-                #{totalOrderItems}, #{totalOrderItemsB2B}, #{fromDate},
-                #{toDate},getdate())
+                #{totalOrderItems}, #{totalOrderItemsB2B},
+                #{sessionsNum},#{sessionPercentageNum}, #{pageViewsNum}, #{pageViewsPercentageNum},
+                #{buyBoxPercentageNum}, #{unitsOrderedNum},
+                #{unitsOrderedB2BNum},
+                #{unitSessionPercentageNum}, #{unitSessionPercentageB2BNum},
+                #{orderedProductSalesNum},
+                #{orderedProductSalesB2BNum},
+                #{totalOrderItemsNum}, #{totalOrderItemsB2BNum},
+                #{fromDate},#{toDate},getdate())
     </update>
 
 </mapper>

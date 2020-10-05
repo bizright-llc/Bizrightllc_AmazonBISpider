@@ -1,5 +1,9 @@
 package com.spider.amazon.utils;
 
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -9,6 +13,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 public class ConvertUtils {
+
+    static Logger log = LoggerFactory.getLogger(ConvertUtils.class);
 
     public static String VC_PROMOTION_DATETIME = "MMMM d, yyyy h:mm:ss a zzz";
 
@@ -66,6 +72,30 @@ public class ConvertUtils {
             return Integer.parseInt(value);
         }catch (NumberFormatException e){
             e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     *
+     * @param numberStr
+     * @return
+     */
+    public static Float convertNumberStrToFloat(String numberStr){
+        if(numberStr == null || StringUtils.isEmpty(numberStr)){
+            return null;
+        }
+
+        if (numberStr.equalsIgnoreCase("—") || numberStr.equalsIgnoreCase("â€”")){
+            return 0f;
+        }
+
+        String str = numberStr.replaceAll("[^0-9.-]", "");
+
+        try{
+            return Float.parseFloat(str);
+        }catch (Exception e){
+            log.error("[convertNumberStrToFloat] number {} convert failed", str, e);
             return null;
         }
     }
