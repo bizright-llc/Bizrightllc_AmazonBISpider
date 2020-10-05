@@ -3,6 +3,7 @@ package com.spider.amazon.batch.sc.buyboxinfo;
 import cn.hutool.core.date.DateUtil;
 import com.spider.amazon.cons.DateFormat;
 import com.spider.amazon.entity.AmzScBuyBox;
+import com.spider.amazon.utils.ConvertUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.validator.ValidatingItemProcessor;
 
@@ -35,6 +36,20 @@ public class CsvItemProcessorForAmzScBuyBox extends ValidatingItemProcessor<AmzS
 
         item.setFromDate(viewingDate);
         item.setToDate(viewingDate);
+
+        item.setSessionsNum(Math.round(ConvertUtils.convertNumberStrToFloat(item.getSessions())));
+        item.setSessionPercentageNum(ConvertUtils.convertNumberStrToFloat(item.getSessionPercentage()));
+        item.setPageViewsNum(Math.round(ConvertUtils.convertNumberStrToFloat(item.getPageViews())));
+        item.setPageViewsPercentageNum(ConvertUtils.convertNumberStrToFloat(item.getPageViewsPercentage()));
+        item.setBuyBoxPercentageNum(ConvertUtils.convertNumberStrToFloat(item.getBuyBoxPercentage()));
+        item.setUnitsOrderedNum(Math.round(ConvertUtils.convertNumberStrToFloat(item.getUnitsOrdered())));
+        item.setUnitsOrderedB2BNum(Math.round(ConvertUtils.convertNumberStrToFloat(item.getUnitsOrderedB2B())));
+        item.setUnitSessionPercentageNum(ConvertUtils.convertNumberStrToFloat(item.getUnitSessionPercentage()));
+        item.setUnitSessionPercentageB2BNum(ConvertUtils.convertNumberStrToFloat(item.getUnitSessionPercentageB2B()));
+        item.setOrderedProductSalesNum(ConvertUtils.convertNumberStrToFloat(item.getOrderedProductSales()));
+        item.setOrderedProductSalesB2BNum(ConvertUtils.convertNumberStrToFloat(item.getOrderedProductSalesB2B()));
+        item.setTotalOrderItemsNum(Math.round(ConvertUtils.convertNumberStrToFloat(item.getTotalOrderItems())));
+        item.setTotalOrderItemsB2BNum(Math.round(ConvertUtils.convertNumberStrToFloat(item.getTotalOrderItemsB2B())));
 
 //        log.info("processor end validating...");
         return item;
