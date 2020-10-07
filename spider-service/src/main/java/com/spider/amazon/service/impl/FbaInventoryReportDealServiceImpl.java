@@ -109,7 +109,7 @@ public class FbaInventoryReportDealServiceImpl implements FbaInventoryReportDeal
         // do not use split(".")
         String[] nameArr = fileName.split("\\.");
 
-        String newFilename = String.format("%s-%s.csv", nameArr[0], IdUtil.simpleUUID());
+        String newFilename = String.format("%s-%s-%s.csv", nameArr[0], COMPLETE_MARK, IdUtil.simpleUUID());
 
         FileUtils.changeFilename(filePath+fileName, newFilename);
 

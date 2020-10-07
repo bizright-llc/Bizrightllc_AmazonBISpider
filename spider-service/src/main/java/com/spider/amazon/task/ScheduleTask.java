@@ -84,6 +84,7 @@ public class ScheduleTask {
     private final static String AMAZON_VC_INVENTORY_HEALTH_FILE_NAME = "Inventory Health_US";
     private final static String AMAZON_VC_DAILY_SALES_FILE_NAME = "Sales Diagnostic_Detail View_US";
     private final static String AMAZON_SC_BUY_BOX_FILE_NAME = "BusinessReport";
+    private final static String AMAZON_SC_FBA_INVENTORY_FILE_NAME = "Fba_Inventory";
 
     /**
      * Fba库存日报处理属性
@@ -491,16 +492,10 @@ public class ScheduleTask {
         class MyFileFilter implements FileFilter {
 
             public boolean accept(File f) {
-
-                final String regex = String.format("%s-\\d{8}.csv", AmazonScFbaInventory.FILE_RENAME);
-
-                final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
-
+                
                 String fileName = f.getName();
 
-                Matcher matcher = pattern.matcher(fileName);
-
-                if (f.getName().contains(AMAZON_SC_BUY_BOX_FILE_NAME) && !f.getName().contains(CsvBatchConfigForAmzScBuyBox.COMPLETE_MARK) && matcher.find()) {
+                if (f.getName().contains(AMAZON_SC_FBA_INVENTORY_FILE_NAME) && !f.getName().contains(FbaInventoryReportDealService.COMPLETE_MARK)) {
                     if(FileUtils.getFileExtension(f.getName()).equalsIgnoreCase("csv")){
                         return true;
                     }

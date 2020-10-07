@@ -6,6 +6,8 @@ package com.spider.amazon.service;
  */
 public interface FbaInventoryReportDealService {
 
+    public static String COMPLETE_MARK = "PROCESSED";
+
     /**
      * 获取BOP的InventoryDataDailySnapShot信息
      * @return
