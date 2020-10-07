@@ -1,221 +1,315 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.spider.amazon.mapper.FBAInventoryInfoDOMapper">
-  <resultMap id="BaseResultMap" type="com.spider.amazon.model.FBAInventoryInfoDO">
-    <result column="Id" jdbcType="INTEGER" property="id"/>
-    <result column="MerchantSKU" jdbcType="VARCHAR" property="merchantSku" />
-    <result column="FulfillmentNetworkSKU" jdbcType="VARCHAR" property="fulfillmentNetworkSku" />
-    <result column="ASIN" jdbcType="VARCHAR" property="asin" />
-    <result column="Title" jdbcType="VARCHAR" property="title" />
-    <result column="Condition" jdbcType="VARCHAR" property="condition" />
-    <result column="Price" jdbcType="VARCHAR" property="price" />
-    <result column="MFNListingExists" jdbcType="VARCHAR" property="mfnListingExists" />
-    <result column="MFNFulfillableQty" jdbcType="VARCHAR" property="mfnFulfillableQty" />
-    <result column="AFNListingExists" jdbcType="VARCHAR" property="afnListingExists" />
-    <result column="AFNWarehouseQty" jdbcType="VARCHAR" property="afnWarehouseQty" />
-    <result column="AFNFulfillableQty" jdbcType="VARCHAR" property="afnFulfillableQty" />
-    <result column="AFNUnsellable_Qty" jdbcType="VARCHAR" property="afnUnsellableQty" />
-    <result column="AFNEncumbered_Qty" jdbcType="VARCHAR" property="afnEncumberedQty" />
-    <result column="AFNTotalQty" jdbcType="VARCHAR" property="afnTotalQty" />
-    <result column="Volume" jdbcType="VARCHAR" property="volume" />
-    <result column="AFNInboundWorkingQty" jdbcType="VARCHAR" property="afnInboundWorkingQty" />
-    <result column="AFNInboundShippedQty" jdbcType="VARCHAR" property="afnInboundShippedQty" />
-    <result column="AFNInboundReceivingQty" jdbcType="VARCHAR" property="afnInboundReceivingQty" />
-    <result column="InventoryDate" jdbcType="TIMESTAMP" property="inventoryDate" />
-    <result column="InsertedAt" jdbcType="DATE" property="insertedAt" />
-  </resultMap>
-  <sql id="Example_Where_Clause">
-    <where>
-      <foreach collection="oredCriteria" item="criteria" separator="or">
-        <if test="criteria.valid">
-          <trim prefix="(" prefixOverrides="and" suffix=")">
-            <foreach collection="criteria.criteria" item="criterion">
-              <choose>
-                <when test="criterion.noValue">
-                  and ${criterion.condition}
-                </when>
-                <when test="criterion.singleValue">
-                  and ${criterion.condition} #{criterion.value}
-                </when>
-                <when test="criterion.betweenValue">
-                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
-                </when>
-                <when test="criterion.listValue">
-                  and ${criterion.condition}
-                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
-                    #{listItem}
-                  </foreach>
-                </when>
-              </choose>
+    <resultMap id="BaseResultMap" type="com.spider.amazon.model.FBAInventoryInfoDO">
+        <result column="Id" jdbcType="INTEGER" property="id"/>
+        <result column="MerchantSKU" jdbcType="VARCHAR" property="merchantSku"/>
+        <result column="FulfillmentNetworkSKU" jdbcType="VARCHAR" property="fulfillmentNetworkSku"/>
+        <result column="ASIN" jdbcType="VARCHAR" property="asin"/>
+        <result column="Title" jdbcType="VARCHAR" property="title"/>
+        <result column="Condition" jdbcType="VARCHAR" property="condition"/>
+        <result column="Price" jdbcType="VARCHAR" property="price"/>
+        <result column="MFNListingExists" jdbcType="VARCHAR" property="mfnListingExists"/>
+        <result column="MFNFulfillableQty" jdbcType="VARCHAR" property="mfnFulfillableQty"/>
+        <result column="AFNListingExists" jdbcType="VARCHAR" property="afnListingExists"/>
+        <result column="AFNWarehouseQty" jdbcType="VARCHAR" property="afnWarehouseQty"/>
+        <result column="AFNFulfillableQty" jdbcType="VARCHAR" property="afnFulfillableQty"/>
+        <result column="AFNUnsellable_Qty" jdbcType="VARCHAR" property="afnUnsellableQty"/>
+        <result column="AFNEncumbered_Qty" jdbcType="VARCHAR" property="afnEncumberedQty"/>
+        <result column="AFNTotalQty" jdbcType="VARCHAR" property="afnTotalQty"/>
+        <result column="Volume" jdbcType="VARCHAR" property="volume"/>
+        <result column="AFNInboundWorkingQty" jdbcType="VARCHAR" property="afnInboundWorkingQty"/>
+        <result column="AFNInboundShippedQty" jdbcType="VARCHAR" property="afnInboundShippedQty"/>
+        <result column="AFNInboundReceivingQty" jdbcType="VARCHAR" property="afnInboundReceivingQty"/>
+        <result column="InventoryDate" jdbcType="TIMESTAMP" property="inventoryDate"/>
+        <result column="InsertedAt" jdbcType="DATE" property="insertedAt"/>
+    </resultMap>
+    <sql id="Example_Where_Clause">
+        <where>
+            <foreach collection="oredCriteria" item="criteria" separator="or">
+                <if test="criteria.valid">
+                    <trim prefix="(" prefixOverrides="and" suffix=")">
+                        <foreach collection="criteria.criteria" item="criterion">
+                            <choose>
+                                <when test="criterion.noValue">
+                                    and ${criterion.condition}
+                                </when>
+                                <when test="criterion.singleValue">
+                                    and ${criterion.condition} #{criterion.value}
+                                </when>
+                                <when test="criterion.betweenValue">
+                                    and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                                </when>
+                                <when test="criterion.listValue">
+                                    and ${criterion.condition}
+                                    <foreach close=")" collection="criterion.value" item="listItem" open="("
+                                             separator=",">
+                                        #{listItem}
+                                    </foreach>
+                                </when>
+                            </choose>
+                        </foreach>
+                    </trim>
+                </if>
             </foreach>
-          </trim>
-        </if>
-      </foreach>
-    </where>
-  </sql>
-  <sql id="Base_Insert_Column_List">
-    MerchantSKU, FulfillmentNetworkSKU,
-      ASIN, Title, Condition,
-      Price, MFNListingExists, MFNFulfillableQty,
-      AFNListingExists, AFNWarehouseQty, AFNFulfillableQty,
-      AFNUnsellableQty, AFNEncumberedQty, AFNTotalQty,
-      Volume, AFNInboundWorkingQty, AFNInboundShippedQty,
-      AFNInboundReceivingQty, InventoryDate, InsertedAt
-  </sql>
-  <insert id="insert" parameterType="com.spider.amazon.model.FBAInventoryInfoDO">
-    insert into FBAInventoryInfo (MerchantSKU, FulfillmentNetworkSKU,
-      ASIN, Title, Condition, 
-      Price, MFNListingExists, MFNFulfillableQty,
-      AFNListingExists, AFNWarehouseQty, AFNFulfillableQty,
-      AFNUnsellableQty, AFNEncumberedQty, AFNTotalQty,
-      Volume, AFNInboundWorkingQty, AFNInboundShippedQty,
-      AFNInboundReceivingQty, InventoryDate, InsertedAt)
-    values (#{merchantSku,jdbcType=VARCHAR}, #{fulfillmentNetworkSku,jdbcType=VARCHAR}, 
-      #{asin,jdbcType=VARCHAR}, #{title,jdbcType=VARCHAR}, #{condition,jdbcType=VARCHAR}, 
-      #{price,jdbcType=VARCHAR}, #{mfnListingExists,jdbcType=VARCHAR}, #{mfnFulfillableQty,jdbcType=VARCHAR}, 
-      #{afnListingExists,jdbcType=VARCHAR}, #{afnWarehouseQty,jdbcType=VARCHAR}, #{afnFulfillableQty,jdbcType=VARCHAR}, 
-      #{afnUnsellableQty,jdbcType=VARCHAR}, #{afnEncumberedQty,jdbcType=VARCHAR}, #{afnTotalQty,jdbcType=VARCHAR}, 
-      #{volume,jdbcType=VARCHAR}, #{afnInboundWorkingQty,jdbcType=VARCHAR}, #{afnInboundShippedQty,jdbcType=VARCHAR}, 
-      #{afnInboundReceivingQty,jdbcType=VARCHAR}, #{inventoryDate}, getdate())
-  </insert>
-  <insert id="insertSelective" parameterType="com.spider.amazon.model.FBAInventoryInfoDO">
-    insert into FBAInventoryInfo
-    <trim prefix="(" suffix=")" suffixOverrides=",">
-      <if test="merchantSku != null">
-        Merchant_SKU,
-      </if>
-      <if test="fulfillmentNetworkSku != null">
-        Fulfillment_Network_SKU,
-      </if>
-      <if test="asin != null">
-        ASIN,
-      </if>
-      <if test="title != null">
-        Title,
-      </if>
-      <if test="condition != null">
-        Condition,
-      </if>
-      <if test="price != null">
-        Price,
-      </if>
-      <if test="mfnListingExists != null">
-        MFN_Listing_Exists,
-      </if>
-      <if test="mfnFulfillableQty != null">
-        MFN_Fulfillable_Qty,
-      </if>
-      <if test="afnListingExists != null">
-        AFN_Listing_Exists,
-      </if>
-      <if test="afnWarehouseQty != null">
-        AFN_Warehouse_Qty,
-      </if>
-      <if test="afnFulfillableQty != null">
-        AFN_Fulfillable_Qty,
-      </if>
-      <if test="afnUnsellableQty != null">
-        AFN_Unsellable_Qty,
-      </if>
-      <if test="afnEncumberedQty != null">
-        AFN_Encumbered_Qty,
-      </if>
-      <if test="afnTotalQty != null">
-        AFN_Total_Qty,
-      </if>
-      <if test="volume != null">
-        Volume,
-      </if>
-      <if test="afnInboundWorkingQty != null">
-        AFN_Inbound_Working_Qty,
-      </if>
-      <if test="afnInboundShippedQty != null">
-        AFN_Inbound_Shipped_Qty,
-      </if>
-      <if test="afnInboundReceivingQty != null">
-        AFN_Inbound_Receiving_Qty,
-      </if>
-      <if test="inserttime != null">
-        insertTime,
-      </if>
-    </trim>
-    <trim prefix="values (" suffix=")" suffixOverrides=",">
-      <if test="merchantSku != null">
-        #{merchantSku,jdbcType=VARCHAR},
-      </if>
-      <if test="fulfillmentNetworkSku != null">
-        #{fulfillmentNetworkSku,jdbcType=VARCHAR},
-      </if>
-      <if test="asin != null">
-        #{asin,jdbcType=VARCHAR},
-      </if>
-      <if test="title != null">
-        #{title,jdbcType=VARCHAR},
-      </if>
-      <if test="condition != null">
-        #{condition,jdbcType=VARCHAR},
-      </if>
-      <if test="price != null">
-        #{price,jdbcType=VARCHAR},
-      </if>
-      <if test="mfnListingExists != null">
-        #{mfnListingExists,jdbcType=VARCHAR},
-      </if>
-      <if test="mfnFulfillableQty != null">
-        #{mfnFulfillableQty,jdbcType=VARCHAR},
-      </if>
-      <if test="afnListingExists != null">
-        #{afnListingExists,jdbcType=VARCHAR},
-      </if>
-      <if test="afnWarehouseQty != null">
-        #{afnWarehouseQty,jdbcType=VARCHAR},
-      </if>
-      <if test="afnFulfillableQty != null">
-        #{afnFulfillableQty,jdbcType=VARCHAR},
-      </if>
-      <if test="afnUnsellableQty != null">
-        #{afnUnsellableQty,jdbcType=VARCHAR},
-      </if>
-      <if test="afnEncumberedQty != null">
-        #{afnEncumberedQty,jdbcType=VARCHAR},
-      </if>
-      <if test="afnTotalQty != null">
-        #{afnTotalQty,jdbcType=VARCHAR},
-      </if>
-      <if test="volume != null">
-        #{volume,jdbcType=VARCHAR},
-      </if>
-      <if test="afnInboundWorkingQty != null">
-        #{afnInboundWorkingQty,jdbcType=VARCHAR},
-      </if>
-      <if test="afnInboundShippedQty != null">
-        #{afnInboundShippedQty,jdbcType=VARCHAR},
-      </if>
-      <if test="afnInboundReceivingQty != null">
-        #{afnInboundReceivingQty,jdbcType=VARCHAR},
-      </if>
-      <if test="inserttime != null">
-        #{inserttime,jdbcType=DATE},
-      </if>
-    </trim>
-  </insert>
-  <select id="selectCountByDate" parameterType="Date" resultType="int">
-    select count(*) totnum
-    from FBAInventoryInfo with(nolock)
-    where InsertedAt=#{date}
-  </select>
-  <!-- 批量插入 -->
-  <insert id="insertBatch" parameterType="java.util.List">
-    insert into FBAInventoryInfo (<include refid="Base_Insert_Column_List" />)
-    values
-    <foreach collection="list" item="item" index="index"  separator=",">
-      (#{item.merchantSku,jdbcType=VARCHAR}, #{item.fulfillmentNetworkSku,jdbcType=VARCHAR},
-      #{item.asin,jdbcType=VARCHAR}, #{item.title,jdbcType=VARCHAR}, #{item.condition,jdbcType=VARCHAR},
-      #{item.price,jdbcType=VARCHAR}, #{item.mfnListingExists,jdbcType=VARCHAR}, #{item.mfnFulfillableQty,jdbcType=VARCHAR},
-      #{item.afnListingExists,jdbcType=VARCHAR}, #{item.afnWarehouseQty,jdbcType=VARCHAR}, #{item.afnFulfillableQty,jdbcType=VARCHAR},
-      #{item.afnUnsellableQty,jdbcType=VARCHAR}, #{item.afnEncumberedQty,jdbcType=VARCHAR}, #{item.afnTotalQty,jdbcType=VARCHAR},
-      #{item.volume,jdbcType=VARCHAR}, #{item.afnInboundWorkingQty,jdbcType=VARCHAR}, #{item.afnInboundShippedQty,jdbcType=VARCHAR},
-      #{item.afnInboundReceivingQty,jdbcType=VARCHAR}, #{item.inventoryDate}, getdate())
-    </foreach>
-  </insert>
+        </where>
+    </sql>
+
+    <!--    <sql id="Base_Insert_Column_List">-->
+    <!--        MerchantSKU, FulfillmentNetworkSKU,-->
+    <!--          ASIN, Title, Condition,-->
+    <!--          Price, MFNListingExists, MFNFulfillableQty,-->
+    <!--          AFNListingExists, AFNWarehouseQty, AFNFulfillableQty,-->
+    <!--          AFNUnsellableQty, AFNEncumberedQty, AFNTotalQty,-->
+    <!--          Volume, AFNInboundWorkingQty, AFNInboundShippedQty,-->
+    <!--          AFNInboundReceivingQty,-->
+<!--    PriceNum,-->
+<!--    MFNFulfillableQtyNum,-->
+<!--    AFNWarehouseQtyNum,-->
+<!--    AFNFulfillableQtyNum,-->
+<!--    AFNUnsellableQtyNum,-->
+<!--    AFNEncumberedQtyNum,-->
+<!--    AFNTotalQtyNum,-->
+<!--    VolumeNum,-->
+<!--    AFNInboundWorkingQtyNum,-->
+<!--    AFNInboundShippedQtyNum,-->
+<!--    AFNInboundReceivingQtyNum,-->
+    <!--        InventoryDate, InsertedAt-->
+    <!--    </sql>-->
+
+    <sql id="Base_Insert_Column_List">
+        MerchantSKU, FulfillmentNetworkSKU,
+          ASIN, Title, Condition,
+          Price, MFNListingExists, MFNFulfillableQty,
+          AFNListingExists, AFNWarehouseQty, AFNFulfillableQty,
+          AFNUnsellableQty, AFNEncumberedQty, AFNTotalQty,
+          Volume, AFNInboundWorkingQty, AFNInboundShippedQty,
+          AFNInboundReceivingQty,
+        PriceNum,
+        MFNFulfillableQtyNum,
+        AFNWarehouseQtyNum,
+        AFNFulfillableQtyNum,
+        AFNUnsellableQtyNum,
+        AFNEncumberedQtyNum,
+        AFNTotalQtyNum,
+        VolumeNum,
+        AFNInboundWorkingQtyNum,
+        AFNInboundShippedQtyNum,
+        AFNInboundReceivingQtyNum,
+        InventoryDate, InsertedAt
+    </sql>
+
+    <insert id="insert" parameterType="com.spider.amazon.model.FBAInventoryInfoDO">
+        insert into FBAInventoryInfo (<include refid="Base_Insert_Column_List"/>)
+        values (#{merchantSku,jdbcType=VARCHAR}, #{fulfillmentNetworkSku,jdbcType=VARCHAR},
+                #{asin,jdbcType=VARCHAR}, #{title,jdbcType=VARCHAR}, #{condition,jdbcType=VARCHAR},
+                #{price,jdbcType=VARCHAR}, #{mfnListingExists,jdbcType=VARCHAR}, #{mfnFulfillableQty,jdbcType=VARCHAR},
+                #{afnListingExists,jdbcType=VARCHAR}, #{afnWarehouseQty,jdbcType=VARCHAR},
+                #{afnFulfillableQty,jdbcType=VARCHAR},
+                #{afnUnsellableQty,jdbcType=VARCHAR}, #{afnEncumberedQty,jdbcType=VARCHAR},
+                #{afnTotalQty,jdbcType=VARCHAR},
+                #{volume,jdbcType=VARCHAR}, #{afnInboundWorkingQty,jdbcType=VARCHAR},
+                #{afnInboundShippedQty,jdbcType=VARCHAR},
+                #{afnInboundReceivingQty,jdbcType=VARCHAR},
+                #{priceNum, jdbcType=DECIMAL},
+                #{mfnFulfillableQtyNum},
+                #{afnWarehouseQtyNum},
+                #{afnFulfillableQtyNum},
+                #{afnUnsellableQtyNum},
+                #{afnEncumberedQtyNum},
+                #{afnTotalQtyNum},
+                #{volumeNum, jdbcType=DECIMAL},
+                #{afnInboundWorkingQtyNum},
+                #{afnInboundShippedQtyNum},
+                #{afnInboundReceivingQtyNum},
+                #{inventoryDate}, getdate())
+    </insert>
+    <insert id="insertSelective" parameterType="com.spider.amazon.model.FBAInventoryInfoDO">
+        insert into FBAInventoryInfo
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="merchantSku != null">
+                Merchant_SKU,
+            </if>
+            <if test="fulfillmentNetworkSku != null">
+                Fulfillment_Network_SKU,
+            </if>
+            <if test="asin != null">
+                ASIN,
+            </if>
+            <if test="title != null">
+                Title,
+            </if>
+            <if test="condition != null">
+                Condition,
+            </if>
+            <if test="price != null">
+                Price,
+            </if>
+            <if test="mfnListingExists != null">
+                MFN_Listing_Exists,
+            </if>
+            <if test="mfnFulfillableQty != null">
+                MFN_Fulfillable_Qty,
+            </if>
+            <if test="afnListingExists != null">
+                AFN_Listing_Exists,
+            </if>
+            <if test="afnWarehouseQty != null">
+                AFN_Warehouse_Qty,
+            </if>
+            <if test="afnFulfillableQty != null">
+                AFN_Fulfillable_Qty,
+            </if>
+            <if test="afnUnsellableQty != null">
+                AFN_Unsellable_Qty,
+            </if>
+            <if test="afnEncumberedQty != null">
+                AFN_Encumbered_Qty,
+            </if>
+            <if test="afnTotalQty != null">
+                AFN_Total_Qty,
+            </if>
+            <if test="volume != null">
+                Volume,
+            </if>
+            <if test="afnInboundWorkingQty != null">
+                AFN_Inbound_Working_Qty,
+            </if>
+            <if test="afnInboundShippedQty != null">
+                AFN_Inbound_Shipped_Qty,
+            </if>
+            <if test="afnInboundReceivingQty != null">
+                AFN_Inbound_Receiving_Qty,
+            </if>
+            <if test="inserttime != null">
+                insertTime,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="merchantSku != null">
+                #{merchantSku,jdbcType=VARCHAR},
+            </if>
+            <if test="fulfillmentNetworkSku != null">
+                #{fulfillmentNetworkSku,jdbcType=VARCHAR},
+            </if>
+            <if test="asin != null">
+                #{asin,jdbcType=VARCHAR},
+            </if>
+            <if test="title != null">
+                #{title,jdbcType=VARCHAR},
+            </if>
+            <if test="condition != null">
+                #{condition,jdbcType=VARCHAR},
+            </if>
+            <if test="price != null">
+                #{price,jdbcType=VARCHAR},
+            </if>
+            <if test="mfnListingExists != null">
+                #{mfnListingExists,jdbcType=VARCHAR},
+            </if>
+            <if test="mfnFulfillableQty != null">
+                #{mfnFulfillableQty,jdbcType=VARCHAR},
+            </if>
+            <if test="afnListingExists != null">
+                #{afnListingExists,jdbcType=VARCHAR},
+            </if>
+            <if test="afnWarehouseQty != null">
+                #{afnWarehouseQty,jdbcType=VARCHAR},
+            </if>
+            <if test="afnFulfillableQty != null">
+                #{afnFulfillableQty,jdbcType=VARCHAR},
+            </if>
+            <if test="afnUnsellableQty != null">
+                #{afnUnsellableQty,jdbcType=VARCHAR},
+            </if>
+            <if test="afnEncumberedQty != null">
+                #{afnEncumberedQty,jdbcType=VARCHAR},
+            </if>
+            <if test="afnTotalQty != null">
+                #{afnTotalQty,jdbcType=VARCHAR},
+            </if>
+            <if test="volume != null">
+                #{volume,jdbcType=VARCHAR},
+            </if>
+            <if test="afnInboundWorkingQty != null">
+                #{afnInboundWorkingQty,jdbcType=VARCHAR},
+            </if>
+            <if test="afnInboundShippedQty != null">
+                #{afnInboundShippedQty,jdbcType=VARCHAR},
+            </if>
+            <if test="afnInboundReceivingQty != null">
+                #{afnInboundReceivingQty,jdbcType=VARCHAR},
+            </if>
+            <if test="inserttime != null">
+                #{inserttime,jdbcType=DATE},
+            </if>
+        </trim>
+    </insert>
+
+    <select id="selectCountByDate" parameterType="Date" resultType="int">
+        select count(*) totnum
+        from FBAInventoryInfo with(nolock)
+        where InsertedAt=#{date}
+    </select>
+    <!-- 批量插入 -->
+    <!--    <insert id="insertBatch" parameterType="java.util.List">-->
+    <!--        insert into FBAInventoryInfo (<include refid="Base_Insert_Column_List"/>)-->
+    <!--        values-->
+    <!--        <foreach collection="list" item="item" index="index" separator=",">-->
+    <!--            (#{item.merchantSku,jdbcType=VARCHAR}, #{item.fulfillmentNetworkSku,jdbcType=VARCHAR},-->
+    <!--            #{item.asin,jdbcType=VARCHAR}, #{item.title,jdbcType=VARCHAR}, #{item.condition,jdbcType=VARCHAR},-->
+    <!--            #{item.price,jdbcType=VARCHAR}, #{item.mfnListingExists,jdbcType=VARCHAR},-->
+    <!--            #{item.mfnFulfillableQty,jdbcType=VARCHAR},-->
+    <!--            #{item.afnListingExists,jdbcType=VARCHAR}, #{item.afnWarehouseQty,jdbcType=VARCHAR},-->
+    <!--            #{item.afnFulfillableQty,jdbcType=VARCHAR},-->
+    <!--            #{item.afnUnsellableQty,jdbcType=VARCHAR}, #{item.afnEncumberedQty,jdbcType=VARCHAR},-->
+    <!--            #{item.afnTotalQty,jdbcType=VARCHAR},-->
+    <!--            #{item.volume,jdbcType=VARCHAR}, #{item.afnInboundWorkingQty,jdbcType=VARCHAR},-->
+    <!--            #{item.afnInboundShippedQty,jdbcType=VARCHAR},-->
+    <!--            #{item.afnInboundReceivingQty,jdbcType=VARCHAR},-->
+    <!--            #{item.priceNum},-->
+    <!--            #{item.mfnFulfillableQtyNum},-->
+    <!--            #{item.afnWarehouseQtyNum},-->
+    <!--            #{item.afnFulfillableQtyNum},-->
+    <!--            #{item.afnUnsellableQtyNum},-->
+    <!--            #{item.afnEncumberedQtyNum},-->
+    <!--            #{item.afnTotalQtyNum},-->
+    <!--            #{item.volumeNum},-->
+    <!--            #{item.afnInboundWorkingQtyNum},-->
+    <!--            #{item.afnInboundShippedQtyNum},-->
+    <!--            #{item.afnInboundReceivingQtyNum},-->
+    <!--            #{item.inventoryDate}, getdate())-->
+    <!--        </foreach>-->
+    <!--    </insert>-->
+
+    <insert id="insertBatch" parameterType="java.util.List">
+        insert into FBAInventoryInfo (<include refid="Base_Insert_Column_List"/>)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.merchantSku,jdbcType=VARCHAR}, #{item.fulfillmentNetworkSku,jdbcType=VARCHAR},
+            #{item.asin,jdbcType=VARCHAR}, #{item.title,jdbcType=VARCHAR}, #{item.condition,jdbcType=VARCHAR},
+            #{item.price,jdbcType=VARCHAR}, #{item.mfnListingExists,jdbcType=VARCHAR},
+            #{item.mfnFulfillableQty,jdbcType=VARCHAR},
+            #{item.afnListingExists,jdbcType=VARCHAR}, #{item.afnWarehouseQty,jdbcType=VARCHAR},
+            #{item.afnFulfillableQty,jdbcType=VARCHAR},
+            #{item.afnUnsellableQty,jdbcType=VARCHAR}, #{item.afnEncumberedQty,jdbcType=VARCHAR},
+            #{item.afnTotalQty,jdbcType=VARCHAR},
+            #{item.volume,jdbcType=VARCHAR}, #{item.afnInboundWorkingQty,jdbcType=VARCHAR},
+            #{item.afnInboundShippedQty,jdbcType=VARCHAR},
+            #{item.afnInboundReceivingQty,jdbcType=VARCHAR},
+            #{item.priceNum, jdbcType=DECIMAL},
+            #{item.mfnFulfillableQtyNum},
+            #{item.afnWarehouseQtyNum},
+            #{item.afnFulfillableQtyNum},
+            #{item.afnUnsellableQtyNum},
+            #{item.afnEncumberedQtyNum},
+            #{item.afnTotalQtyNum},
+            #{item.volumeNum, jdbcType=DECIMAL},
+            #{item.afnInboundWorkingQtyNum},
+            #{item.afnInboundShippedQtyNum},
+            #{item.afnInboundReceivingQtyNum},
+            #{item.inventoryDate}, getdate())
+        </foreach>
+    </insert>
+
 </mapper>

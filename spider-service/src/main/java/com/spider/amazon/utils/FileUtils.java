@@ -1,12 +1,19 @@
 package com.spider.amazon.utils;
 
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.StrUtil;
 import com.google.common.io.Files;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileFilter;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Optional;
+
+import static cn.hutool.core.io.FileUtil.exist;
 
 /**
  * File Utility
@@ -107,6 +114,35 @@ public class FileUtils {
 
     public static String getFileExtension(String filename){
         return Files.getFileExtension(filename);
+    }
+
+    /**
+     * Change filename in same folder
+     * @param filepath
+     * @param newFilename
+     */
+    public static void changeFilename(String filepath, String newFilename){
+
+        if (exist(filepath)) {
+
+            File finishedFile = new File(filepath);
+
+            Path oldFilePath = Paths.get(finishedFile.getPath());
+
+            try {
+
+                //make sure file path doesn't have '/'
+                java.nio.file.Files.move(oldFilePath, oldFilePath.resolveSibling(newFilename));
+
+                logger.info("File rename {}", newFilename);
+
+            } catch (Exception ex) {
+                logger.info("File {} rename failed", oldFilePath, ex);
+            }
+
+        }else{
+            throw new IllegalArgumentException(String.format("Filepath %s is not exist", filepath));
+        }
     }
 
 }

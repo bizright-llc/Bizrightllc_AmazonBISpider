@@ -10,6 +10,7 @@ import java.util.List;
 @Repository
 @Mapper
 public interface FBAInventoryInfoDOMapper {
+
     int insert(FBAInventoryInfoDO record);
 
     int insertSelective(FBAInventoryInfoDO record);

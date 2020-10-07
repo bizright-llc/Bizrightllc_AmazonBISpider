@@ -10,19 +10,26 @@ import com.spider.amazon.mapper.FBAInventoryInfoDOMapper;
 import com.spider.amazon.model.FBAInventoryInfoDO;
 import com.spider.amazon.service.FbaInventoryReportDealService;
 import com.spider.amazon.utils.CSVUtils;
+import com.spider.amazon.utils.ConvertUtils;
+import com.spider.amazon.utils.FileUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import static java.lang.Thread.sleep;
 
 /**
  * @ClassName FbaInventoryReportDealImpl
@@ -41,6 +48,8 @@ public class FbaInventoryReportDealServiceImpl implements FbaInventoryReportDeal
     private final int startrow=1;
     private final int endrow=10000;
     private final int colnum=21;
+
+    public final String COMPLETE_MARK = "PROCESS";
 
     /**
      * 入库
@@ -85,15 +94,7 @@ public class FbaInventoryReportDealServiceImpl implements FbaInventoryReportDeal
             throw new ServiceException(RespErrorEnum.FILE_NOT_EXIT.getSubStatusCode(), RespErrorEnum.FILE_NOT_EXIT.getSubStatusMsg());
         }
 
-//         1.检查当日入库文件是否存在,存在则直接返回，否则进行入库
-//        Date date=DateUtil.offsetDay(DateUtil.date(),offerSetDay);
-//        int totNum=fbaInventoryInfoDOMapper.selectCountByDate(date);
-//        if (totNum!=0) {
-//            if (log.isInfoEnabled()) {
-//                log.info("step42=>已经存在当日文件");
-//            }
-//            return;
-//        }
+        log.info("[dealFbaInventoryReport] Deal file {}", filePath + fileName);
 
         String inventoryDateStr = fileName.substring(fileName.indexOf("-")+1, fileName.indexOf("."));
 
@@ -104,6 +105,14 @@ public class FbaInventoryReportDealServiceImpl implements FbaInventoryReportDeal
         // 2.入库处理
         List<List<String>> csvRowList = CSVUtils.readCSVAdv(filePath+fileName, startrow, endrow, colnum);
         dealResult(transResVo2ResDo(csvRowList,inventoryLocalDate));
+
+        // 3. change file name
+        // do not use split(".")
+        String[] nameArr = fileName.split("\\.");
+
+        String newFilename = String.format("%s-%s.csv", nameArr[0], COMPLETE_MARK);
+
+        FileUtils.changeFilename(filePath+fileName, newFilename);
 
     }
 
@@ -120,7 +129,7 @@ public class FbaInventoryReportDealServiceImpl implements FbaInventoryReportDeal
         // 1.数据校验
         if (ObjectUtil.isEmpty(members)) {
             if (log.isInfoEnabled()){
-                log.info("服务器无返回数据");
+                log.info("[dealResult] 服务器无返回数据");
             }
 //            throw new ServiceException(RespErrorEnum.SERVICE_NO_RESPOND.getSubStatusCode(), RespErrorEnum.SERVICE_NO_RESPOND.getSubStatusMsg());
             return ;
@@ -136,7 +145,7 @@ public class FbaInventoryReportDealServiceImpl implements FbaInventoryReportDeal
             //通过新的session获取mapper
             FBAInventoryInfoDOMapper mapper = batchSqlSession.getMapper(FBAInventoryInfoDOMapper.class);
 
-            int batchCount = 100;// 每批commit的个数
+            int batchCount = 50;// 每批commit的个数
             int batchLastIndex = batchCount;// 每批最后一个的下标
 
             for (int index = 0; index < members.size(); ) {
@@ -148,7 +157,7 @@ public class FbaInventoryReportDealServiceImpl implements FbaInventoryReportDeal
                     //清理缓存，防止溢出
                     batchSqlSession.clearCache();
                     if (log.isInfoEnabled()) {
-                        log.info("index:" + index + " batchLastIndex:" + batchLastIndex);
+                        log.info("[dealResult] index:" + index + " batchLastIndex:" + batchLastIndex);
                     }
                     break;// 数据插入完毕，退出循环
                 } else {
@@ -158,13 +167,13 @@ public class FbaInventoryReportDealServiceImpl implements FbaInventoryReportDeal
                     //清理缓存，防止溢出
                     batchSqlSession.clearCache();
                     if (log.isInfoEnabled()) {
-                        log.info("index:" + index + " batchLastIndex:" + batchLastIndex);
+                        log.info("[dealResult] index:" + index + " batchLastIndex:" + batchLastIndex);
                     }
                     index = batchLastIndex;// 设置下一批下标
                     batchLastIndex = index + (batchCount - 1);
                 }
                 if (log.isInfoEnabled()) {
-                    log.info("=============>result=[" + result + "] begin=[" + index + "] end=[" + batchLastIndex + "]");
+                    log.info("[dealResult] result=[" + result + "] begin=[" + index + "] end=[" + batchLastIndex + "]");
                 }
             }
             batchSqlSession.commit();
@@ -189,25 +198,37 @@ public class FbaInventoryReportDealServiceImpl implements FbaInventoryReportDeal
 
         for(int index=0; index<csvRowList.size();++index) {
             List<String> resultData=csvRowList.get(index);
-            log.info("resultData:"+resultData.toString());
-            reulstList.add(FBAInventoryInfoDO.builder().merchantSku(resultData.get(0))
+//            log.info("resultData:"+resultData.toString());
+            reulstList.add(FBAInventoryInfoDO.builder()
+                    .merchantSku(resultData.get(0))
                     .fulfillmentNetworkSku(resultData.get(1))
                     .asin(resultData.get(2))
                     .title(resultData.get(3))
                     .condition(resultData.get(4))
                     .price(resultData.get(5))
+                    .priceNum(getBigDecimalFromStr(resultData.get(5)))
                     .mfnListingExists(resultData.get(6))
                     .mfnFulfillableQty(resultData.get(7))
+                    .mfnFulfillableQtyNum(getIntegerFromStr(resultData.get(7)))
                     .afnListingExists(resultData.get(8))
                     .afnWarehouseQty(resultData.get(9))
+                    .afnWarehouseQtyNum(getIntegerFromStr(resultData.get(9)))
                     .afnFulfillableQty(resultData.get(10))
+                    .afnFulfillableQtyNum(getIntegerFromStr(resultData.get(10)))
                     .afnUnsellableQty(resultData.get(11))
+                    .afnUnsellableQtyNum(getIntegerFromStr(resultData.get(11)))
                     .afnEncumberedQty(resultData.get(12))
+                    .afnEncumberedQtyNum(getIntegerFromStr(resultData.get(12)))
                     .afnTotalQty(resultData.get(13))
+                    .afnTotalQtyNum(getIntegerFromStr(resultData.get(13)))
                     .volume(resultData.get(14))
+                    .volumeNum(getBigDecimalFromStr(resultData.get(14)))
                     .afnInboundWorkingQty(resultData.get(15))
+                    .afnInboundWorkingQtyNum(getIntegerFromStr(resultData.get(15)))
                     .afnInboundShippedQty(resultData.get(16))
+                    .afnInboundShippedQtyNum(getIntegerFromStr(resultData.get(16)))
                     .afnInboundReceivingQty(resultData.get(17))
+                    .afnInboundReceivingQtyNum(getIntegerFromStr(resultData.get(17)))
                     .insertedAt(insertedAt).build());
         }
 
@@ -233,25 +254,41 @@ public class FbaInventoryReportDealServiceImpl implements FbaInventoryReportDeal
                     .title(resultData.get(3))
                     .condition(resultData.get(4))
                     .price(resultData.get(5))
+                    .priceNum(getBigDecimalFromStr(resultData.get(5)))
                     .mfnListingExists(resultData.get(6))
                     .mfnFulfillableQty(resultData.get(7))
+                    .mfnFulfillableQtyNum(getIntegerFromStr(resultData.get(7)))
                     .afnListingExists(resultData.get(8))
                     .afnWarehouseQty(resultData.get(9))
+                    .afnWarehouseQtyNum(getIntegerFromStr(resultData.get(9)))
                     .afnFulfillableQty(resultData.get(10))
+                    .afnFulfillableQtyNum(getIntegerFromStr(resultData.get(10)))
                     .afnUnsellableQty(resultData.get(11))
+                    .afnUnsellableQtyNum(getIntegerFromStr(resultData.get(11)))
                     .afnEncumberedQty(resultData.get(12))
+                    .afnEncumberedQtyNum(getIntegerFromStr(resultData.get(12)))
                     .afnTotalQty(resultData.get(13))
+                    .afnTotalQtyNum(getIntegerFromStr(resultData.get(13)))
                     .volume(resultData.get(14))
+                    .volumeNum(getBigDecimalFromStr(resultData.get(14)))
                     .afnInboundWorkingQty(resultData.get(15))
+                    .afnInboundWorkingQtyNum(getIntegerFromStr(resultData.get(15)))
                     .afnInboundShippedQty(resultData.get(16))
+                    .afnInboundShippedQtyNum(getIntegerFromStr(resultData.get(16)))
                     .afnInboundReceivingQty(resultData.get(17))
+                    .afnInboundReceivingQtyNum(getIntegerFromStr(resultData.get(17)))
                     .insertedAt(insertedAt).build());
         }
 
         return reulstList;
     }
 
-
+    /**
+     * Transfer csv data to object
+     * @param csvRowList
+     * @param inventoryDate
+     * @return
+     */
     public List<FBAInventoryInfoDO> transResVo2ResDo(List<List<String>> csvRowList, LocalDate inventoryDate) {
         List<FBAInventoryInfoDO> reulstList = new ArrayList<>();
 
@@ -259,30 +296,78 @@ public class FbaInventoryReportDealServiceImpl implements FbaInventoryReportDeal
 
         for(int index=0; index<csvRowList.size();++index) {
             List<String> resultData=csvRowList.get(index);
-            log.info("resultData:"+resultData.toString());
+
             reulstList.add(FBAInventoryInfoDO.builder().merchantSku(resultData.get(0))
                     .fulfillmentNetworkSku(resultData.get(1))
                     .asin(resultData.get(2))
                     .title(resultData.get(3))
                     .condition(resultData.get(4))
                     .price(resultData.get(5))
+                    .priceNum(getBigDecimalFromStr(resultData.get(5)))
                     .mfnListingExists(resultData.get(6))
                     .mfnFulfillableQty(resultData.get(7))
+                    .mfnFulfillableQtyNum(getIntegerFromStr(resultData.get(7)))
                     .afnListingExists(resultData.get(8))
                     .afnWarehouseQty(resultData.get(9))
+                    .afnWarehouseQtyNum(getIntegerFromStr(resultData.get(9)))
                     .afnFulfillableQty(resultData.get(10))
+                    .afnFulfillableQtyNum(getIntegerFromStr(resultData.get(10)))
                     .afnUnsellableQty(resultData.get(11))
+                    .afnUnsellableQtyNum(getIntegerFromStr(resultData.get(11)))
                     .afnEncumberedQty(resultData.get(12))
+                    .afnEncumberedQtyNum(getIntegerFromStr(resultData.get(12)))
                     .afnTotalQty(resultData.get(13))
+                    .afnTotalQtyNum(getIntegerFromStr(resultData.get(13)))
                     .volume(resultData.get(14))
+                    .volumeNum(getBigDecimalFromStr(resultData.get(14)))
                     .afnInboundWorkingQty(resultData.get(15))
+                    .afnInboundWorkingQtyNum(getIntegerFromStr(resultData.get(15)))
                     .afnInboundShippedQty(resultData.get(16))
+                    .afnInboundShippedQtyNum(getIntegerFromStr(resultData.get(16)))
                     .afnInboundReceivingQty(resultData.get(17))
+                    .afnInboundReceivingQtyNum(getIntegerFromStr(resultData.get(17)))
                     .inventoryDate(inventoryDate)
                     .insertedAt(insertedAt).build());
         }
 
         return reulstList;
+    }
+
+    /**
+     * Get {@class Integer} from file number string
+     * @param str
+     * @return
+     */
+    private Integer getIntegerFromStr(String str){
+
+        if(str == null || StringUtils.isEmpty(str)){
+            return null;
+        }
+
+        return Math.round(ConvertUtils.convertNumberStrToFloat(str));
+    }
+
+    /**
+     * Get {@class Float} from file number string
+     * @param str
+     * @return
+     */
+    private Float getFloatFromStr(String str){
+
+        if(str == null || StringUtils.isEmpty(str)){
+            return null;
+        }
+
+        return ConvertUtils.convertNumberStrToFloat(str);
+    }
+
+    /**
+     * Get BigDecimal from amazon file number string
+     * @param str
+     * @return
+     */
+    private BigDecimal getBigDecimalFromStr(String str){
+        return ConvertUtils.convertNumberStrToBigDecimal(str);
     }
 
 }

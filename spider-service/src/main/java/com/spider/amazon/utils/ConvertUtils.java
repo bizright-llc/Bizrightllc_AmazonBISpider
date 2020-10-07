@@ -5,12 +5,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
+
+import static java.lang.Thread.sleep;
 
 public class ConvertUtils {
 
@@ -72,6 +76,7 @@ public class ConvertUtils {
             return Integer.parseInt(value);
         }catch (NumberFormatException e){
             e.printStackTrace();
+            log.error("[convertStringToInteger] convert {} to Integer failed", value);
             return null;
         }
     }
@@ -96,6 +101,31 @@ public class ConvertUtils {
             return Float.parseFloat(str);
         }catch (Exception e){
             log.error("[convertNumberStrToFloat] number {} convert failed", str, e);
+            return null;
+        }
+    }
+
+    /**
+     * Convert number string to BigDecimal object
+     * return 0 if the string is empty or null
+     * @param numberStr
+     * @return
+     */
+    public static BigDecimal convertNumberStrToBigDecimal(String numberStr) {
+
+        String str = numberStr.replaceAll("[^0-9.-]", "");
+
+        if(str == null || StringUtils.isEmpty(str)){
+            return new BigDecimal(0).setScale(2, RoundingMode.UNNECESSARY);
+        }
+        if (str.equalsIgnoreCase("—") || str.equalsIgnoreCase("â€”")){
+            return new BigDecimal(0).setScale(2, RoundingMode.UNNECESSARY);
+        }
+
+        try{
+            return new BigDecimal(str).setScale(2, RoundingMode.UNNECESSARY);
+        }catch (Exception e){
+            log.error("[convertNumberStrToBigDecimal] number {} convert failed", str, e);
             return null;
         }
     }

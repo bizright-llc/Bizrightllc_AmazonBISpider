@@ -336,7 +336,9 @@ public class ScheduleTask {
 
         if(StringUtils.isNotEmpty(filenameExist)){
 
-            fbaInventoryReportDealService.dealFbaInventoryReport(filenameExist, spiderConfig.getScFBAInventoryDownloadPath(),offerSetDay);
+            fbaInventoryReportDealService.dealFbaInventoryReport(filenameExist, spiderConfig.getScFBAInventoryDownloadPath());
+
+            log.info("[schedulerScFbaInventoryDeal] complete process");
 
         }else{
             log.info("[schedulerScFbaInventoryDeal] no file found to process");

@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.ToString;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -49,6 +50,18 @@ public class FBAInventoryInfoDO {
     private String afnInboundShippedQty;
 
     private String afnInboundReceivingQty;
+
+    private BigDecimal priceNum;
+    private Integer mfnFulfillableQtyNum;
+    private Integer afnWarehouseQtyNum;
+    private Integer afnFulfillableQtyNum;
+    private Integer afnUnsellableQtyNum;
+    private Integer afnEncumberedQtyNum;
+    private Integer afnTotalQtyNum;
+    private BigDecimal volumeNum;
+    private Integer afnInboundWorkingQtyNum;
+    private Integer afnInboundShippedQtyNum;
+    private Integer afnInboundReceivingQtyNum;
 
     private LocalDate inventoryDate;
 
