@@ -127,7 +127,7 @@ public class ScheduleTask {
     /**
      * 定时下载Amazon SC Buy Box数据
      */
-    @Scheduled(cron = "0 50 1 * * 1")
+    @Scheduled(cron = "0 50 1 * * ?")
     @Retryable(value = Exception.class, maxAttempts = 3)
     public void schedulerScBuyBox() {
         log.info("0.step56=>开始执行［schedulerScBuyBox］");
