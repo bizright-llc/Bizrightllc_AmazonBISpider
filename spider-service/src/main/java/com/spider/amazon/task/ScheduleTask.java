@@ -511,7 +511,7 @@ public class ScheduleTask {
 
         MyFileFilter filter = new MyFileFilter();
 
-        File[] files = FileUtils.getFileFromDir(spiderConfig.getVcDailySalesDownloadPath(), filter);
+        File[] files = FileUtils.getFileFromDir(spiderConfig.getScFBAInventoryDownloadPath(), filter);
 
         File file = files != null && files.length > 0 ? files[0] : null;
 
