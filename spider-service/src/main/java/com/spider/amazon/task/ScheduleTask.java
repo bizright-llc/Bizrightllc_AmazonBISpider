@@ -84,16 +84,12 @@ public class ScheduleTask {
     private final static String AMAZON_VC_INVENTORY_HEALTH_FILE_NAME = "Inventory Health_US";
     private final static String AMAZON_VC_DAILY_SALES_FILE_NAME = "Sales Diagnostic_Detail View_US";
     private final static String AMAZON_SC_BUY_BOX_FILE_NAME = "BusinessReport";
-    private final static String AMAZON_SC_FBA_INVENTORY_FILE_NAME = "Fba_Inventory";
 
     /**
      * Fba库存日报处理属性
      */
-    private final static String fbaInventoryFileName = "Fba_Inventory";
-    private static final int offerSetDay = 0;
     private static final int invoiceOfferSetDay=0;
     private static final int poHeaderOfferSetDay=0;
-    private static final int vendorPoOfferSetDay=0;
 
 
     /**
@@ -491,7 +487,7 @@ public class ScheduleTask {
                 
                 String fileName = f.getName();
 
-                if (f.getName().contains(AMAZON_SC_FBA_INVENTORY_FILE_NAME) && !f.getName().contains(FbaInventoryReportDealService.COMPLETE_MARK)) {
+                if (f.getName().contains(AmazonScFbaInventory.FILE_RENAME) && !f.getName().contains(FbaInventoryReportDealService.COMPLETE_MARK)) {
                     if(FileUtils.getFileExtension(f.getName()).equalsIgnoreCase("csv")){
                         return true;
                     }
