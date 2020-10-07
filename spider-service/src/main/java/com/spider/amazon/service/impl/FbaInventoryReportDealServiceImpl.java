@@ -2,6 +2,7 @@ package com.spider.amazon.service.impl;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.common.exception.ServiceException;
 import com.spider.amazon.cons.DateFormat;
@@ -48,8 +49,6 @@ public class FbaInventoryReportDealServiceImpl implements FbaInventoryReportDeal
     private final int startrow=1;
     private final int endrow=10000;
     private final int colnum=21;
-
-    public final String COMPLETE_MARK = "PROCESS";
 
     /**
      * 入库
@@ -110,7 +109,7 @@ public class FbaInventoryReportDealServiceImpl implements FbaInventoryReportDeal
         // do not use split(".")
         String[] nameArr = fileName.split("\\.");
 
-        String newFilename = String.format("%s-%s.csv", nameArr[0], COMPLETE_MARK);
+        String newFilename = String.format("%s-%s.csv", nameArr[0], IdUtil.simpleUUID());
 
         FileUtils.changeFilename(filePath+fileName, newFilename);
 
@@ -131,7 +130,7 @@ public class FbaInventoryReportDealServiceImpl implements FbaInventoryReportDeal
             if (log.isInfoEnabled()){
                 log.info("[dealResult] 服务器无返回数据");
             }
-//            throw new ServiceException(RespErrorEnum.SERVICE_NO_RESPOND.getSubStatusCode(), RespErrorEnum.SERVICE_NO_RESPOND.getSubStatusMsg());
+
             return ;
         }
 
