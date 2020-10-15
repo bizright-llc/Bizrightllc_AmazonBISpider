@@ -2,26 +2,33 @@ package com.spider.amazon.utils;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.spider.amazon.entity.Cookie;
+import com.spider.amazon.model.ProxyDO;
 import com.spider.amazon.remote.api.SpiderUrl;
 import com.spider.amazon.service.MailService;
 import com.spider.amazon.service.impl.MailServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.firefox.FirefoxProfile;
+import org.openqa.selenium.phantomjs.PhantomJSDriver;
+import org.openqa.selenium.phantomjs.PhantomJSDriverService;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 import static java.lang.Thread.sleep;
 
@@ -89,6 +96,138 @@ public class WebDriverUtils {
         System.setProperty("webdriver.chrome.driver", driverPath);
 
         WebDriver driver = new ChromeDriver(options);
+
+        return driver;
+    }
+
+    /**
+     * Get web driver
+     *
+     * @param driverPath
+     * @param downloadPath
+     * @param useProxy
+     * @param background
+     * @return
+     */
+    public static WebDriver getWebDriver(String driverPath, String downloadPath, boolean useProxy, boolean background){
+        ChromeOptions options = new ChromeOptions();
+
+        if(StringUtils.isNotEmpty(downloadPath)){
+            HashMap<String, Object> chromePrefs = new HashMap<String, Object>();
+            chromePrefs.put("profile.default_content_settings.popups", 0);
+            chromePrefs.put("download.default_directory", downloadPath);
+
+            options.setExperimentalOption("prefs", chromePrefs);
+        }
+
+        if(useProxy){
+            options.addExtensions(new File("/Users/shaochinlin/Documents/Bizright/BI/BiSpider/proxy/luminatiproxy.zip"));
+        }
+
+        if(background){
+            // driver work at background
+            options.addArguments("--headless", "--disable-gpu", "--window-size=1920,1200","--ignore-certificate-errors", "--silent");
+        }
+
+        System.setProperty("webdriver.chrome.driver", driverPath);
+
+        RemoteWebDriver driver = new ChromeDriver(options);
+
+        return driver;
+    }
+
+    /**
+     * Get firefox browser driver
+     *
+     * @param driverPath
+     * @param downloadPath
+     * @param proxy
+     * @param backgroud
+     * @return
+     */
+    public static WebDriver getFirefoxDriver(String driverPath, String downloadPath, ProxyDO proxy, boolean backgroud){
+
+        System.setProperty("webdriver.gecko.driver", driverPath);
+
+        FirefoxOptions options = new FirefoxOptions();
+
+        if (proxy != null){
+            FirefoxProfile profile = new FirefoxProfile();
+            // use proxy
+            profile.setPreference("network.proxy.type", 1);
+            // proxy setting
+            profile.setPreference("network.proxy.http", proxy.getIp());
+            profile.setPreference("network.proxy.http_port", proxy.getPort());
+
+            profile.setPreference("network.proxy.ssl", proxy.getIp());
+            profile.setPreference("network.proxy.ssl_port", proxy.getPort());
+
+            profile.setPreference("username", proxy.getUsername());
+            profile.setPreference("password", proxy.getPassword());
+
+            // use same proxy setting
+            profile.setPreference("network.proxy.share_proxy_settings", true);
+
+            // dont use proxy on localhost
+            profile.setPreference("network.proxy.no_proxies_on", "localhost");
+
+            options.setCapability("firefox_profile", profile);
+
+        }
+
+        options.addArguments("--no-sandbox");
+
+        // open firefox driver
+        FirefoxDriver driver = new FirefoxDriver(options);
+
+        return driver;
+    }
+
+    public static WebDriver getPhantomJSDriver(String driverPath, String downloadPath, ProxyDO proxy, boolean backgroud){
+
+        System.setProperty("phantomjs.binary.path", driverPath);
+
+        WebDriver driver = null;
+        ArrayList cliArgsCap = new ArrayList();
+
+        cliArgsCap.add("--proxy="+String.format("%s:%s",proxy.getIp(),proxy.getPort()));
+        cliArgsCap.add("--proxy-auth=" + String.format("%s:%s", proxy.getUsername(), proxy.getPassword()));
+        cliArgsCap.add("--proxy-type=http");
+
+        DesiredCapabilities capabilities = DesiredCapabilities.phantomjs();
+
+        capabilities.setCapability(PhantomJSDriverService.PHANTOMJS_CLI_ARGS, cliArgsCap);
+
+        driver = new PhantomJSDriver(capabilities);
+        driver.manage().timeouts().implicitlyWait(5L, TimeUnit.SECONDS);
+        driver.manage().window().maximize();
+
+        return driver;
+    }
+
+    public static WebDriver getWebDriver(String driverPath, String downloadPath, String proxy, boolean background){
+        ChromeOptions options = new ChromeOptions();
+
+        if(StringUtils.isNotEmpty(downloadPath)){
+            HashMap<String, Object> chromePrefs = new HashMap<String, Object>();
+            chromePrefs.put("profile.default_content_settings.popups", 0);
+            chromePrefs.put("download.default_directory", downloadPath);
+
+            options.setExperimentalOption("prefs", chromePrefs);
+        }
+
+        if(StringUtils.isNotEmpty(proxy)){
+            options.addArguments(String.format("--proxy-server=%s", proxy));
+        }
+
+        if(background){
+            // driver work at background
+            options.addArguments("--headless", "--disable-gpu", "--window-size=1920,1200","--ignore-certificate-errors", "--silent");
+        }
+
+        System.setProperty("webdriver.chrome.driver", driverPath);
+
+        RemoteWebDriver driver = new ChromeDriver(options);
 
         return driver;
     }

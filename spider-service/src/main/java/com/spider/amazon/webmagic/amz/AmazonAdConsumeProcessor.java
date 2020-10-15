@@ -6,11 +6,9 @@ import com.common.exception.ServiceException;
 import com.spider.amazon.config.SpiderConfig;
 import com.spider.amazon.cons.*;
 import com.spider.amazon.dto.AmazonAdIndexDTO;
-import com.spider.amazon.model.IpPoolDO;
 import com.spider.amazon.remote.api.SpiderUrl;
 import com.spider.amazon.utils.WebDriverUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -19,11 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Site;
-import us.codecraft.webmagic.Spider;
-import us.codecraft.webmagic.downloader.HttpClientDownloader;
 import us.codecraft.webmagic.processor.PageProcessor;
 import us.codecraft.webmagic.proxy.Proxy;
-import us.codecraft.webmagic.proxy.SimpleProxyProvider;
 
 import java.io.IOException;
 import java.util.*;
@@ -616,6 +611,8 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
         proxies.add(new Proxy("47.99.65.77", Integer.valueOf("3128")));
         return proxies;
     }
+
+
 
 }
 
