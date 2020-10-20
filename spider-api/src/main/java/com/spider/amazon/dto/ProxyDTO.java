@@ -70,4 +70,13 @@ public class ProxyDTO {
 
     private LocalDateTime updatedAt;
 
+    @Override
+    public String toString() {
+        return "ProxyDTO{" +
+                "ip='" + ip + '\'' +
+                ", port='" + port + '\'' +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                '}';
+    }
 }

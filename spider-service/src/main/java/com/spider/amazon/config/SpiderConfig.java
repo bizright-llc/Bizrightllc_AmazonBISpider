@@ -61,4 +61,6 @@ public class SpiderConfig {
     @Value("${spider.driver.proxy.filepath.chrome}")
     private String chromeProxyFilepath;
 
+    @Value("${spider.driver.proxy.chrome}")
+    private Boolean chromeProxy;
 }

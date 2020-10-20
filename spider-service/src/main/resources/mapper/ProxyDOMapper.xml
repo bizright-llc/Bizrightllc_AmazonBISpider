@@ -2,6 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.spider.amazon.mapper.ProxyDOMapper">
     <resultMap id="BaseResultMap" type="com.spider.amazon.model.ProxyDO">
+        <id column="Id" jdbcType="INTEGER" property="id"/>
         <id column="Ip" jdbcType="VARCHAR" property="ip"/>
         <id column="Port" jdbcType="VARCHAR" property="port"/>
         <result column="Username" jdbcType="VARCHAR" property="username"/>

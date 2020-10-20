@@ -9,6 +9,7 @@ import com.spider.amazon.model.ProxyProvider;
 import com.spider.amazon.service.ProxyProviderFactory;
 import com.spider.amazon.service.ProxyProviderService;
 import com.spider.amazon.service.ProxyService;
+import com.spider.amazon.service.RestService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
@@ -54,6 +55,8 @@ public class ProxyServiceImpl implements ProxyService {
 
     private static String TEST_URL = "http://www.amazon.com/";
 
+    private RestService restService;
+
     private ProxyDOMapper proxyDOMapper;
 
     private ModelMapper modelMapper;
@@ -88,6 +91,30 @@ public class ProxyServiceImpl implements ProxyService {
             }catch (Exception ex){
                 log.error("[refreshIpPool] Proxy provider {} refresh status failed", provider.getValue(), ex);
             }
+        }
+    }
+
+    /**
+     * Check all ips and test
+     */
+    @Override
+    public void testIpPool() {
+
+        try{
+            List<ProxyDO> proxyDOS = proxyDOMapper.getAllActiveProxies();
+
+            TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+
+            for (ProxyDO proxyDO: proxyDOS) {
+                try{
+
+                }catch (Exception ex){
+                    log.error("[testIpPool] proxy {}:{} test throw exception", proxyDO.getIp(), proxyDO.getPort());
+                }
+            }
+
+        }catch (Exception ex){
+
         }
     }
 

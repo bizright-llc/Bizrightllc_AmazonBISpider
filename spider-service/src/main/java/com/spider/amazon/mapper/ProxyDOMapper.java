@@ -23,6 +23,8 @@ public interface ProxyDOMapper {
      */
 //    List<ProxyDO> getActiveProxy();
 
+    List<ProxyDO> getAllActiveProxies();
+
     /**
      * Get random proxy which is active
      *

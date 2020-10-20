@@ -4,6 +4,7 @@ import com.spider.SpiderServiceApplication;
 import com.spider.amazon.config.SpiderConfig;
 import com.spider.amazon.dto.ProxyDTO;
 import com.spider.amazon.model.ProxyDO;
+import com.spider.amazon.service.RestService;
 import com.spider.amazon.utils.WebDriverUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
@@ -20,6 +21,7 @@ import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
+import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.Proxy;
@@ -29,6 +31,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import javax.validation.constraints.AssertTrue;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,14 +39,38 @@ import java.util.List;
 import static java.lang.Thread.sleep;
 
 @ExtendWith(SpringExtension.class)
-@SpringBootTest(classes= SpiderServiceApplication.class)
+@SpringBootTest(classes = SpiderServiceApplication.class)
 public class ProxyTest {
 
     @Autowired
     private SpiderConfig spiderConfig;
 
+    @Autowired
+    private RestService restService;
+
+    /**
+     * Test proxy
+     */
+    @Test
+    public void testProxy() throws Exception {
+
+        ProxyDTO proxyDto = ProxyDTO
+                .builder()
+                .ip("zproxy.lum-superproxy.io")
+                .port("22225")
+                .username("lum-customer-ipower-zone-static-country-us")
+                .password("38rnyeoymh2g")
+                .build();
+
+        boolean result = restService.testProxy(proxyDto);
+
+        Assert.assertTrue(result);
+
+    }
+
     /**
      * Test proxy server get request
+     *
      * @throws IOException
      */
     @Test
@@ -64,12 +91,12 @@ public class ProxyTest {
         String url = "http://www.tutorialspoint.com/";
 
 
-        for (int i=0; i< testCount; i++){
-            long usedTime = testProxy(proxy,url);
+        for (int i = 0; i < testCount; i++) {
+            long usedTime = testProxy(proxy, url);
 
             totalCount++;
 
-            if(usedTime != -1){
+            if (usedTime != -1) {
                 validCount++;
                 usedTimeList.add(usedTime);
             }
@@ -77,41 +104,13 @@ public class ProxyTest {
 
         getStatusResult(usedTimeList, validCount, totalCount);
 
-//
-//        DefaultProxyRoutePlanner routePlanner = new DefaultProxyRoutePlanner(proxy);
-//
-//        //Client credentials
-//        CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-//        credentialsProvider.setCredentials(new AuthScope(proxy),
-//                new UsernamePasswordCredentials("lum-customer-ipower-zone-static-country-us", "38rnyeoymh2g"));
-//
-//        // Create AuthCache instance
-//        AuthCache authCache = new BasicAuthCache();
-//
-//        BasicScheme basicAuth = new BasicScheme();
-//        authCache.put(proxy, basicAuth);
-//        HttpClientContext context = HttpClientContext.create();
-//        context.setCredentialsProvider(credentialsProvider);
-//        context.setAuthCache(authCache);
-//
-//        HttpClient httpclient = HttpClients.custom()
-//                .setRoutePlanner(routePlanner)
-//                .setDefaultCredentialsProvider(credentialsProvider)
-//                .build();
-//
-//        HttpGet httpget = new HttpGet("http://www.tutorialspoint.com/");
-//
-//        HttpResponse httpresponse = httpclient.execute(httpget);
-
-//        System.out.println(httpresponse.getStatusLine());
     }
 
     /**
-     *
      * @param url
      * @return
      */
-    private long testProxy(HttpHost proxy, String url){
+    private long testProxy(HttpHost proxy, String url) {
 
         System.out.println("Test Proxy");
 
@@ -137,7 +136,7 @@ public class ProxyTest {
                 .setConnectionRequestTimeout(timeout * 1000)
                 .setSocketTimeout(timeout * 1000).build();
 
-        try{
+        try {
             long startTime = System.currentTimeMillis();
 
             HttpClient httpclient = HttpClients.custom()
@@ -146,13 +145,11 @@ public class ProxyTest {
                     .setDefaultRequestConfig(config)
                     .build();
 
-            HttpGet httpget = new HttpGet(url);
+            HttpGet httpGet = new HttpGet(url);
 
-            HttpResponse httpresponse = httpclient.execute(httpget);
+            HttpResponse httpresponse = httpclient.execute(httpGet);
 
-//            System.out.println(httpresponse.getStatusLine());
-
-            if(httpresponse.getStatusLine().getStatusCode() != HttpStatus.OK.value()){
+            if (httpresponse.getStatusLine().getStatusCode() != HttpStatus.OK.value()) {
                 throw new Exception("Request failed");
             }
 
@@ -161,13 +158,13 @@ public class ProxyTest {
             sleep(2000);
 
             return endTime - startTime;
-        }catch (Exception e){
+        } catch (Exception e) {
             return -1;
         }
 
     }
 
-    private void getStatusResult(List<Long> usedTimeList, int validCount, int totalCount){
+    private void getStatusResult(List<Long> usedTimeList, int validCount, int totalCount) {
 
         long sum = usedTimeList.stream().reduce(0L, Long::sum);
 
@@ -186,7 +183,7 @@ public class ProxyTest {
      *
      */
     @Test
-    public void chromedriverProxyWithAuthTest(){
+    public void chromedriverProxyWithAuthTest() {
 
         WebDriver driver = null;
 
@@ -195,7 +192,7 @@ public class ProxyTest {
 
             driver = WebDriverUtils.getWebDriverWithProxy(spiderConfig.getChromeDriverPath(), spiderConfig.getDownloadPath(), spiderConfig.getChromeProxyFilepath(), false);
 
-            for (int i=0; i< 10; i++){
+            for (int i = 0; i < 10; i++) {
 
                 driver.get(baseUrl);
 
@@ -206,14 +203,14 @@ public class ProxyTest {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if(driver != null){
+            if (driver != null) {
                 driver.quit();
             }
         }
     }
 
     @Test
-    public void chromedriverProxyWithoutAuthTest(){
+    public void chromedriverProxyWithoutAuthTest() {
 
         WebDriver driver = null;
 
@@ -227,7 +224,7 @@ public class ProxyTest {
 
             driver = WebDriverUtils.getWebDriverWithProxy(spiderConfig.getChromeDriverPath(), spiderConfig.getDownloadPath(), proxyDTO, false);
 
-            for (int i=0; i< 10; i++){
+            for (int i = 0; i < 10; i++) {
 
                 driver.get(baseUrl);
 
@@ -238,7 +235,7 @@ public class ProxyTest {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if(driver != null){
+            if (driver != null) {
                 driver.quit();
             }
         }

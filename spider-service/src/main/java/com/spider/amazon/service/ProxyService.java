@@ -19,6 +19,11 @@ public interface ProxyService {
     public void refreshIpPool();
 
     /**
+     * Test all active proxy in ip pool
+     */
+    public void testIpPool();
+
+    /**
      * Get random active proxy not include self rotating
      * Mark used time when get proxy
      *
