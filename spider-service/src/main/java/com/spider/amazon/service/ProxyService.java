@@ -19,6 +19,22 @@ public interface ProxyService {
     public void refreshIpPool();
 
     /**
+     * Get random active proxy not include self rotating
+     * Mark used time when get proxy
+     *
+     * @return
+     */
+    public ProxyDTO getRandomActiveProxy();
+
+    /**
+     * Get random active proxy which is self rotating
+     * Mark used time when get proxy
+     *
+     * @return
+     */
+    public ProxyDTO getRandomActiveSelfRotatingProxy();
+
+    /**
      *  Get random active proxy
      *
      * @return

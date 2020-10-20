@@ -33,6 +33,28 @@ public interface ProxyDOMapper {
     @Select({"Select top ${count} * from IpPool where Active = 1 and (ExpireAt is null or ExpireAt > getdate()) order by newid()"})
     List<ProxyDO> getRandomActiveProxiesCount(@Param("count") int count);
 
+    /**
+     * Get all self rotating proxy
+     *
+     * @return
+     */
+    List<ProxyDO> getAllSelfRotatingProxyHost();
+
+    /**
+     * Get all active self rotating proxy
+     *
+     * @return
+     */
+    List<ProxyDO> getAllActiveSelfRotatingProxyHost();
+
+    /**
+     * Get random active self rotating proxy
+     *
+     * @return
+     */
+    @Select({"Select top ${count} * from IpPool where Active = 1 and (ExpireAt is null or ExpireAt > getdate()) order by newid() and SelfRotating = 1"})
+    List<ProxyDO> getRandomActiveSelfRotatingProxyHost(@Param("count") int count);
+
     ProxyDO getProxyByIpAndPort(@Param("ip") String ip, @Param("port") String port);
 
 //    boolean isExist(@Param("ip") String ip, @Param("port") String port);
@@ -55,7 +77,7 @@ public interface ProxyDOMapper {
      * Mark used time
      * @param id
      */
-    void markProxyUsedTime(@Param("id")Long id);
+    void markProxyUsedTimeByIds(@Param("id")Long id);
 
     /**
      * Mark proxies used by ids

@@ -2,23 +2,20 @@ package com.spider.amazon.dto;
 
 import com.spider.amazon.model.ProxyProvider;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.Date;
 
-@Builder
+/**
+ * This model is the proxy data from the provider
+ *
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProxyDTO {
-
-    /**
-     * Internal id
-     */
-    private Long id;
+public class ProviderProxyDTO {
 
     /**
      * Provider id
@@ -52,17 +49,11 @@ public class ProxyDTO {
 
     private String country;
 
-    private String responeSp;
-
-    private Date lastCheckTime;
-
     private LocalDateTime expiredAt;
 
     private String ipStatus;
 
     private Boolean selfRotating;
-
-    private Boolean active;
 
     private LocalDateTime lastUsedAt;
 

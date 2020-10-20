@@ -1,203 +1,239 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.spider.amazon.mapper.ProxyDOMapper">
-  <resultMap id="BaseResultMap" type="com.spider.amazon.model.ProxyDO">
-    <id column="Ip" jdbcType="VARCHAR" property="ip" />
-    <id column="Port" jdbcType="VARCHAR" property="port" />
-    <id column="Username" jdbcType="VARCHAR" property="username" />
-    <id column="Password" jdbcType="VARCHAR" property="password" />
-    <id column="Provider" jdbcType="VARCHAR" property="provider" />
-    <id column="IpType" jdbcType="VARCHAR" property="ipType" />
-    <result column="SecretType" jdbcType="VARCHAR" property="secretType" />
-    <result column="Location" jdbcType="VARCHAR" property="location" />
-    <result column="ResponeSp" jdbcType="VARCHAR" property="responeSp" />
-    <result column="LastCheckTime" jdbcType="TIMESTAMP" property="lastCheckTime" />
-    <result column="Active" jdbcType="BOOLEAN" property="active" />
-    <result column="ExpireAt" jdbcType="TIMESTAMP" property="expireAt" />
-    <result column="LastUsedAt" jdbcType="TIMESTAMP" property="lastUsedAt" />
-    <result column="InsertedAt" jdbcType="TIMESTAMP" property="insertedAt" />
-    <result column="UpdatedAt" jdbcType="TIMESTAMP" property="updatedAt" />
-  </resultMap>
+    <resultMap id="BaseResultMap" type="com.spider.amazon.model.ProxyDO">
+        <id column="Ip" jdbcType="VARCHAR" property="ip"/>
+        <id column="Port" jdbcType="VARCHAR" property="port"/>
+        <result column="Username" jdbcType="VARCHAR" property="username"/>
+        <result column="Password" jdbcType="VARCHAR" property="password"/>
+        <result column="Provider" jdbcType="VARCHAR" property="provider" typeHandler="com.spider.amazon.mapper.ProxyProviderTypeHandler"/>
+        <result column="IpType" jdbcType="VARCHAR" property="ipType"/>
+        <result column="SecretType" jdbcType="VARCHAR" property="secretType"/>
+        <result column="Location" jdbcType="VARCHAR" property="location"/>
+        <result column="ResponeSp" jdbcType="VARCHAR" property="responeSp"/>
+        <result column="LastCheckTime" jdbcType="TIMESTAMP" property="lastCheckTime"/>
+        <result column="SelfRotating" jdbcType="BOOLEAN" property="selfRotating"/>
+        <result column="Active" jdbcType="BOOLEAN" property="active"/>
+        <result column="ExpireAt" jdbcType="TIMESTAMP" property="expireAt"/>
+        <result column="LastUsedAt" jdbcType="TIMESTAMP" property="lastUsedAt"/>
+        <result column="InsertedAt" jdbcType="TIMESTAMP" property="insertedAt"/>
+        <result column="UpdatedAt" jdbcType="TIMESTAMP" property="updatedAt"/>
+    </resultMap>
 
-  <sql id="Base_Column_List">
-    Ip, Port, IpType, SecretType, Location, ResponeSp, LastCheckTime, Active
-  </sql>
+    <sql id="Base_Column_List">
+        Ip, Port, IpType, SecretType, Location, ResponeSp, LastCheckTime, SelfRotating, Active
+    </sql>
 
-  <select id="getProxyByIpAndPort" parameterType="map" resultMap="BaseResultMap">
+    <select id="getProxyByIpAndPort" parameterType="map" resultMap="BaseResultMap">
 
-    select * from "Amazon".dbo.IpPool
-    where Ip = #{ip} and Port = #{port}
+        select *
+        from "Amazon".dbo.IpPool
+        where Ip = #{ip}
+          and Port = #{port}
 
-  </select>
+    </select>
 
-<!--  <select id="getRandomActiveProxy">-->
-<!--    Select top 50 * from IpPool-->
-<!--    where Active = 1 and (ExpireAt is null or ExpireAt > getdate())-->
-<!--    order by newid()-->
-<!--  </select>-->
+    <select id="getAllSelfRotatingProxyHost" resultMap="BaseResultMap">
 
-<!--  <select id="getRandomActiveProxiesCount" parameterType="map" resultMap="BaseResultMap">-->
-<!--    Select top #{count} * from IpPool-->
-<!--    where Active = 1 and (ExpireAt is null or ExpireAt > getdate())-->
-<!--    order by newid()-->
-<!--  </select>-->
+        select *
+        from "Amazon".dbo.IpPool
+        where SelfRotating = 1
 
-  <insert id="insert" parameterType="com.spider.amazon.model.ProxyDO">
-    insert into IpPool (Ip, Port, IpType,
-      SecretType, Location, ResponeSp, Active,
-      LastCheckTime, InsertedAt, UpdatedAt)
-    values (#{ip,jdbcType=VARCHAR}, #{port,jdbcType=VARCHAR}, #{ipType,jdbcType=VARCHAR}, 
-      #{secretType,jdbcType=VARCHAR}, #{location,jdbcType=VARCHAR}, #{responeSp,jdbcType=VARCHAR}, true,
-      getdate(), getdate(), getdate())
-  </insert>
+    </select>
 
-  <insert id="insertSelective" parameterType="com.spider.amazon.model.ProxyDO" useGeneratedKeys="true" keyColumn="Id" keyProperty="id">
-    insert into IpPool
-    <trim prefix="(" suffix=")" suffixOverrides=",">
-      <if test="ip != null">
-        Ip,
-      </if>
-      <if test="port != null">
-        Port,
-      </if>
-      <if test="username != null">
-        Username,
-      </if>
-      <if test="password != null">
-        Password,
-      </if>
-      <if test="provider != null">
-        Provider,
-      </if>
-      <if test="ipType != null">
-        IpType,
-      </if>
-      <if test="secretType != null">
-        SecretType,
-      </if>
-      <if test="location != null">
-        Location,
-      </if>
-      <if test="responeSp != null">
-        ResponeSp,
-      </if>
-      <if test="lastCheckTime != null">
-        LastCheckTime,
-      </if>
-      <if test="active != null">
-        Active,
-      </if>
-      <if test="expireAt != null">
-        ExpireAt,
-      </if>
-        InsertedAt,
-        UpdatedAt
-    </trim>
+    <!--  Get self rotating proxy which is active and not expire  -->
+    <select id="getAllActiveSelfRotatingProxyHost" resultMap="BaseResultMap">
 
-    <trim prefix="values (" suffix=")" suffixOverrides=",">
-      <if test="ip != null">
-        #{ip,jdbcType=VARCHAR},
-      </if>
-      <if test="port != null">
-        #{port,jdbcType=VARCHAR},
-      </if>
-      <if test="username != null">
-        #{username,jdbcType=VARCHAR},
-      </if>
-      <if test="password != null">
-        #{password,jdbcType=VARCHAR},
-      </if>
-      <if test="provider != null">
-        #{provider,jdbcType=VARCHAR},
-      </if>
-      <if test="ipType != null">
-        #{ipType,jdbcType=VARCHAR},
-      </if>
-      <if test="secretType != null">
-        #{secretType,jdbcType=VARCHAR},
-      </if>
-      <if test="location != null">
-        #{location,jdbcType=VARCHAR},
-      </if>
-      <if test="responeSp != null">
-        #{responeSp,jdbcType=VARCHAR},
-      </if>
-      <if test="lastCheckTime != null">
-        #{lastCheckTime,jdbcType=TIMESTAMP},
-      </if>
-      <if test="active != null">
-        #{active,jdbcType=BOOLEAN},
-      </if>
-      <if test="expireAt != null">
-        #{expireAt,jdbcType=TIMESTAMP},
-      </if>
-        getdate(),
-        getdate()
-    </trim>
-  </insert>
+        select *
+        from "Amazon".dbo.IpPool
+        where SelfRotating = 1 and (ExpireAt is null or ExpireAt > getdate())
 
-  <!-- 批量插入 -->
-  <insert id="insertBatch" parameterType="java.util.List">
-    insert into IpPool (<include refid="Base_Column_List" />)
-    values
-    <foreach collection="list" item="item" index="index"  separator=",">
-      (#{item.ip,jdbcType=VARCHAR}, #{item.port,jdbcType=VARCHAR}, #{item.ipType,jdbcType=VARCHAR},
-      #{item.secretType,jdbcType=VARCHAR}, #{item.location,jdbcType=VARCHAR}, #{item.responeSp,jdbcType=VARCHAR},
-      #{item.lastCheckTime,jdbcType=TIMESTAMP}, #{item.ipStatus,jdbcType=VARCHAR})
-    </foreach>
-  </insert>
+    </select>
 
-  <update id="update" parameterType="com.spider.amazon.model.ProxyDO">
-    update "Amazon".dbo.IpPool
-    set Username = #{username},
+    <!--  <select id="getRandomActiveProxy">-->
+    <!--    Select top 50 * from IpPool-->
+    <!--    where Active = 1 and (ExpireAt is null or ExpireAt > getdate())-->
+    <!--    order by newid()-->
+    <!--  </select>-->
+
+    <!--  <select id="getRandomActiveProxiesCount" parameterType="map" resultMap="BaseResultMap">-->
+    <!--    Select top #{count} * from IpPool-->
+    <!--    where Active = 1 and (ExpireAt is null or ExpireAt > getdate())-->
+    <!--    order by newid()-->
+    <!--  </select>-->
+
+    <insert id="insert" parameterType="com.spider.amazon.model.ProxyDO">
+        insert into IpPool (Ip, Port, IpType,
+                            SecretType, Location, ResponeSp, Active,
+                            LastCheckTime, InsertedAt, UpdatedAt)
+        values (#{ip,jdbcType=VARCHAR}, #{port,jdbcType=VARCHAR}, #{ipType,jdbcType=VARCHAR},
+                #{secretType,jdbcType=VARCHAR}, #{location,jdbcType=VARCHAR}, #{responeSp,jdbcType=VARCHAR}, true,
+                getdate(), getdate(), getdate())
+    </insert>
+
+    <insert id="insertSelective" parameterType="com.spider.amazon.model.ProxyDO" useGeneratedKeys="true" keyColumn="Id"
+            keyProperty="id">
+        insert into IpPool
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ip != null">
+                Ip,
+            </if>
+            <if test="port != null">
+                Port,
+            </if>
+            <if test="username != null">
+                Username,
+            </if>
+            <if test="password != null">
+                Password,
+            </if>
+            <if test="provider != null">
+                Provider,
+            </if>
+            <if test="ipType != null">
+                IpType,
+            </if>
+            <if test="secretType != null">
+                SecretType,
+            </if>
+            <if test="location != null">
+                Location,
+            </if>
+            <if test="responeSp != null">
+                ResponeSp,
+            </if>
+            <if test="lastCheckTime != null">
+                LastCheckTime,
+            </if>
+            <if test="selfRotating != null">
+                SelfRotating,
+            </if>
+            <if test="active != null">
+                Active,
+            </if>
+            <if test="expireAt != null">
+                ExpireAt,
+            </if>
+            InsertedAt,
+            UpdatedAt
+        </trim>
+
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="ip != null">
+                #{ip,jdbcType=VARCHAR},
+            </if>
+            <if test="port != null">
+                #{port,jdbcType=VARCHAR},
+            </if>
+            <if test="username != null">
+                #{username,jdbcType=VARCHAR},
+            </if>
+            <if test="password != null">
+                #{password,jdbcType=VARCHAR},
+            </if>
+            <if test="provider != null">
+                #{provider,jdbcType=VARCHAR, typeHandler=com.spider.amazon.mapper.ProxyProviderTypeHandler},
+            </if>
+            <if test="ipType != null">
+                #{ipType,jdbcType=VARCHAR},
+            </if>
+            <if test="secretType != null">
+                #{secretType,jdbcType=VARCHAR},
+            </if>
+            <if test="location != null">
+                #{location,jdbcType=VARCHAR},
+            </if>
+            <if test="responeSp != null">
+                #{responeSp,jdbcType=VARCHAR},
+            </if>
+            <if test="lastCheckTime != null">
+                #{lastCheckTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="selfRotating != null">
+                #{selfRotating,jdbcType=BOOLEAN},
+            </if>
+            <if test="active != null">
+                #{active,jdbcType=BOOLEAN},
+            </if>
+            <if test="expireAt != null">
+                #{expireAt,jdbcType=TIMESTAMP},
+            </if>
+            getdate(),
+            getdate()
+        </trim>
+    </insert>
+
+    <!-- 批量插入 -->
+    <insert id="insertBatch" parameterType="java.util.List">
+        insert into IpPool (<include refid="Base_Column_List"/>)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            <if test="item != null">
+
+            </if>
+            (#{item.ip,jdbcType=VARCHAR}, #{item.port,jdbcType=VARCHAR}, #{item.ipType,jdbcType=VARCHAR},
+            #{item.secretType,jdbcType=VARCHAR}, #{item.location,jdbcType=VARCHAR}, #{item.responeSp,jdbcType=VARCHAR},
+            #{item.lastCheckTime,jdbcType=TIMESTAMP}, #{item.selfRotating,jdbcType=BOOLEAN}, #{item.active,jdbcType=BOOLEAN})
+        </foreach>
+    </insert>
+
+    <update id="update" parameterType="com.spider.amazon.model.ProxyDO">
+        update "Amazon".dbo.IpPool
+        set Username = #{username},
         Password = #{password},
         <if test="ipType != null">
-          IpType = #{ipType}
+            IpType = #{ipType},
+        </if>
+        <if test="selfRotating != null">
+            SelfRotating = #{selfRotating},
         </if>
         <if test="active != null">
-          Active = #{active},
+            Active = #{active},
         </if>
         <if test="expireAt != null">
-          ExpireAt = #{expireAt},
+            ExpireAt = #{expireAt},
         </if>
         <if test="lastCheckTime != null">
-          LastCheckTime = lastCheckTime(),
+            LastCheckTime = #{lastCheckTime},
         </if>
         UpdatedAt = getdate()
-  </update>
 
-  <update id="markProxyUsedTime" parameterType="map">
-    update "Amazon".dbo.IpPool
-    set LastUsedAt = getdate(),
-        UpdatedAt = getdate()
-    where Id = #{id}
-  </update>
+        where Id = #{id}
+    </update>
 
-  <update id="markProxiesUsedTime" parameterType="java.util.List">
-    update "Amazon".dbo.IpPool
-    set LastUsedAt = gettime()
-    where Id in
-    <foreach open="(" collection="list" item="item"  separator="," close=")">
-        #{item}
-    </foreach>
-  </update>
+    <update id="markProxyUsedTime" parameterType="map">
+        update "Amazon".dbo.IpPool
+        set LastUsedAt = getdate(),
+            UpdatedAt  = getdate()
+        where Id = #{id}
+    </update>
 
-  <update id="setProxyActive" parameterType="map">
-    update "Amazon".dbo.IpPool
-    set Active = true,
-        UpdatedAt = getdate()
-    where Id = #{id}
-  </update>
+    <update id="markProxyUsedTimeByIds" parameterType="java.util.List">
+        update "Amazon".dbo.IpPool
+        set LastUsedAt = gettime()
+        where Id in
+        <foreach open="(" collection="list" item="item" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
 
-  <update id="setProxyNonActive" parameterType="map">
-    update "Amazon".dbo.IpPool
-    set Active = true,
-        UpdatedAt = getdate()
-    where Id = #{id}
-  </update>
+    <update id="setProxyActive" parameterType="map">
+        update "Amazon".dbo.IpPool
+        set Active    = true,
+            UpdatedAt = getdate()
+        where Id = #{id}
+    </update>
 
-  <delete id="deleteById" parameterType="map">
-    delete from IpPool
-    where Id = #{id}
-  </delete>
+    <update id="setProxyNonActive" parameterType="map">
+        update "Amazon".dbo.IpPool
+        set Active    = true,
+            UpdatedAt = getdate()
+        where Id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="map">
+        delete
+        from IpPool
+        where Id = #{id}
+    </delete>
 </mapper>

@@ -2,6 +2,7 @@ package com.spider.amazon.service.impl;
 
 import com.spider.SpiderServiceApplication;
 import com.spider.amazon.dto.ProxyDTO;
+import com.spider.amazon.model.ProxyProvider;
 import com.spider.amazon.service.ProxyService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,6 +12,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -30,7 +32,7 @@ class ProxyServiceImplTest {
             ProxyDTO proxyDTO = new ProxyDTO();
             proxyDTO.setIp(String.format("0.0.%s.%s", i/255, i%255));
             proxyDTO.setPort(String.format("1111"));
-            proxyDTO.setProvider("Test");
+            proxyDTO.setProvider(ProxyProvider.TEST);
 
             proxies.add(proxyDTO);
         }
@@ -58,7 +60,7 @@ class ProxyServiceImplTest {
             ProxyDTO proxyDTO = new ProxyDTO();
             proxyDTO.setIp(String.format("0.0.%s.%s", i/255, i%255));
             proxyDTO.setPort(String.format("1111"));
-            proxyDTO.setProvider("Test");
+            proxyDTO.setProvider(ProxyProvider.TEST);
 
             proxies.add(proxyDTO);
         }
@@ -93,6 +95,5 @@ class ProxyServiceImplTest {
             }
         }
 
-        System.exit(2);
     }
 }

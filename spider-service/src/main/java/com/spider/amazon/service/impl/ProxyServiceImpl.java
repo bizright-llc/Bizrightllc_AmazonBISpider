@@ -1,9 +1,13 @@
 package com.spider.amazon.service.impl;
 
 import com.common.exception.RepositoryException;
+import com.spider.amazon.dto.ProviderProxyDTO;
 import com.spider.amazon.dto.ProxyDTO;
 import com.spider.amazon.mapper.ProxyDOMapper;
 import com.spider.amazon.model.ProxyDO;
+import com.spider.amazon.model.ProxyProvider;
+import com.spider.amazon.service.ProxyProviderFactory;
+import com.spider.amazon.service.ProxyProviderService;
 import com.spider.amazon.service.ProxyService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -23,31 +27,30 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
 import org.apache.ibatis.executor.ExecutorException;
-import org.apache.ibatis.javassist.tools.rmi.ObjectNotFoundException;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.Provider;
 import org.mybatis.spring.MyBatisSystemException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.session.NonUniqueSessionRepositoryException;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
 import java.net.*;
-import java.sql.SQLException;
-import java.util.List;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.stream.Collectors;
-
-import static java.lang.Thread.sleep;
 
 @Service
 @Slf4j
 public class ProxyServiceImpl implements ProxyService {
+
+    private Queue<ProxyDTO> nonUsedProxies = new LinkedBlockingQueue<>();
+    private List<ProxyDTO> rotatingProxies = new ArrayList<>();
 
     private static String TEST_URL = "http://www.amazon.com/";
 
@@ -70,6 +73,102 @@ public class ProxyServiceImpl implements ProxyService {
     @Override
     public void refreshIpPool() {
 
+        for (ProxyProvider provider: ProxyProvider.values()){
+            try{
+                ProxyProviderService proxyProviderService = ProxyProviderFactory.getProvider(provider);
+
+                if(proxyProviderService == null){
+                    continue;
+                }
+
+                List<ProviderProxyDTO> proxies = proxyProviderService.getActiveProxies();
+
+                updateActiveProxies(proxies);
+
+            }catch (Exception ex){
+                log.error("[refreshIpPool] Proxy provider {} refresh status failed", provider.getValue(), ex);
+            }
+        }
+    }
+
+    /**
+     * Update proxy to database
+     * if ip and port exist, it will update the active status
+     * if ip and port not exist, insert new data
+     *
+     * @param proxies
+     */
+    private void updateActiveProxies(List<ProviderProxyDTO> proxies){
+
+        TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+
+        for (ProviderProxyDTO p: proxies){
+
+            transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+                @Override
+                protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
+                    ProxyDO existProxy = proxyDOMapper.getProxyByIpAndPort(p.getIp(), p.getPort());
+
+                    if(existProxy != null){
+                        existProxy.setUsername(p.getUsername());
+                        existProxy.setPassword(p.getPassword());
+                        existProxy.setLastCheckTime(LocalDateTime.now());
+                        existProxy.setSelfRotating(p.getSelfRotating());
+                        existProxy.setExpireAt(p.getExpiredAt());
+                        existProxy.setActive(true);
+
+                        proxyDOMapper.update(existProxy);
+                    }else{
+                        // insert new proxy data
+                        ProxyDO newProxy = providerDtoToDO(p);
+                        newProxy.setLastCheckTime(LocalDateTime.now());
+                        newProxy.setActive(true);
+
+                        proxyDOMapper.insertSelective(newProxy);
+                    }
+
+                }
+            });
+        }
+    }
+
+    @Override
+    public ProxyDTO getRandomActiveProxy() {
+        if(nonUsedProxies.size() == 0){
+            nonUsedProxies.addAll(getRandomActiveProxies(100));
+        }
+
+        TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+
+        return transactionTemplate.execute(status -> {
+
+            ProxyDTO proxyDTO = nonUsedProxies.peek();
+
+            proxyDOMapper.markProxyUsedTimeByIds(proxyDTO.getId());
+
+            return nonUsedProxies.poll();
+
+        });
+
+    }
+
+    @Override
+    public ProxyDTO getRandomActiveSelfRotatingProxy() {
+        if (rotatingProxies.size() == 0){
+            rotatingProxies.addAll(getRandomActiveSelfRotatingProxies(10));
+        }
+
+        TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+
+        return transactionTemplate.execute(status -> {
+            int randomIndex = new Random().nextInt(rotatingProxies.size());
+
+            ProxyDTO proxy = rotatingProxies.get(randomIndex);
+            proxy.setLastUsedAt(LocalDateTime.now());
+            proxyDOMapper.markProxyUsedTimeByIds(proxy.getId());
+
+            return proxy;
+        });
     }
 
     @Override
@@ -79,8 +178,45 @@ public class ProxyServiceImpl implements ProxyService {
             count = 100;
         }
 
+        TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+
+        int finalCount = count;
+        return transactionTemplate.execute(transactionStatus -> {
+
+            List<ProxyDTO> proxies = proxyDOMapper.getRandomActiveProxiesCount(finalCount).stream().map(this::doToDTO).collect(Collectors.toList());
+
+            return proxies;
+        });
+
+    }
+
+    /**
+     * Get random active proxies and mark used time
+     *
+     * @param count
+     * @return
+     */
+    private List<ProxyDTO> getRandomActiveProxies(int count) {
+
+        if (count <= 0){
+            count = 100;
+        }
+
         return proxyDOMapper.getRandomActiveProxiesCount(count).stream().map(this::doToDTO).collect(Collectors.toList());
 
+    }
+
+    /**
+     *
+     * @param count
+     * @return
+     */
+    private List<ProxyDTO> getRandomActiveSelfRotatingProxies(int count){
+        if (count <= 0){
+            count = 100;
+        }
+
+        return proxyDOMapper.getRandomActiveSelfRotatingProxyHost(count).stream().map(this::doToDTO).collect(Collectors.toList());
     }
 
     @Override
@@ -143,7 +279,7 @@ public class ProxyServiceImpl implements ProxyService {
 
         try{
 
-            proxyDOMapper.markProxyUsedTime(proxy.getId());
+            proxyDOMapper.markProxyUsedTimeByIds(proxy.getId());
 
         }catch (Exception e){
 
@@ -275,5 +411,9 @@ public class ProxyServiceImpl implements ProxyService {
      */
     private ProxyDO dtoToDO(ProxyDTO proxyDTO){
         return modelMapper.map(proxyDTO, ProxyDO.class);
+    }
+
+    private ProxyDO providerDtoToDO(ProviderProxyDTO providerProxyDTO){
+        return modelMapper.map(providerProxyDTO, ProxyDO.class);
     }
 }

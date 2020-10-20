@@ -1,6 +1,7 @@
 package com.spider.amazon.utils;
 
 import cn.hutool.core.util.ObjectUtil;
+import com.spider.amazon.dto.ProxyDTO;
 import com.spider.amazon.entity.Cookie;
 import com.spider.amazon.model.ProxyDO;
 import com.spider.amazon.remote.api.SpiderUrl;
@@ -102,14 +103,12 @@ public class WebDriverUtils {
 
     /**
      * Get web driver
-     *
-     * @param driverPath
-     * @param downloadPath
-     * @param useProxy
-     * @param background
+     * @param background the web driver wont show the window
+     * @param downloadPath the download file path
      * @return
      */
-    public static WebDriver getWebDriver(String driverPath, String downloadPath, boolean useProxy, boolean background){
+    public static WebDriver getWebDriver(String downloadPath, boolean background){
+
         ChromeOptions options = new ChromeOptions();
 
         if(StringUtils.isNotEmpty(downloadPath)){
@@ -120,8 +119,78 @@ public class WebDriverUtils {
             options.setExperimentalOption("prefs", chromePrefs);
         }
 
-        if(useProxy){
-            options.addExtensions(new File("/Users/shaochinlin/Documents/Bizright/BI/BiSpider/proxy/luminatiproxy.zip"));
+        if(background){
+            // driver work at background
+            options.addArguments("--headless", "--disable-gpu", "--window-size=1920,1200","--ignore-certificate-errors", "--silent");
+        }
+
+        WebDriver driver = new ChromeDriver(options);
+
+        return driver;
+    }
+
+    /**
+     * Get web driver
+     *
+     * @param driverPath
+     * @param downloadPath
+     * @param background
+     * @return
+     */
+    public static WebDriver getWebDriverWithProxy(String driverPath, String downloadPath, String proxyFile, boolean background){
+        ChromeOptions options = new ChromeOptions();
+
+        if(StringUtils.isNotEmpty(downloadPath)){
+            HashMap<String, Object> chromePrefs = new HashMap<String, Object>();
+            chromePrefs.put("profile.default_content_settings.popups", 0);
+            chromePrefs.put("download.default_directory", downloadPath);
+
+            options.setExperimentalOption("prefs", chromePrefs);
+        }
+
+        options.addExtensions(new File(proxyFile));
+
+        if(background){
+            // driver work at background
+            options.addArguments("--headless", "--disable-gpu", "--window-size=1920,1200","--ignore-certificate-errors", "--silent");
+        }
+
+        System.setProperty("webdriver.chrome.driver", driverPath);
+
+        RemoteWebDriver driver = new ChromeDriver(options);
+
+        return driver;
+    }
+
+    /**
+     * Get web driver with proxy setting
+     * cannot use proxy with auth
+     *
+     * @param driverPath
+     * @param downloadPath
+     * @param proxy
+     * @param background
+     * @return
+     */
+    public static WebDriver getWebDriverWithProxy(String driverPath, String downloadPath, ProxyDTO proxy, boolean background){
+        ChromeOptions options = new ChromeOptions();
+
+        if(StringUtils.isNotEmpty(downloadPath)){
+            HashMap<String, Object> chromePrefs = new HashMap<String, Object>();
+            chromePrefs.put("profile.default_content_settings.popups", 0);
+            chromePrefs.put("download.default_directory", downloadPath);
+
+            options.setExperimentalOption("prefs", chromePrefs);
+        }
+
+        if (StringUtils.isNotEmpty(proxy.getUsername())){
+            throw new IllegalArgumentException("Cannot set driver with proxy need auth");
+        }
+
+        if(proxy != null && StringUtils.isNotEmpty(proxy.getIp())){
+            options.addArguments(String.format("--proxy-server=%s", proxy));
+        }else{
+            throw new IllegalArgumentException("proxy cannot be null");
         }
 
         if(background){
@@ -201,61 +270,6 @@ public class WebDriverUtils {
         driver = new PhantomJSDriver(capabilities);
         driver.manage().timeouts().implicitlyWait(5L, TimeUnit.SECONDS);
         driver.manage().window().maximize();
-
-        return driver;
-    }
-
-    public static WebDriver getWebDriver(String driverPath, String downloadPath, String proxy, boolean background){
-        ChromeOptions options = new ChromeOptions();
-
-        if(StringUtils.isNotEmpty(downloadPath)){
-            HashMap<String, Object> chromePrefs = new HashMap<String, Object>();
-            chromePrefs.put("profile.default_content_settings.popups", 0);
-            chromePrefs.put("download.default_directory", downloadPath);
-
-            options.setExperimentalOption("prefs", chromePrefs);
-        }
-
-        if(StringUtils.isNotEmpty(proxy)){
-            options.addArguments(String.format("--proxy-server=%s", proxy));
-        }
-
-        if(background){
-            // driver work at background
-            options.addArguments("--headless", "--disable-gpu", "--window-size=1920,1200","--ignore-certificate-errors", "--silent");
-        }
-
-        System.setProperty("webdriver.chrome.driver", driverPath);
-
-        RemoteWebDriver driver = new ChromeDriver(options);
-
-        return driver;
-    }
-
-    /**
-     * Get web driver
-     * @param background the web driver wont show the window
-     * @param downloadPath the download file path
-     * @return
-     */
-    public static WebDriver getWebDriver(String downloadPath, boolean background){
-
-        ChromeOptions options = new ChromeOptions();
-
-        if(StringUtils.isNotEmpty(downloadPath)){
-            HashMap<String, Object> chromePrefs = new HashMap<String, Object>();
-            chromePrefs.put("profile.default_content_settings.popups", 0);
-            chromePrefs.put("download.default_directory", downloadPath);
-
-            options.setExperimentalOption("prefs", chromePrefs);
-        }
-
-        if(background){
-            // driver work at background
-            options.addArguments("--headless", "--disable-gpu", "--window-size=1920,1200","--ignore-certificate-errors", "--silent");
-        }
-
-        WebDriver driver = new ChromeDriver(options);
 
         return driver;
     }

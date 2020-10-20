@@ -2,6 +2,7 @@ package com.spider.amazon.webmagic;
 
 import com.spider.SpiderServiceApplication;
 import com.spider.amazon.config.SpiderConfig;
+import com.spider.amazon.dto.ProxyDTO;
 import com.spider.amazon.model.ProxyDO;
 import com.spider.amazon.utils.WebDriverUtils;
 import org.apache.http.HttpHost;
@@ -190,15 +191,9 @@ public class ProxyTest {
         WebDriver driver = null;
 
         try {
-            String baseUrl = "https://whatismyipaddress.com/";
+            String baseUrl = "http://www.amazon.com";
 
-            Proxy proxy = new org.openqa.selenium.Proxy();
-            proxy.setSslProxy("zproxy.lum-superproxy.io" + ":" + 22225);
-
-            proxy.setSocksUsername("lum-customer-ipower-zone-static");
-            proxy.setSocksPassword("38rnyeoymh2g");
-
-            driver = WebDriverUtils.getWebDriver(spiderConfig.getChromeDriverPath(), spiderConfig.getDownloadPath(), true, false);
+            driver = WebDriverUtils.getWebDriverWithProxy(spiderConfig.getChromeDriverPath(), spiderConfig.getDownloadPath(), spiderConfig.getChromeProxyFilepath(), false);
 
             for (int i=0; i< 10; i++){
 
@@ -215,74 +210,6 @@ public class ProxyTest {
                 driver.quit();
             }
         }
-
-    }
-
-    @Test
-    public void firefoxDriverProxyWithAuthTest(){
-
-        WebDriver driver = null;
-
-        try {
-            String baseUrl = "https://whatismyipaddress.com/";
-
-            ProxyDO proxy = new ProxyDO();
-            proxy.setIp("zproxy.lum-superproxy.io");
-            proxy.setPort("22225");
-            proxy.setUsername("lum-customer-ipower-zone-static-country-us");
-            proxy.setPassword("38rnyeoymh2g");
-
-            driver = WebDriverUtils.getFirefoxDriver(spiderConfig.getFirefoxDriverPath(), spiderConfig.getDownloadPath(), proxy, false);
-
-            for (int i=0; i< 10; i++){
-
-                driver.get(baseUrl);
-
-                sleep(10000);
-
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if(driver != null){
-                driver.quit();
-            }
-        }
-
-    }
-
-    @Test
-    public void phantomJsDriverProxyWithAuthTest(){
-
-        WebDriver driver = null;
-
-        try {
-            String baseUrl = "https://whatismyipaddress.com/";
-
-            ProxyDO proxy = new ProxyDO();
-            proxy.setIp("zproxy.lum-superproxy.io");
-            proxy.setPort("22225");
-            proxy.setUsername("lum-customer-ipower-zone-static-country-us");
-            proxy.setPassword("38rnyeoymh2g");
-
-            driver = WebDriverUtils.getPhantomJSDriver(spiderConfig.getPhantomJsDriverPath(), spiderConfig.getDownloadPath(), proxy, false);
-
-            for (int i=0; i< 10; i++){
-
-                driver.get(baseUrl);
-
-                sleep(10000);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if(driver != null){
-                driver.quit();
-            }
-        }
-
     }
 
     @Test
@@ -291,15 +218,14 @@ public class ProxyTest {
         WebDriver driver = null;
 
         try {
-            String baseUrl = "https://whatismyipaddress.com/";
+            String baseUrl = "http://lumtest.com/myip.json";
 
-            Proxy proxy = new org.openqa.selenium.Proxy();
-            proxy.setSslProxy("zproxy.lum-superproxy.io" + ":" + 22225);
+            ProxyDTO proxyDTO = new ProxyDTO();
 
-            proxy.setSocksUsername("lum-customer-ipower-zone-static-country-us");
-            proxy.setSocksPassword("38rnyeoymh2g");
+            proxyDTO.setIp("108.59.14.203");
+            proxyDTO.setPort("13010");
 
-            driver = WebDriverUtils.getWebDriver(spiderConfig.getChromeDriverPath(), spiderConfig.getDownloadPath(), "35.233.232.84:3128", false);
+            driver = WebDriverUtils.getWebDriverWithProxy(spiderConfig.getChromeDriverPath(), spiderConfig.getDownloadPath(), proxyDTO, false);
 
             for (int i=0; i< 10; i++){
 

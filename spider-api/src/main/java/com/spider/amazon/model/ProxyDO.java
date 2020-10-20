@@ -26,7 +26,7 @@ public class ProxyDO {
      */
     private String proxyId;
 
-    private String provider;
+    private ProxyProvider provider;
 
     /**
      * Proxy host
@@ -52,26 +52,51 @@ public class ProxyDO {
      */
     private String secretType;
 
+    /**
+     * Proxy country
+     */
     private String location;
-
-    private String country;
 
     private String responeSp;
 
-    private Date lastCheckTime;
+    /**
+     * Last time check proxy valid or not
+     */
+    private LocalDateTime lastCheckTime;
 
-    private LocalDateTime expiredAt;
-
+    /**
+     *
+     */
     private String ipStatus;
 
+    /**
+     * Self rotating proxy host
+     */
+    private Boolean selfRotating;
+
+    /**
+     * This proxy is active or not
+     */
     private Boolean active;
 
+    /**
+     * This proxy expire time
+     */
     private LocalDateTime expireAt;
 
+    /**
+     * Last used time
+     */
     private LocalDateTime lastUsedAt;
 
+    /**
+     * Insert time
+     */
     private LocalDateTime insertedAt;
 
+    /**
+     * Last update time
+     */
     private LocalDateTime updatedAt;
 
 }
