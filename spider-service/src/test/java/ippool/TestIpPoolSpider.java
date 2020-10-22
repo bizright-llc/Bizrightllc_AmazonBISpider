@@ -2,6 +2,7 @@ package ippool;
 
 import com.spider.SpiderServiceApplication;
 import com.spider.amazon.config.SpiderConfig;
+import com.spider.amazon.service.ProxyService;
 import com.spider.amazon.webmagic.ippool.IpPoolPipeline;
 import com.spider.amazon.webmagic.ippool.IpPoolProcessor;
 import org.junit.jupiter.api.Test;
@@ -21,11 +22,14 @@ class TestIpPoolSpider {
     @Autowired
     private SpiderConfig spiderConfig;
 
+    @Autowired
+    private ProxyService proxyService;
+
     @Test
     void testHawSpider(){
 
         // 3.调用爬虫
-        Spider spider= Spider.create(new IpPoolProcessor(spiderConfig));
+        Spider spider= Spider.create(new IpPoolProcessor(spiderConfig, proxyService));
         PriorityScheduler scheduler = new PriorityScheduler();
         for (int index=1;index<=100;index++) {
             scheduler.push(new Request("http://www.89ip.cn/index_"+index+".html"),spider);

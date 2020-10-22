@@ -98,7 +98,7 @@ public class HawProductScrapyTask {
      */
     @Scheduled(cron = "0 5/30 * * * ? ")
     public void scheduleHawDataDeal() {
-        log.info("[执行Haw数据处理任务]=>[scheduleHawDataDeal]");
+        log.info("[scheduleHawDataDeal] start ");
 
         // 1.获取数据抓取成功状态的任务
         Map<String,Object> params = new HashMap<>();

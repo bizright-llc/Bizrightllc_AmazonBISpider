@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spider.amazon.mapper.ProxyAccountDOMapper">
+    <resultMap id="BaseResultMap" type="com.spider.amazon.model.ProxyAccountDO">
+        <id column="Id" jdbcType="INTEGER" property="id"/>
+        <result column="Provider" jdbcType="VARCHAR" property="provider"/>
+        <result column="Username" jdbcType="VARCHAR" property="username"/>
+        <result column="Password" jdbcType="VARCHAR" property="password"/>
+        <result column="Token" jdbcType="VARCHAR" property="token"/>
+        <result column="Active" jdbcType="BOOLEAN" property="active"/>
+        <result column="ExpireAt" jdbcType="TIMESTAMP" property="expireAt"/>
+        <result column="InsertedAt" jdbcType="TIMESTAMP" property="insertedAt"/>
+        <result column="UpdatedAt" jdbcType="TIMESTAMP" property="updatedAt"/>
+        <result column="Remove" jdbcType="BOOLEAN" property="remove"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        Id, Provider, Username, Password, Password, Token, Active, ExpireAt, InsertedAt, UpdatedAt, Remove
+    </sql>
+
+    <select id="getAccountById" resultMap="BaseResultMap" parameterType="map">
+        select *
+        from ProxyAccount
+        where Id = #{id}
+    </select>
+
+    <select id="getAllAccount" resultMap="BaseResultMap">
+
+        select *
+        from ProxyAccount
+        where Remove = 0
+
+    </select>
+
+    <select id="getAllActiveAccount" parameterType="map" resultMap="BaseResultMap">
+
+        select *
+        from ProxyAccount
+        where Active = 1 and Remove = 0
+
+    </select>
+
+    <select id="getAllAccountByProvider" resultMap="BaseResultMap">
+        select *
+        from ProxyAccount
+        where Provider = #{provider} and Remove = 0
+    </select>
+
+    <select id="getAllAccountByProviderAndStatus" parameterType="map" resultMap="BaseResultMap">
+        select *
+        from ProxyAccount
+        where Provider = #{provider} and Active = #{active} and Remove = #{remove}
+    </select>
+
+    <!--  Get self rotating proxy which is active and not expire  -->
+    <update id="insertSelective" useGeneratedKeys="true" keyProperty="id" keyColumn="Id" >
+        insert into ProxyAccount
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="provider != null">
+                Provider,
+            </if>
+            <if test="username != null">
+                Username,
+            </if>
+            <if test="password != null">
+                Password,
+            </if>
+            <if test="token != null">
+                Token,
+            </if>
+            <if test="active != null">
+                Active,
+            </if>
+            <if test="expireAt != null">
+                ExpireAt,
+            </if>
+            <if test="remove != null">
+                Remove,
+            </if>
+            InsertedAt,
+            UpdatedAt
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="provider != null">
+                #{provider},
+            </if>
+            <if test="username != null">
+                #{username},
+            </if>
+            <if test="password != null">
+                #{password},
+            </if>
+            <if test="token != null">
+                #{token},
+            </if>
+            <if test="active != null">
+                #{active},
+            </if>
+            <if test="expireAt != null">
+                #{expireAt},
+            </if>
+            <if test="remove != null">
+                #{remove},
+            </if>
+            getdate(),
+            getdate()
+        </trim>
+    </update>
+
+    <update id="updateAccount" parameterType="com.spider.amazon.model.ProxyAccountDO">
+        update ProxyAccount
+            <trim prefix="set " >
+                <if test="username != null">
+                    Username = #{username},
+                </if>
+                <if test="password != null">
+                    Password = #{password},
+                </if>
+                <if test="token != null">
+                    Token = #{token},
+                </if>
+                <if test="active != null">
+                    Active = #{active},
+                </if>
+                <if test="expireAt != null">
+                    ExpireAt = #{expireAt},
+                </if>
+                UpdatedAt = getdate()
+            </trim>
+        where Id = #{id}
+    </update>
+
+    <update id="disActiveAccount" parameterType="map">
+        update ProxyAccount
+        set Active = 0,
+            UpdatedAt = getdate()
+        where Id = #{id}
+    </update>
+
+    <update id="deleteAccount" parameterType="map">
+        update ProxyAccount
+        set Remove = 1,
+            UpdatedAt = getdate()
+        where Id = #{id}
+    </update>
+
+
+</mapper>

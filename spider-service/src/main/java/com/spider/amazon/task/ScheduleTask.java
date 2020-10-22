@@ -6,6 +6,7 @@ import cn.hutool.core.io.FileUtil;
 import com.common.exception.ServiceException;
 import com.spider.amazon.batch.sc.buyboxinfo.CsvBatchConfigForAmzScBuyBox;
 import com.spider.amazon.config.SpiderConfig;
+import com.spider.amazon.cons.DateFormat;
 import com.spider.amazon.cons.PageQryType;
 import com.spider.amazon.cons.RespErrorEnum;
 import com.spider.amazon.cons.SqlResult;
@@ -25,6 +26,7 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import us.codecraft.webmagic.Request;
 import us.codecraft.webmagic.Spider;
 import us.codecraft.webmagic.downloader.HttpClientDownloader;
 import us.codecraft.webmagic.proxy.Proxy;
@@ -33,6 +35,8 @@ import us.codecraft.webmagic.proxy.SimpleProxyProvider;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -150,6 +154,62 @@ public class ScheduleTask {
         }catch (Exception ex){
             log.error("[schedulerVcDailySales] failed", ex);
             throw ex;
+        }
+    }
+
+    /**
+     * Every Tuesday download last week data
+     * Mon - Sun
+     *
+     */
+    @Scheduled(cron = "0 10 2 * * Tue")
+    public void schedulerDownloadLastWeekVcDailySales() throws InterruptedException {
+        log.info("[schedulerDownloadLastWeekVcDailySales］start schedule");
+
+        LocalDate startDate = LocalDate.now().minusWeeks(1).with(DayOfWeek.MONDAY);
+        LocalDate lastDate = LocalDate.now().minusWeeks(1).with(DayOfWeek.SUNDAY);
+
+        log.info("[schedulerDownloadLastWeekVcDailySales] download daily sales from {} to {}", startDate, lastDate);
+
+        Spider spider = null;
+        boolean tryAgain = false;
+
+        while (startDate.compareTo(lastDate) <= 0){
+
+            if(spider == null || spider.getStatus() == Spider.Status.Stopped){
+
+                try{
+
+                    AmazonVcDailySales process = new AmazonVcDailySales(spiderConfig, commonSettingService);
+                    process.setParseDate(startDate);
+
+                    spider = Spider.create(process);
+
+                    spider.thread(2);
+                    Request request = new Request(spiderConfig.getSpiderIndex());
+
+                    spider.addRequest(request);
+                    spider.start();
+
+                    startDate = startDate.plusDays(1);
+                }catch (Exception ex){
+                    log.info("[schedulerDownloadLastWeekVcDailySales] get daily sales {} failed", startDate, ex);
+
+                    if (tryAgain == true){
+
+                        log.info("[schedulerDownloadLastWeekVcDailySales] get daily sales {} failed again", startDate, ex);
+
+                        tryAgain = false;
+                    }else{
+                        tryAgain = true;
+                        // try again
+                        startDate.minusDays(1);
+                    }
+                }
+
+            }else{
+                Thread.sleep(5000);
+            }
         }
     }
 

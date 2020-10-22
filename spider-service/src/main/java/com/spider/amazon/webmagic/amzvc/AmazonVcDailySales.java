@@ -24,7 +24,12 @@ import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.processor.PageProcessor;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.WeekFields;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -45,14 +50,26 @@ import static java.lang.Thread.sleep;
 @Slf4j
 public class AmazonVcDailySales implements PageProcessor {
 
-    private static int DATE_OFFSET=-3;
-
     private final static String manufacturingViewXPath = "//*[@id=\"dashboard-filter-distributorView\"]/div/awsui-button-dropdown/div/div/ul/li[contains(@data-testid,'manufacturer')]";
     private final static String sourcingViewXPath = "//*[@id=\"dashboard-filter-distributorView\"]/div/awsui-button-dropdown/div/div/ul/li[contains(@data-testid,'sourcing')]";
 
     private final static String salesViewShippedCOGSLevelXPath = "//*[@id='dashboard-filter-viewFilter']//awsui-button-dropdown//ul/li[contains(@data-testid, \"shippedCOGSLevel\")]";
 
+    // date picker xpath
+    private final static String dateRangeFromDateXPath = "(//input[contains(@class, 'date-picker-input')])[1]";
+    private final static String dateRangeToDateXPath = "(//input[contains(@class, 'date-picker-input')])[2]";
+    private final static String datePickerPreviousBtnXPath = "//a[contains(@class, 'react-datepicker__navigation--previous')]";
+    private final static String datePickerNextBtnXPath = "//a[contains(@class, 'react-datepicker__navigation--next')]";
+    private final static String datePickerLeftMonthXPath = "(//div[contains(@class, 'react-datepicker__current-month')])[1]";
+    private final static String datePickerRightMonthXPath = "(//div[contains(@class, 'react-datepicker__current-month')])[2]";
+
     private final String detailCsvXPath = "//*[@id=\"downloadButton\"]/awsui-button-dropdown/div/div/ul/li/ul[contains(@aria-label, 'Detail View')]/li[contains(@data-testid, 'salesDiagnosticDetail_csv')]";
+
+    /**
+     * If parse date is set, parse the date
+     * if not, just download the newest date data
+     */
+    private LocalDate parseDate;
 
     private SpiderConfig spiderConfig;
 
@@ -62,6 +79,10 @@ public class AmazonVcDailySales implements PageProcessor {
     public AmazonVcDailySales(SpiderConfig spiderConfig, CommonSettingService commonSettingService) {
         this.spiderConfig = spiderConfig;
         this.commonSettingService = commonSettingService;
+    }
+
+    public void setParseDate(LocalDate parseDate){
+        this.parseDate = parseDate;
     }
 
     private Site site = Site
@@ -79,11 +100,6 @@ public class AmazonVcDailySales implements PageProcessor {
      */
     public Site getSite() {
 
-//        List<Cookie> listCookies = commonSettingService.getAmazonVCCookies();
-//
-//        for (Cookie cookie : listCookies) {
-//            site.addCookie(cookie.getName().toString(), cookie.getValue().toString());
-//        }
         return site;
 
     }
@@ -97,6 +113,8 @@ public class AmazonVcDailySales implements PageProcessor {
         if (log.isInfoEnabled()) {
             log.info("0.step21=>进入抓取");
         }
+
+        log.info("[process] parse date {}", parseDate == null ? "default" : parseDate.toString());
 
         // 1.建立WebDriver
         System.setProperty("webdriver.chrome.driver", spiderConfig.getChromeDriverPath());
@@ -170,6 +188,52 @@ public class AmazonVcDailySales implements PageProcessor {
                         }
                         dailySelectElement.click();
 
+                        if(parseDate != null){
+                            WebElement toDateEle = WebDriverUtils.expWaitForElement(manuDriver, By.xpath(dateRangeToDateXPath), 10);
+                            toDateEle.click();
+
+                            WebDriverUtils.randomSleep();
+
+                            // select month
+                            WebElement leftMonthEle = WebDriverUtils.expWaitForElement(manuDriver, By.xpath(datePickerLeftMonthXPath), 10);
+                            String eleText = leftMonthEle.getText().toLowerCase();
+                            String parseDateMonthStr = parseDate.getMonth().toString().toLowerCase();
+
+                            while (!eleText.contains(parseDateMonthStr)){
+
+                                WebElement previousEle = WebDriverUtils.expWaitForElement(manuDriver, By.xpath(datePickerPreviousBtnXPath), 10);
+
+                                WebDriverUtils.elementClick(previousEle);
+
+                                WebDriverUtils.randomSleep();
+
+                                leftMonthEle = WebDriverUtils.expWaitForElement(manuDriver, By.xpath(datePickerLeftMonthXPath), 10);
+                                eleText = leftMonthEle.getText().toLowerCase();
+                            }
+
+                            // select date
+                            String leftDatePickerDateXPathFormat = "/html/body/div[4]/div/div[2]//div[@aria-label='day-%s']";
+                            int day = parseDate.getDayOfMonth();
+                            String dateXPath = String.format(leftDatePickerDateXPathFormat, day);
+                            List<WebElement> elements = WebDriverUtils.expWaitForElements(manuDriver, By.xpath(dateXPath), 10);
+
+                            WebElement dateEle = null;
+
+                            if (elements.size() > 1){
+                                if(day <= 7 ){
+                                    dateEle = elements.get(0);
+                                }else{
+                                    dateEle = elements.get(1);
+                                }
+                            }else{
+                                dateEle = elements.get(0);
+                            }
+
+                            // Bug
+                            WebDriverUtils.elementClick(dateEle);
+                            WebDriverUtils.randomSleep();
+                        }
+
                         // 4.21 Choose DistributeView View
                         WebElement distributeViewViewButtonElement = WebDriverUtils.expWaitForElement(manuDriver, By.xpath("//*[@id='dashboard-filter-distributorView']//awsui-button-dropdown//button"), 10);
                         if (log.isInfoEnabled()) {
@@ -229,9 +293,10 @@ public class AmazonVcDailySales implements PageProcessor {
                         if (log.isInfoEnabled()) {
                             log.info("1.1.step137=>scrapy the alert");
                         }
-                        Alert downloadAlertElement = manuDriver.switchTo().alert();//获取弹出框
-                        log.info("alert text:" + downloadAlertElement.getText());//获取框中文本内容
-                        log.info("alert toString():" + downloadAlertElement.toString());
+                        //获取弹出框
+                        Alert downloadAlertElement = manuDriver.switchTo().alert();
+                        //获取框中文本内容
+                        log.info("alert text:" + downloadAlertElement.getText());
                         downloadAlertElement.accept();
 
                         sleep(10000);
@@ -277,6 +342,50 @@ public class AmazonVcDailySales implements PageProcessor {
                             log.info("2.step112=>dailySelectElement:" + dailySelectElement.toString());
                         }
                         dailySelectElement.click();
+
+                        if(parseDate != null){
+                            WebElement toDateEle = WebDriverUtils.expWaitForElement(sourcingDriver, By.xpath(dateRangeToDateXPath), 10);
+                            toDateEle.click();
+
+                            WebDriverUtils.randomSleep();
+
+                            // select month
+                            WebElement leftMonthEle = WebDriverUtils.expWaitForElement(sourcingDriver, By.xpath(datePickerLeftMonthXPath), 10);
+                            String eleText = leftMonthEle.getText().toLowerCase();
+                            String parseDateMonthStr = parseDate.getMonth().toString().toLowerCase();
+
+                            while (!eleText.contains(parseDateMonthStr)){
+
+                                WebElement previousEle = WebDriverUtils.expWaitForElement(sourcingDriver, By.xpath(datePickerPreviousBtnXPath), 10);
+
+                                WebDriverUtils.elementClick(previousEle);
+
+                                WebDriverUtils.randomSleep();
+
+                                leftMonthEle = WebDriverUtils.expWaitForElement(sourcingDriver, By.xpath(datePickerLeftMonthXPath), 10);
+                                eleText = leftMonthEle.getText().toLowerCase();
+                            }
+
+                            // select date
+                            String leftDatePickerDateXPathFormat = "/html/body/div[4]/div/div[2]//div[@aria-label='day-%s']";
+                            int day = parseDate.getDayOfMonth();
+                            String dateXPath = String.format(leftDatePickerDateXPathFormat, day);
+                            List<WebElement> elements = WebDriverUtils.expWaitForElements(sourcingDriver, By.xpath(dateXPath), 10);
+
+                            WebElement dateEle = null;
+
+                            if (elements.size() > 1){
+                                if(day <= 7 ){
+                                    dateEle = elements.get(0);
+                                }else{
+                                    dateEle = elements.get(1);
+                                }
+                            }else{
+                                dateEle = elements.get(0);
+                            }
+
+                            WebDriverUtils.elementClick(dateEle);
+                        }
 
                         // 4.21 Choose DistributeView View
                         WebElement distributeViewViewButtonElement = WebDriverUtils.expWaitForElement(sourcingDriver, By.xpath("//*[@id='dashboard-filter-distributorView']//awsui-button-dropdown//button"), 10);
@@ -373,6 +482,7 @@ public class AmazonVcDailySales implements PageProcessor {
         if (log.isInfoEnabled()) {
             log.info("1.step84=>抓取结束");
         }
+
     }
 
     /**
