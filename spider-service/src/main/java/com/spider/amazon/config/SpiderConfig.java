@@ -52,12 +52,6 @@ public class SpiderConfig {
     @Value("${spider.driver.chrome.path}")
     private String chromeDriverPath;
 
-    @Value("${spider.driver.firefox.path}")
-    private String firefoxDriverPath;
-
-    @Value("${spider.driver.phantomjs.path}")
-    private String phantomJsDriverPath;
-
     @Value("${spider.driver.proxy.filepath.chrome}")
     private String chromeProxyFilepath;
 
