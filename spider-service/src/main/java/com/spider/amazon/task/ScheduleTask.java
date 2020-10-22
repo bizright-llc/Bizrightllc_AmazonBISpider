@@ -137,26 +137,7 @@ public class ScheduleTask {
         spider.setExitWhenComplete(true);
         spider.run();
     }
-
-    /**
-     * 定时下载Amazon VC daily sales manufacturing view
-     */
-    @Scheduled(cron = "0 10 2 * * ?")
-    @Retryable(value = Exception.class, maxAttempts = 3)
-    public void schedulerVcDailySales() throws InterruptedException {
-        log.info("0.step56=>开始执行［schedulerVcDailySales］");
-
-        try{
-            Spider spider = Spider.create(new AmazonVcDailySales(spiderConfig, commonSettingService));
-            spider.addUrl(spiderConfig.getSpiderIndex());
-            spider.setExitWhenComplete(true);
-            spider.run();
-        }catch (Exception ex){
-            log.error("[schedulerVcDailySales] failed", ex);
-            throw ex;
-        }
-    }
-
+    
     /**
      * Every Tuesday download last week data
      * Mon - Sun
