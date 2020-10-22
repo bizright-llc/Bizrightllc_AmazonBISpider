@@ -31,8 +31,10 @@ public class AmzVcDailySales implements Serializable {
     private String SubcategoryBetterWorse;
     private String AverageSalesPrice;
     private String AverageSalesPricePriorPeriod;
+    private String glanceViews;
     private String ChangeInGlanceViewPriorPeriod;
     private String ChangeInGVLastYear;
+    private String conversionRate;
     private String RepOOS;
     private String RepOOSofTotal;
     private String RepOOSPriorPeriod;
