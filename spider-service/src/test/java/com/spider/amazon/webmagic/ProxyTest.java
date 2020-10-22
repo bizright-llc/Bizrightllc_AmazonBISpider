@@ -33,8 +33,12 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.validation.constraints.AssertTrue;
 import java.io.IOException;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.temporal.WeekFields;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import static java.lang.Thread.sleep;
 
