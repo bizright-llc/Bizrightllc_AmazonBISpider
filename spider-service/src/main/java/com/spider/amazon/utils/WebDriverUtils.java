@@ -188,7 +188,7 @@ public class WebDriverUtils {
         }
 
         if(proxy != null && StringUtils.isNotEmpty(proxy.getIp())){
-            options.addArguments(String.format("--proxy-server=%s", proxy));
+            options.addArguments(String.format("--proxy-server=%s:%s", proxy.getIp(), proxy.getPort()));
         }else{
             throw new IllegalArgumentException("proxy cannot be null");
         }

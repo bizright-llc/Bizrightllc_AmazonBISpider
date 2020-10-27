@@ -6,7 +6,6 @@ import cn.hutool.core.io.FileUtil;
 import com.common.exception.ServiceException;
 import com.spider.amazon.batch.sc.buyboxinfo.CsvBatchConfigForAmzScBuyBox;
 import com.spider.amazon.config.SpiderConfig;
-import com.spider.amazon.cons.DateFormat;
 import com.spider.amazon.cons.PageQryType;
 import com.spider.amazon.cons.RespErrorEnum;
 import com.spider.amazon.cons.SqlResult;
@@ -24,7 +23,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import us.codecraft.webmagic.Request;
 import us.codecraft.webmagic.Spider;
 import us.codecraft.webmagic.downloader.HttpClientDownloader;
@@ -79,6 +77,9 @@ public class ScheduleTask {
 
     @Autowired
     private CommonSettingService commonSettingService;
+
+    @Autowired
+    private AmazonAdService amazonAdService;
 
 
     private final static int pageSize = 100000;
@@ -400,7 +401,7 @@ public class ScheduleTask {
         }
         httpClientDownloader.setProxyProvider(new SimpleProxyProvider(proxies));
 
-        Spider.create(new AmazonAdConsumeProcessor(spiderConfig))
+        Spider.create(new AmazonAdConsumeProcessor(spiderConfig, amazonAdService))
                 .addUrl(SpiderUrl.AMAZON_INDEX)
                 .setDownloader(httpClientDownloader)
                 .run();

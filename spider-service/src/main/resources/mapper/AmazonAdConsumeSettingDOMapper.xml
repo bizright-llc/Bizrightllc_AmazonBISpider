@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spider.amazon.mapper.AmazonAdConsumeSettingDOMapper">
+    <resultMap id="BaseResultMap" type="com.spider.amazon.model.AmazonAdConsumeSettingDO">
+        <id column="Id" jdbcType="INTEGER" property="id"/>
+        <result column="Name" jdbcType="VARCHAR" property="name"/>
+        <result column="Description" jdbcType="VARCHAR" property="description"/>
+        <result column="Active" jdbcType="BOOLEAN" property="active" />
+        <result column="CreatedBy" jdbcType="VARCHAR" property="createdBy"/>
+        <result column="UpdatedBy" jdbcType="VARCHAR" property="updatedBy"/>
+        <result column="CreatedAt" jdbcType="TIMESTAMP" property="createdAt"/>
+        <result column="UpdatedAt" jdbcType="TIMESTAMP" property="updatedAt"/>
+        <result column="Removed" jdbcType="BOOLEAN" property="removed"/>
+
+        <collection property="items" ofType="com.spider.amazon.model.AmazonAdConsumeItemDO">
+            <id column="Id" jdbcType="INTEGER" property="id" />
+            <result column="SettingId" jdbcType="INTEGER" property="settingId"/>
+            <result property="name" jdbcType="VARCHAR" column="Name"/>
+            <result property="asin" jdbcType="VARCHAR" column="Asin"/>
+            <result property="keyword" jdbcType="VARCHAR" column="Keyword"/>
+            <result column="Consume" jdbcType="BOOLEAN" property="consume" />
+            <result column="CreatedBy" jdbcType="VARCHAR" property="createdBy"/>
+            <result column="UpdatedBy" jdbcType="VARCHAR" property="updatedBy"/>
+            <result column="CreatedAt" jdbcType="TIMESTAMP" property="createdAt"/>
+            <result column="UpdatedAt" jdbcType="TIMESTAMP" property="updatedAt"/>
+            <result column="Removed" jdbcType="BOOLEAN" property="removed"/>
+        </collection>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        Id, Name, Description, CreatedBy, UpdatedBy, CreatedAt, UpdatedAt
+    </sql>
+
+    <select id="getAllSetting" resultMap="BaseResultMap">
+        select *
+        from AmazonAdConsumeSetting acs
+                 join AmazonAdConsumeItem aci on acs.Id = aci.SettingId and aci."Removed" = 0
+        where acs."Removed" = 0;
+    </select>
+
+    <select id="getAllActiveSetting" resultMap="BaseResultMap">
+        select *
+        from AmazonAdConsumeSetting acs
+                 join AmazonAdConsumeItem aci on acs.Id = aci.SettingId and aci."Removed" = 0
+        where acs."Removed" = 0
+          and Active = 1;
+    </select>
+
+    <select id="getSettingById" parameterType="map" resultMap="BaseResultMap">
+        select *
+        from AmazonAdConsumeSetting acs
+                 join AmazonAdConsumeItem aci on acs.Id = aci.SettingId and aci."Removed" = 0
+        where acs."Removed" = 0
+          and acs.Id = #{settingId}
+    </select>
+
+    <select id="getAllSettingByCreatedUser" parameterType="map" resultMap="BaseResultMap">
+        select *
+        from AmazonAdConsumeSetting acs
+                 join AmazonAdConsumeItem aci on acs.Id = aci.SettingId and aci."Removed" = 0
+        where acs."Removed" = 0
+          and acs.CreatedBy = #{userId}
+    </select>
+
+    <select id="getAllActiveSettingByCreatedUser" parameterType="map" resultMap="BaseResultMap">
+        select *
+        from AmazonAdConsumeSetting acs
+                 join AmazonAdConsumeItem aci on acs.Id = aci.SettingId and aci."Removed" = 0
+        where acs."Removed" = 0
+          and Active = 1
+          and acs.CreatedBy = #{userId}
+    </select>
+
+    <insert id="insertSetting" parameterType="com.spider.amazon.model.AmazonAdConsumeSettingDO">
+        insert into AmazonAdConsumeSetting
+        <trim prefix="(" suffix=")">
+            <if test="name != null">
+                Name,
+            </if>
+            <if test="description != null">
+                Description,
+            </if>
+            <if test="searchWords != null">
+                SearchWords,
+            </if>
+            <if test="createdBy != null">
+                CreatedBy,
+            </if>
+            <if test="updatedBy != null">
+                UpdatedBy,
+            </if>
+            CreatedAt,
+            UpdatedAt
+        </trim>
+        <trim prefix="values (" suffix=")">
+            <if test="name != null">
+                #{name},
+            </if>
+            <if test="description != null">
+                #{description},
+            </if>
+            <if test="searchWords != null">
+                #{searchWords},
+            </if>
+            <if test="createdBy != null">
+                #{createdBy},
+            </if>
+            <if test="updatedBy != null">
+                #{updatedBy},
+            </if>
+            getdate(),
+            getdate()
+        </trim>
+    </insert>
+
+    <update id="updateSetting" parameterType="com.spider.amazon.model.AmazonAdConsumeSettingDO">
+        insert into AmazonAdConsumeSetting
+        <trim prefix=" set ">
+            <if test="name != null">
+                Name = #{name},
+            </if>
+            <if test="description != null">
+                Description = #{description},
+            </if>
+            <if test="searchWords != null">
+                SearchWords #{searchWords},
+            </if>
+            <if test="updatedBy != null">
+                UpdatedBy = #{updatedBy},
+            </if>
+            UpdatedAt = getdate()
+        </trim>
+        where Id = #{id} and "Removed" = 0
+    </update>
+
+    <update id="startAdConsume" parameterType="map">
+        update AmazonAdConsumeSetting
+        set Active = 1,
+            UpdatedAt = getdate(),
+            UpdatedBy = #{userId}
+        where Id = #{settingId} and "Removed" = 0
+    </update>
+
+    <update id="stopAdConsume" parameterType="map">
+        update AmazonAdConsumeSetting
+        set Active = 0,
+            UpdatedAt = getdate(),
+            UpdatedBy = #{userId}
+        where Id = #{settingId} and "Removed" = 0
+    </update>
+
+    <update id="updateAdConsumeItem" parameterType="com.spider.amazon.model.AmazonAdConsumeItemDO">
+        insert into AmazonAdConsumeItem
+        <trim prefix=" set ">
+            <if test="name != null">
+                Name = #{name},
+            </if>
+            <if test="asin != null">
+                Asin = #{asin},
+            </if>
+            <if test="keyword != null">
+                Keyword #{keyword},
+            </if>
+            <if test="updatedBy != null">
+                consume = #{consume},
+            </if>
+            <if test="updatedBy != null">
+                UpdatedBy = #{updatedBy},
+            </if>
+            UpdatedAt = getdate()
+        </trim>
+        where Id = #{id} and "Removed" = 0
+    </update>
+
+    <update id="whileListItem" parameterType="map">
+        update AmazonAdConsumeItem
+        set Consume = 1,
+            UpdatedAt = getdate(),
+            UpdatedBy = #{userId}
+        where Id = #{settingId} and "Removed" = 0
+    </update>
+
+    <update id="blackListItem" parameterType="map">
+        update AmazonAdConsumeItem
+        set Consume = 0,
+            UpdatedAt = getdate(),
+            UpdatedBy = #{userId}
+        where Id = #{settingId} and "Removed" = 0
+    </update>
+
+    <update id="removeSetting" parameterType="map">
+        update AmazonAdConsumeSetting
+        set Removed = 1,
+            UpdatedAt = getdate(),
+            UpdatedBy = #{userId}
+        where Removed = 0 and Id = #{settingId} and "Removed" = 0
+    </update>
+
+    <update id="removeItem" parameterType="map">
+        update AmazonAdConsumeItem
+        set Removed = 1,
+            UpdatedAt = getdate(),
+            UpdatedBy = #{userId}
+        where Removed = 0 and Id = #{itemId} and "Removed" = 0
+    </update>
+
+</mapper>

@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spider.amazon.mapper.UserDOMapper">
+  <resultMap id="BaseResultMap" type="com.spider.amazon.model.UserDO">
+    <id column="userid" jdbcType="INTEGER" property="userid" />
+    <result column="username" jdbcType="NVARCHAR" property="username" />
+    <result column="password" jdbcType="NVARCHAR" property="password" />
+    <result column="inserttime" jdbcType="TIMESTAMP" property="inserttime" />
+    <result column="deadline" jdbcType="TIMESTAMP" property="deadline" />
+    <result column="updatetime" jdbcType="TIMESTAMP" property="updatetime" />
+    <result column="parent_name" jdbcType="NVARCHAR" property="parentName" />
+    <result column="is_parent" jdbcType="NVARCHAR" property="isParent" />
+    <result column="account_type" jdbcType="NVARCHAR" property="accountType" />
+    <result column="is_edit" jdbcType="NVARCHAR" property="isEdit" />
+    <result column="Subaccount" jdbcType="INTEGER" property="subaccount" />
+    <result column="untreated_password" jdbcType="NVARCHAR" property="untreatedPassword" />
+    <result column="note" jdbcType="NVARCHAR" property="note" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    userid, username, password, inserttime, deadline, updatetime, parent_name, is_parent, 
+    account_type, is_edit, Subaccount, untreated_password, note
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from user
+    where userid = #{userid,jdbcType=INTEGER}
+  </select>
+
+  <select id="getUserAccountByUserId" parameterType="map">
+    select *
+    from "Amazon".dbo."user"
+    where userid = #{userId}
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from user
+    where userid = #{userid,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.spider.amazon.model.UserDO">
+    insert into user (userid, username, password, 
+      inserttime, deadline, updatetime, 
+      parent_name, is_parent, account_type, 
+      is_edit, Subaccount, untreated_password, 
+      note)
+    values (#{userid,jdbcType=INTEGER}, #{username,jdbcType=NVARCHAR}, #{password,jdbcType=NVARCHAR}, 
+      #{inserttime,jdbcType=TIMESTAMP}, #{deadline,jdbcType=TIMESTAMP}, #{updatetime,jdbcType=TIMESTAMP}, 
+      #{parentName,jdbcType=NVARCHAR}, #{isParent,jdbcType=NVARCHAR}, #{accountType,jdbcType=NVARCHAR}, 
+      #{isEdit,jdbcType=NVARCHAR}, #{subaccount,jdbcType=INTEGER}, #{untreatedPassword,jdbcType=NVARCHAR}, 
+      #{note,jdbcType=NVARCHAR})
+  </insert>
+
+  <insert id="insertSelective" parameterType="com.spider.amazon.model.UserDO">
+    insert into user
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="userid != null">
+        userid,
+      </if>
+      <if test="username != null">
+        username,
+      </if>
+      <if test="password != null">
+        password,
+      </if>
+      <if test="inserttime != null">
+        inserttime,
+      </if>
+      <if test="deadline != null">
+        deadline,
+      </if>
+      <if test="updatetime != null">
+        updatetime,
+      </if>
+      <if test="parentName != null">
+        parent_name,
+      </if>
+      <if test="isParent != null">
+        is_parent,
+      </if>
+      <if test="accountType != null">
+        account_type,
+      </if>
+      <if test="isEdit != null">
+        is_edit,
+      </if>
+      <if test="subaccount != null">
+        Subaccount,
+      </if>
+      <if test="untreatedPassword != null">
+        untreated_password,
+      </if>
+      <if test="note != null">
+        note,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="userid != null">
+        #{userid,jdbcType=INTEGER},
+      </if>
+      <if test="username != null">
+        #{username,jdbcType=NVARCHAR},
+      </if>
+      <if test="password != null">
+        #{password,jdbcType=NVARCHAR},
+      </if>
+      <if test="inserttime != null">
+        #{inserttime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="deadline != null">
+        #{deadline,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updatetime != null">
+        #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="parentName != null">
+        #{parentName,jdbcType=NVARCHAR},
+      </if>
+      <if test="isParent != null">
+        #{isParent,jdbcType=NVARCHAR},
+      </if>
+      <if test="accountType != null">
+        #{accountType,jdbcType=NVARCHAR},
+      </if>
+      <if test="isEdit != null">
+        #{isEdit,jdbcType=NVARCHAR},
+      </if>
+      <if test="subaccount != null">
+        #{subaccount,jdbcType=INTEGER},
+      </if>
+      <if test="untreatedPassword != null">
+        #{untreatedPassword,jdbcType=NVARCHAR},
+      </if>
+      <if test="note != null">
+        #{note,jdbcType=NVARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.spider.amazon.model.UserDO">
+    update user
+    <set>
+      <if test="username != null">
+        username = #{username,jdbcType=NVARCHAR},
+      </if>
+      <if test="password != null">
+        password = #{password,jdbcType=NVARCHAR},
+      </if>
+      <if test="inserttime != null">
+        inserttime = #{inserttime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="deadline != null">
+        deadline = #{deadline,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updatetime != null">
+        updatetime = #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="parentName != null">
+        parent_name = #{parentName,jdbcType=NVARCHAR},
+      </if>
+      <if test="isParent != null">
+        is_parent = #{isParent,jdbcType=NVARCHAR},
+      </if>
+      <if test="accountType != null">
+        account_type = #{accountType,jdbcType=NVARCHAR},
+      </if>
+      <if test="isEdit != null">
+        is_edit = #{isEdit,jdbcType=NVARCHAR},
+      </if>
+      <if test="subaccount != null">
+        Subaccount = #{subaccount,jdbcType=INTEGER},
+      </if>
+      <if test="untreatedPassword != null">
+        untreated_password = #{untreatedPassword,jdbcType=NVARCHAR},
+      </if>
+      <if test="note != null">
+        note = #{note,jdbcType=NVARCHAR},
+      </if>
+    </set>
+    where userid = #{userid,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.spider.amazon.model.UserDO">
+    update user
+    set username = #{username,jdbcType=NVARCHAR},
+      password = #{password,jdbcType=NVARCHAR},
+      inserttime = #{inserttime,jdbcType=TIMESTAMP},
+      deadline = #{deadline,jdbcType=TIMESTAMP},
+      updatetime = #{updatetime,jdbcType=TIMESTAMP},
+      parent_name = #{parentName,jdbcType=NVARCHAR},
+      is_parent = #{isParent,jdbcType=NVARCHAR},
+      account_type = #{accountType,jdbcType=NVARCHAR},
+      is_edit = #{isEdit,jdbcType=NVARCHAR},
+      Subaccount = #{subaccount,jdbcType=INTEGER},
+      untreated_password = #{untreatedPassword,jdbcType=NVARCHAR},
+      note = #{note,jdbcType=NVARCHAR}
+    where userid = #{userid,jdbcType=INTEGER}
+  </update>
+  
+  
+  <select id="login" resultMap="BaseResultMap">
+        update dbo.[user] set LastLogonDate=GETDATE() where username=#{arg0} and password=#{arg1};
+
+		select
+		<include refid="Base_Column_List" />
+		 from dbo.[user]
+		where username=#{arg0} and password=#{arg1};
+	</select>
+	<select id="getUserAccount" resultType="map">
+		select * from dbo.[user] where is_parent =  #{isParent,jdbcType=NVARCHAR}
+	</select>
+	<insert id="addUserAccount">
+		insert into dbo.[user] 
+		(username,password,parent_name,is_parent,account_type,untreated_password,is_edit,inserttime) 
+		values (#{loginname,jdbcType=NVARCHAR},#{untreatedpassword,jdbcType=NVARCHAR},#{parentName,jdbcType=NVARCHAR},#{isParent,jdbcType=NVARCHAR},#{accountType,jdbcType=NVARCHAR},#{password,jdbcType=NVARCHAR},#{isEdit},#{inserttime,jdbcType=TIMESTAMP})
+	</insert>
+	<update id="editUserAccount">
+	update dbo.[user] set password = #{untreatedpassword,jdbcType=NVARCHAR},
+	untreated_password = #{password,jdbcType=NVARCHAR}
+	where userid = #{userid,jdbcType=INTEGER}
+	</update>
+	<delete id="delUserAccount">
+	 delete from dbo.[user]
+	 where userid = #{userid,jdbcType=INTEGER}
+	</delete>
+	
+	
+	<select id="selectLabelList" resultType="Map">
+	
+		SELECT DISTINCT labelName from asinLabel;
+		
+	</select>
+	<select id="getAccountByuser" resultType="Map">
+	select username,userid from dbo.[user] where is_parent = #{isParent}
+	</select>
+</mapper>
