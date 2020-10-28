@@ -1,7 +1,6 @@
 package com.spider.amazon.cons;
 
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.spider.amazon.model.ProxySecretType;
 
 /**
  *

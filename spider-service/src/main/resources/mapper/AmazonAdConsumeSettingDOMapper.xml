@@ -2,76 +2,145 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.spider.amazon.mapper.AmazonAdConsumeSettingDOMapper">
     <resultMap id="BaseResultMap" type="com.spider.amazon.model.AmazonAdConsumeSettingDO">
-        <id column="Id" jdbcType="INTEGER" property="id"/>
-        <result column="Name" jdbcType="VARCHAR" property="name"/>
-        <result column="Description" jdbcType="VARCHAR" property="description"/>
-        <result column="Active" jdbcType="BOOLEAN" property="active" />
-        <result column="CreatedBy" jdbcType="VARCHAR" property="createdBy"/>
-        <result column="UpdatedBy" jdbcType="VARCHAR" property="updatedBy"/>
-        <result column="CreatedAt" jdbcType="TIMESTAMP" property="createdAt"/>
-        <result column="UpdatedAt" jdbcType="TIMESTAMP" property="updatedAt"/>
-        <result column="Removed" jdbcType="BOOLEAN" property="removed"/>
+        <id column="SettingId" jdbcType="INTEGER" property="id"/>
+        <result column="SettingName" jdbcType="VARCHAR" property="name"/>
+        <result column="SettingDescription" jdbcType="VARCHAR" property="description"/>
+        <result column="SettingSearchWords" jdbcType="VARCHAR" property="searchWords"/>
+        <result column="SettingActive" jdbcType="BOOLEAN" property="active"/>
+        <result column="SettingCreatedBy" jdbcType="VARCHAR" property="createdBy"/>
+        <result column="SettingUpdatedBy" jdbcType="VARCHAR" property="updatedBy"/>
+        <result column="SettingCreatedAt" jdbcType="TIMESTAMP" property="createdAt"/>
+        <result column="SettingUpdatedAt" jdbcType="TIMESTAMP" property="updatedAt"/>
+        <result column="SettingRemoved" jdbcType="BOOLEAN" property="removed"/>
 
         <collection property="items" ofType="com.spider.amazon.model.AmazonAdConsumeItemDO">
-            <id column="Id" jdbcType="INTEGER" property="id" />
-            <result column="SettingId" jdbcType="INTEGER" property="settingId"/>
-            <result property="name" jdbcType="VARCHAR" column="Name"/>
-            <result property="asin" jdbcType="VARCHAR" column="Asin"/>
-            <result property="keyword" jdbcType="VARCHAR" column="Keyword"/>
-            <result column="Consume" jdbcType="BOOLEAN" property="consume" />
-            <result column="CreatedBy" jdbcType="VARCHAR" property="createdBy"/>
-            <result column="UpdatedBy" jdbcType="VARCHAR" property="updatedBy"/>
-            <result column="CreatedAt" jdbcType="TIMESTAMP" property="createdAt"/>
-            <result column="UpdatedAt" jdbcType="TIMESTAMP" property="updatedAt"/>
-            <result column="Removed" jdbcType="BOOLEAN" property="removed"/>
+            <id column="ItemId" jdbcType="INTEGER" property="id"/>
+            <result column="ItemSettingId" jdbcType="INTEGER" property="settingId"/>
+            <result property="name" jdbcType="VARCHAR" column="ItemName"/>
+            <result property="asin" jdbcType="VARCHAR" column="ItemAsin"/>
+            <result property="keyword" jdbcType="VARCHAR" column="ItemKeyword"/>
+            <result column="ItemConsume" jdbcType="BOOLEAN" property="consume"/>
+            <result column="ItemCreatedBy" jdbcType="VARCHAR" property="createdBy"/>
+            <result column="ItemUpdatedBy" jdbcType="VARCHAR" property="updatedBy"/>
+            <result column="ItemCreatedAt" jdbcType="TIMESTAMP" property="createdAt"/>
+            <result column="ItemUpdatedAt" jdbcType="TIMESTAMP" property="updatedAt"/>
+            <result column="ItemRemoved" jdbcType="BOOLEAN" property="removed"/>
         </collection>
     </resultMap>
 
-    <sql id="Base_Column_List">
-        Id, Name, Description, CreatedBy, UpdatedBy, CreatedAt, UpdatedAt
+    <resultMap id="itemResultMap" type="com.spider.amazon.model.AmazonAdConsumeItemDO">
+        <id column="ItemId" jdbcType="INTEGER" property="id"/>
+        <result column="ItemSettingId" jdbcType="INTEGER" property="settingId"/>
+        <result property="name" jdbcType="VARCHAR" column="ItemName"/>
+        <result property="asin" jdbcType="VARCHAR" column="ItemAsin"/>
+        <result property="keyword" jdbcType="VARCHAR" column="ItemKeyword"/>
+        <result column="ItemConsume" jdbcType="BOOLEAN" property="consume"/>
+        <result column="ItemCreatedBy" jdbcType="VARCHAR" property="createdBy"/>
+        <result column="ItemUpdatedBy" jdbcType="VARCHAR" property="updatedBy"/>
+        <result column="ItemCreatedAt" jdbcType="TIMESTAMP" property="createdAt"/>
+        <result column="ItemUpdatedAt" jdbcType="TIMESTAMP" property="updatedAt"/>
+        <result column="ItemRemoved" jdbcType="BOOLEAN" property="removed"/>
+    </resultMap>
+
+    <sql id="settingColumn">
+        ${setting}."Id"                 SettingId,
+        ${setting}."Name"               SettingName,
+        ${setting}."Description"        SettingDescription,
+        ${setting}."SearchWords"        SettingSearchWords,
+        ${setting}."Active"             SettingActive,
+        ${setting}."CreatedAt"          SettingCreatedAt,
+        ${setting}."UpdatedAt"          SettingUpdatedAt,
+        ${setting}."CreatedBy"          SettingCreatedBy,
+        ${setting}."UpdatedBy"          SettingUpdatedBy,
+        ${setting}."Removed"            SettingRemoved,
+        ${setting}."SearchWords"        SettingSearchWords,
+    </sql>
+
+    <sql id="itemColumn">
+        ${item}.Id            ItemId,
+        ${item}.SettingId        ItemSettingId,
+        ${item}.Name        ItemName,
+        ${item}.Asin        ItemAsin,
+        ${item}.Keyword        ItemKeyword,
+        ${item}.Consume        ItemConsume,
+        ${item}.CreatedBy        ItemCreatedBy,
+        ${item}.UpdatedBy        ItemUpdatedBy,
+        ${item}.CreatedAt        ItemCreatedAt,
+        ${item}.UpdatedAt        ItemUpdatedAt,
+        ${item}.Removed        ItemRemoved
     </sql>
 
     <select id="getAllSetting" resultMap="BaseResultMap">
-        select *
+        select
+        <include refid="settingColumn">
+            <property name="setting" value="acs"/>
+        </include>
+        <include refid="itemColumn">
+            <property name="item" value="aci"/>
+        </include>
         from AmazonAdConsumeSetting acs
-                 join AmazonAdConsumeItem aci on acs.Id = aci.SettingId and aci."Removed" = 0
+        left join AmazonAdConsumeItem aci on acs.Id = aci.SettingId and aci."Removed" = 0
         where acs."Removed" = 0;
     </select>
 
     <select id="getAllActiveSetting" resultMap="BaseResultMap">
-        select *
+        select
+        <include refid="settingColumn">
+            <property name="setting" value="acs"/>
+        </include>
+        <include refid="itemColumn">
+            <property name="item" value="aci"/>
+        </include>
         from AmazonAdConsumeSetting acs
-                 join AmazonAdConsumeItem aci on acs.Id = aci.SettingId and aci."Removed" = 0
+        left join AmazonAdConsumeItem aci on acs.Id = aci.SettingId and aci."Removed" = 0
         where acs."Removed" = 0
-          and Active = 1;
+        and Active = 1;
     </select>
 
     <select id="getSettingById" parameterType="map" resultMap="BaseResultMap">
-        select *
+        select
+        <include refid="settingColumn">
+            <property name="setting" value="acs"/>
+        </include>
+        <include refid="itemColumn">
+            <property name="item" value="aci"/>
+        </include>
         from AmazonAdConsumeSetting acs
-                 join AmazonAdConsumeItem aci on acs.Id = aci.SettingId and aci."Removed" = 0
+        left join AmazonAdConsumeItem aci on acs.Id = aci.SettingId and aci."Removed" = 0
         where acs."Removed" = 0
-          and acs.Id = #{settingId}
+        and acs.Id = #{settingId}
     </select>
 
     <select id="getAllSettingByCreatedUser" parameterType="map" resultMap="BaseResultMap">
-        select *
+        select
+        <include refid="settingColumn">
+            <property name="setting" value="acs"/>
+        </include>
+        <include refid="itemColumn">
+            <property name="item" value="aci"/>
+        </include>
         from AmazonAdConsumeSetting acs
-                 join AmazonAdConsumeItem aci on acs.Id = aci.SettingId and aci."Removed" = 0
+        left join AmazonAdConsumeItem aci on acs.Id = aci.SettingId and aci."Removed" = 0
         where acs."Removed" = 0
-          and acs.CreatedBy = #{userId}
+        and acs.CreatedBy = #{userId}
     </select>
 
     <select id="getAllActiveSettingByCreatedUser" parameterType="map" resultMap="BaseResultMap">
-        select *
+        select
+        <include refid="settingColumn">
+            <property name="setting" value="acs"/>
+        </include>
+        <include refid="itemColumn">
+            <property name="item" value="aci"/>
+        </include>
         from AmazonAdConsumeSetting acs
-                 join AmazonAdConsumeItem aci on acs.Id = aci.SettingId and aci."Removed" = 0
+        left join AmazonAdConsumeItem aci on acs.Id = aci.SettingId and aci."Removed" = 0
         where acs."Removed" = 0
-          and Active = 1
-          and acs.CreatedBy = #{userId}
+        and Active = 1
+        and acs.CreatedBy = #{userId}
     </select>
 
-    <insert id="insertSetting" parameterType="com.spider.amazon.model.AmazonAdConsumeSettingDO">
+    <insert id="insertSetting" parameterType="com.spider.amazon.model.AmazonAdConsumeSettingDO" useGeneratedKeys="true" keyProperty="id">
         insert into AmazonAdConsumeSetting
         <trim prefix="(" suffix=")">
             <if test="name != null">
@@ -114,7 +183,7 @@
     </insert>
 
     <update id="updateSetting" parameterType="com.spider.amazon.model.AmazonAdConsumeSettingDO">
-        insert into AmazonAdConsumeSetting
+        update AmazonAdConsumeSetting
         <trim prefix=" set ">
             <if test="name != null">
                 Name = #{name},
@@ -135,22 +204,89 @@
 
     <update id="startAdConsume" parameterType="map">
         update AmazonAdConsumeSetting
-        set Active = 1,
+        set Active    = 1,
             UpdatedAt = getdate(),
             UpdatedBy = #{userId}
-        where Id = #{settingId} and "Removed" = 0
+        where Id = #{settingId}
+          and "Removed" = 0
     </update>
 
     <update id="stopAdConsume" parameterType="map">
         update AmazonAdConsumeSetting
-        set Active = 0,
+        set Active    = 0,
             UpdatedAt = getdate(),
             UpdatedBy = #{userId}
-        where Id = #{settingId} and "Removed" = 0
+        where Id = #{settingId}
+          and "Removed" = 0
     </update>
 
-    <update id="updateAdConsumeItem" parameterType="com.spider.amazon.model.AmazonAdConsumeItemDO">
+    <select id="getSettingItemById" parameterType="map" resultMap="itemResultMap">
+        select
+        <include refid="itemColumn">
+            <property name="item" value="aci"/>
+        </include>
+        from AmazonAdConsumeItem aci
+        where "Removed" = 0 and Id = #{itemId}
+    </select>
+
+    <insert id="insertAdConsumeItem" parameterType="com.spider.amazon.model.AmazonAdConsumeItemDO" useGeneratedKeys="true"
+            keyProperty="id">
         insert into AmazonAdConsumeItem
+        <trim prefix="( " suffix=" )">
+            <if test="settingId != null">
+                SettingId,
+            </if>
+            <if test="name != null">
+                "Name",
+            </if>
+            <if test="asin != null">
+                Asin,
+            </if>
+            <if test="keyword != null">
+                Keyword,
+            </if>
+            <if test="consume != null">
+                Consume,
+            </if>
+            <if test="createdBy != null">
+                CreatedBy,
+            </if>
+            <if test="updatedBy != null">
+                UpdatedBy,
+            </if>
+            CreatedAt,
+            UpdatedAt
+        </trim>
+
+        <trim prefix="values ( " suffix=" )">
+            <if test="settingId != null">
+                #{settingId},
+            </if>
+            <if test="name != null">
+                #{name},
+            </if>
+            <if test="asin != null">
+                #{asin},
+            </if>
+            <if test="keyword != null">
+                #{keyword},
+            </if>
+            <if test="consume != null">
+                #{consume},
+            </if>
+            <if test="createdBy != null">
+                #{createdBy},
+            </if>
+            <if test="updatedBy != null">
+                #{updatedBy},
+            </if>
+            getdate(),
+            getdate()
+        </trim>
+    </insert>
+
+    <update id="updateAdConsumeItem" parameterType="com.spider.amazon.model.AmazonAdConsumeItemDO">
+        update AmazonAdConsumeItem
         <trim prefix=" set ">
             <if test="name != null">
                 Name = #{name},
@@ -174,34 +310,40 @@
 
     <update id="whileListItem" parameterType="map">
         update AmazonAdConsumeItem
-        set Consume = 1,
+        set Consume   = 1,
             UpdatedAt = getdate(),
             UpdatedBy = #{userId}
-        where Id = #{settingId} and "Removed" = 0
+        where Id = #{settingId}
+          and "Removed" = 0
     </update>
 
     <update id="blackListItem" parameterType="map">
         update AmazonAdConsumeItem
-        set Consume = 0,
+        set Consume   = 0,
             UpdatedAt = getdate(),
             UpdatedBy = #{userId}
-        where Id = #{settingId} and "Removed" = 0
+        where Id = #{settingId}
+          and "Removed" = 0
     </update>
 
     <update id="removeSetting" parameterType="map">
         update AmazonAdConsumeSetting
-        set Removed = 1,
+        set Removed   = 1,
             UpdatedAt = getdate(),
             UpdatedBy = #{userId}
-        where Removed = 0 and Id = #{settingId} and "Removed" = 0
+        where Removed = 0
+          and Id = #{settingId}
+          and "Removed" = 0
     </update>
 
     <update id="removeItem" parameterType="map">
         update AmazonAdConsumeItem
-        set Removed = 1,
+        set Removed   = 1,
             UpdatedAt = getdate(),
             UpdatedBy = #{userId}
-        where Removed = 0 and Id = #{itemId} and "Removed" = 0
+        where Removed = 0
+          and Id = #{itemId}
+          and "Removed" = 0
     </update>
 
 </mapper>
