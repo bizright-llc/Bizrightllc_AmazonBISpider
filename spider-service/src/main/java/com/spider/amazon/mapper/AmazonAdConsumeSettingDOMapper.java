@@ -1,6 +1,7 @@
 package com.spider.amazon.mapper;
 
 import com.spider.amazon.model.AmazonAdConsumeItemDO;
+import com.spider.amazon.model.AmazonAdConsumeLogDO;
 import com.spider.amazon.model.AmazonAdConsumeSettingDO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -126,5 +127,7 @@ public interface AmazonAdConsumeSettingDOMapper {
      * @param itemId
      */
     void removeItem(@Param("userId") Long userId, @Param("itemId") Long itemId);
+
+    void insertLog(AmazonAdConsumeLogDO record);
 
 }

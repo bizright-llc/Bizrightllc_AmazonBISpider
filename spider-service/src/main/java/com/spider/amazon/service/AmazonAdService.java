@@ -119,21 +119,30 @@ public interface AmazonAdService {
      */
     void removeItem(Long userId, Long itemId);
 
-    /**
-     * Check the ad consume or not
-     *
-     * @param consumeSettingDTO
-     * @param amazonAdDTO
-     * @return
-     */
-    boolean consume(AmazonAdConsumeSettingDTO consumeSettingDTO, AmazonAdDTO amazonAdDTO);
+//    /**
+//     * Check the ad consume or not
+//     *
+//     * @param consumeSettingDTO
+//     * @param amazonAdDTO
+//     * @return
+//     */
+//    boolean consume(AmazonAdConsumeSettingDTO consumeSettingDTO, AmazonAdDTO amazonAdDTO);
+//
+//    /**
+//     * Return the setting want to consume this ad
+//     *
+//     * @param amazonAdDTO
+//     * @return
+//     */
+//    List<AmazonAdConsumeSettingDTO> consume(AmazonAdDTO amazonAdDTO);
+
+    List<AmazonAdConsumeSettingDTO> consume(AmazonAdDTO amazonAdDTO, List<AmazonAdConsumeSettingDTO> settingDTOS);
 
     /**
-     * Return the setting want to consume this ad
+     * Insert log to database
      *
      * @param amazonAdDTO
-     * @return
      */
-    List<AmazonAdConsumeSettingDTO> consume(AmazonAdDTO amazonAdDTO);
+    void insertAdConsumeLog(AmazonAdDTO amazonAdDTO);
 
 }

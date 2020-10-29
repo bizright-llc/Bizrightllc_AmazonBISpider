@@ -346,4 +346,52 @@
           and "Removed" = 0
     </update>
 
+    <insert id="insertLog" parameterType="com.spider.amazon.model.AmazonAdConsumeLogDO">
+        insert into AmazonAdConsumeLog
+        <trim prefix="(" suffix=")">
+            <if test="type != null">
+                Type,
+            </if>
+            <if test="title != null">
+                Title,
+            </if>
+            <if test="asin != null">
+                Asin,
+            </if>
+            <if test="brand != null">
+                Brand,
+            </if>
+            <if test="createdBy != null">
+                CreatedBy,
+            </if>
+            <if test="updatedBy != null">
+                UpdatedBy,
+            </if>
+            CreatedAt,
+            UpdatedAt
+        </trim>
+        <trim prefix="values (" suffix=")">
+            <if test="type != null">
+                #{type},
+            </if>
+            <if test="title != null">
+                #{title},
+            </if>
+            <if test="asin != null">
+                Asin,
+            </if>
+            <if test="brand != null">
+                #{brand},
+            </if>
+            <if test="createdBy != null">
+                #{createdBy},
+            </if>
+            <if test="updatedBy != null">
+                #{updatedBy},
+            </if>
+            getdate(),
+            getdate()
+        </trim>
+    </insert>
+
 </mapper>

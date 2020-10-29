@@ -20,7 +20,6 @@ import org.openqa.selenium.WebElement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 import us.codecraft.webmagic.Page;
@@ -32,6 +31,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static com.spider.amazon.cons.AmazonAdNodeType.*;
 import static java.lang.Thread.sleep;
@@ -100,8 +100,7 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
 
     private AmazonAdService amazonAdService;
 
-    private List<AmazonAdConsumeItemDTO> adBlackList = new ArrayList<>();
-    private List<AmazonAdConsumeItemDTO> adWhiteList = new ArrayList<>();
+    private List<AmazonAdConsumeSettingDTO> amazonAdSettings = null;
 
     private Site site = Site
             .me()
@@ -138,6 +137,8 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
             log.info("0.step21=>进入抓取");
         }
 
+        amazonAdSettings = amazonAdService.getAllActiveSetting();
+
         Map<String, Object> params = new HashMap<>();
 
         // 1.建立WebDriver
@@ -158,32 +159,25 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
 
             // 3.当前搜索框循环输入参数列表
             // 3.0
-            // TODO test
-            String searchListStr = "usb c";
-            String blackListStr = "Simple Deluxe 18 Inch High Velocity|";
-            String whiteListStr = "Hey-bro|";
+            String searchWords = amazonAdSettings.stream().map(s -> s.getSearchWords()).reduce("", (words, w) -> {
+                if(StringUtils.isNotEmpty(w.trim())){
+                    words = words +"," + w.trim();
+                }
 
-//            String searchListStr =page.getRequest().getExtra(SEARCH_LIST).toString();
-//            String blackListStr =page.getRequest().getExtra(BLACK_LIST).toString();
-//            String whiteListStr =page.getRequest().getExtra(WHITE_LIST).toString();
-            String[] searchList = searchListStr.split("\\|");
-            String[] blackList = blackListStr.split("\\|");
-            String[] whiteList = whiteListStr.split("\\|");
-//            Map<Object, Object> blackMap= strListToMap(blackList);
-//            Map<Object, Object> whiteMap= strListToMap(whiteList);
+                return words;
 
-            adBlackList = getBlackList();
-            adWhiteList = getWhiteList();
+            });
 
+            List<String> searchList = Arrays.asList(searchWords.split(",")).stream().filter(w -> StringUtils.isNotEmpty(w.trim())).collect(Collectors.toList());
 
             // 3.1 定位输入框输入当前循环参数（外层循环）
-            for (int searchIndex = 0; searchIndex < searchList.length; searchIndex++) {
+            for (String searchWord: searchList) {
                 if (isExistsSearchBox(driver)) {  // 存在搜索框
 //                    driver.get(SpiderUrl.AMAZON_INDEX);
                     WebElement searchElement = WebDriverUtils.expWaitForElement(driver, By.xpath(SEARCH_INPUT_ELE), 10);
                     WebElement searchClickElement = WebDriverUtils.expWaitForElement(driver, By.xpath(SEARCH_CLICK_ELE), 10);
                     searchElement.clear();
-                    searchElement.sendKeys(searchList[searchIndex]);
+                    searchElement.sendKeys(searchWord);
                     searchClickElement.click();
 
                     // 4.定位Sponsored广告商品
@@ -197,7 +191,7 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
                     for (AmazonAdDTO sponsoredProduct : sponsoredProductList) {
 
                         WebElement productElement = null;
-                        if (!isSponsoredPro(driver, sponsoredProduct)) {
+                        if (!isSponsoredPro(sponsoredProduct)) {
                             continue;
                         }
 
@@ -269,10 +263,11 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
             return false;
         }
 
-        List<AmazonAdConsumeSettingDTO> consumeSettings = amazonAdService.consume(amazonAd);
+        List<AmazonAdConsumeSettingDTO> consumeSettings = amazonAdService.consume(amazonAd, this.amazonAdSettings);
 
         if(consumeSettings!= null && consumeSettings.size() > 0){
-            amazonAd.setSettingId(consumeSettings.get(0).getId());
+            List<Long> ids = consumeSettings.stream().map(s -> s.getId()).collect(Collectors.toList());
+            amazonAd.setSettingIds(ids);
             return true;
         }
 
@@ -290,10 +285,10 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
      */
     private boolean isSponsoredPro(AmazonAdDTO amazonAd) {
 
-        List<AmazonAdConsumeSettingDTO> consumeSettings = amazonAdService.consume(amazonAd);
+        List<AmazonAdConsumeSettingDTO> consumeSettings = amazonAdService.consume(amazonAd, this.amazonAdSettings);
 
         if(consumeSettings!= null && consumeSettings.size() > 0){
-            amazonAd.setSettingId(consumeSettings.get(0).getId());
+            amazonAd.setSettingIds(consumeSettings.stream().map(s -> s.getId()).collect(Collectors.toList()));
             return true;
         }
 
@@ -1013,6 +1008,7 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
                 log.info("[logAmazonAdConsume] click ad {}", amazonAd.toString());
 
                 //TODO: log ad consume in database
+                amazonAdService.insertAdConsumeLog(amazonAd);
 
             }catch (Exception ex){
                 log.error("[logAmazonAdConsume] log ad consume failed", ex);
@@ -1020,20 +1016,6 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
         });
 
     }
-
-    /**
-     * 不错的免费代理IP站点
-     * www.89ip.cn
-     *
-     * @return
-     */
-    public static List<Proxy> buildProxyIP() throws IOException {
-        List<Proxy> proxies = new ArrayList<Proxy>();
-        proxies.add(new Proxy("210.22.5.117", Integer.valueOf("3128")));
-        proxies.add(new Proxy("47.99.65.77", Integer.valueOf("3128")));
-        return proxies;
-    }
-
 
 }
 

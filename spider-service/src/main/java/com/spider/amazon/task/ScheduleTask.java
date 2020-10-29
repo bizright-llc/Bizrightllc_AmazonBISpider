@@ -393,13 +393,13 @@ public class ScheduleTask {
         HttpClientDownloader httpClientDownloader = new HttpClientDownloader();
 
         // 调用api获取代理IP列表
-        List<Proxy> proxies = null;
-        try {
-            proxies = AmazonAdConsumeProcessor.buildProxyIP();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        httpClientDownloader.setProxyProvider(new SimpleProxyProvider(proxies));
+//        List<Proxy> proxies = null;
+//        try {
+//            proxies = AmazonAdConsumeProcessor.buildProxyIP();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        httpClientDownloader.setProxyProvider(new SimpleProxyProvider(proxies));
 
         Spider.create(new AmazonAdConsumeProcessor(spiderConfig, amazonAdService))
                 .addUrl(SpiderUrl.AMAZON_INDEX)

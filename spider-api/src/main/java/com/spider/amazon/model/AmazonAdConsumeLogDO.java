@@ -18,9 +18,26 @@ public class AmazonAdConsumeLogDO {
     private Long id;
 
     /**
-     * This field show the ad consume is trigger by which setting
+     * product title
      */
-    private Long settingId;
+    private String title;
+
+    /**
+     * product asin
+     */
+    private String asin;
+
+    /**
+     * product brand
+     */
+    private String brand;
+
+    /**
+     * This field show the ad consume is trigger by which setting
+     * maybe more than one setting
+     * id separate by ','
+     */
+    private String settingIds;
 
     private AmazonAdNodeType type;
 

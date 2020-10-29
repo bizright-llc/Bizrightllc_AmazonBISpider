@@ -5,19 +5,23 @@ import org.openqa.selenium.*;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @ClassName AmazonAdIndexDTO
- * @Description 亚马逊主页广告位置实体
+ * @Description Amazon ad object
  */
 @Builder(toBuilder = true)
 @Data
 public class AmazonAdDTO {
     private AmazonAdNodeType type;
     private String title;
+    private String brand;
     private String asin;
     private String index;
 
-    private Long settingId;
+    private List<Long> settingIds;
 
     private String xpath;
     private WebElement webElement;

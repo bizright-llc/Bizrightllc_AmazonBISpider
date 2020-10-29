@@ -8,6 +8,7 @@ import com.spider.amazon.dto.AmazonAdDTO;
 import com.spider.amazon.mapper.AmazonAdConsumeSettingDOMapper;
 import com.spider.amazon.mapper.UserDOMapper;
 import com.spider.amazon.model.AmazonAdConsumeItemDO;
+import com.spider.amazon.model.AmazonAdConsumeLogDO;
 import com.spider.amazon.model.AmazonAdConsumeSettingDO;
 import com.spider.amazon.model.UserDO;
 import com.spider.amazon.service.AmazonAdService;
@@ -19,29 +20,18 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.stream.Collectors;
 
 /**
  * The service deal with the amazon ad consume setting
- *
  */
 @Service
 public class AmazonAdServiceImpl implements AmazonAdService {
-
-    /**
-     * The ad setting in the service
-     *
-     */
-    private List<AmazonAdConsumeSettingDTO> activeAdConsumeSetting;
-
-    /**
-     * The active ad setting last update time
-     */
-    private LocalDateTime updatedAt;
 
     private PlatformTransactionManager transactionManager;
 
@@ -50,6 +40,8 @@ public class AmazonAdServiceImpl implements AmazonAdService {
     private UserDOMapper userDOMapper;
 
     private ModelMapper modelMapper;
+
+    private BlockingQueue<AmazonAdDTO> insertLogQueue;
 
     @Autowired
     public AmazonAdServiceImpl(PlatformTransactionManager transactionManager, AmazonAdConsumeSettingDOMapper amazonAdConsumeSettingDOMapper, UserDOMapper userDOMapper, ModelMapper modelMapper) {
@@ -66,10 +58,8 @@ public class AmazonAdServiceImpl implements AmazonAdService {
 
     @Override
     public List<AmazonAdConsumeSettingDTO> getAllActiveSetting() {
-        List<AmazonAdConsumeSettingDTO> activeAdConsumeSetting = amazonAdConsumeSettingDOMapper.getAllActiveSetting().stream().map(this::settingDOToDto).collect(Collectors.toList());
 
-        this.activeAdConsumeSetting = activeAdConsumeSetting;
-        this.updatedAt = LocalDateTime.now();
+        List<AmazonAdConsumeSettingDTO> activeAdConsumeSetting = amazonAdConsumeSettingDOMapper.getAllActiveSetting().stream().map(this::settingDOToDto).collect(Collectors.toList());
 
         return activeAdConsumeSetting;
     }
@@ -99,7 +89,7 @@ public class AmazonAdServiceImpl implements AmazonAdService {
 
                 UserDO userDO = userDOMapper.getUserAccountByUserId(userId);
 
-                if(userDO == null){
+                if (userDO == null) {
                     throw new IllegalArgumentException(String.format("[insertSetting] user id %s not exist", userId));
                 }
 
@@ -124,13 +114,13 @@ public class AmazonAdServiceImpl implements AmazonAdService {
 
                 UserDO userDO = userDOMapper.getUserAccountByUserId(userId);
 
-                if(userDO == null){
+                if (userDO == null) {
                     throw new IllegalArgumentException(String.format("[insertSetting] user id %s not exist", userId));
                 }
 
                 AmazonAdConsumeSettingDO oldSetting = amazonAdConsumeSettingDOMapper.getSettingById(updateSetting.getId());
 
-                if (oldSetting == null){
+                if (oldSetting == null) {
                     throw new IllegalArgumentException(String.format("[insertSetting] setting id %s not exist", updateSetting.getId()));
                 }
 
@@ -155,13 +145,13 @@ public class AmazonAdServiceImpl implements AmazonAdService {
 
                 UserDO userDO = userDOMapper.getUserAccountByUserId(userId);
 
-                if(userDO == null){
+                if (userDO == null) {
                     throw new IllegalArgumentException(String.format("[startAdConsume] user id %s not exist", userId));
                 }
 
                 AmazonAdConsumeSettingDO oldSetting = amazonAdConsumeSettingDOMapper.getSettingById(settingId);
 
-                if (oldSetting == null){
+                if (oldSetting == null) {
                     throw new IllegalArgumentException(String.format("[startAdConsume] setting id %s not exist", settingId));
                 }
 
@@ -183,13 +173,13 @@ public class AmazonAdServiceImpl implements AmazonAdService {
 
                 UserDO userDO = userDOMapper.getUserAccountByUserId(userId);
 
-                if(userDO == null){
+                if (userDO == null) {
                     throw new IllegalArgumentException(String.format("[stopAdConsume] user id %s not exist", userId));
                 }
 
                 AmazonAdConsumeSettingDO oldSetting = amazonAdConsumeSettingDOMapper.getSettingById(settingId);
 
-                if (oldSetting == null){
+                if (oldSetting == null) {
                     throw new IllegalArgumentException(String.format("[stopAdConsume] setting id %s not exist", settingId));
                 }
 
@@ -212,7 +202,7 @@ public class AmazonAdServiceImpl implements AmazonAdService {
 
                 UserDO userDO = userDOMapper.getUserAccountByUserId(userId);
 
-                if(userDO == null){
+                if (userDO == null) {
                     throw new IllegalArgumentException(String.format("[insertSetting] user id %s not exist", userId));
                 }
 
@@ -237,13 +227,13 @@ public class AmazonAdServiceImpl implements AmazonAdService {
 
                 UserDO userDO = userDOMapper.getUserAccountByUserId(userId);
 
-                if(userDO == null){
+                if (userDO == null) {
                     throw new IllegalArgumentException(String.format("[updateAdConsumeItem] user id %s not exist", userId));
                 }
 
                 AmazonAdConsumeItemDO oldItem = amazonAdConsumeSettingDOMapper.getSettingItemById(item.getId());
 
-                if(oldItem == null){
+                if (oldItem == null) {
                     throw new IllegalArgumentException(String.format("[updateAdConsumeItem] item id %s not exist", item.getId()));
                 }
 
@@ -268,13 +258,13 @@ public class AmazonAdServiceImpl implements AmazonAdService {
 
                 UserDO userDO = userDOMapper.getUserAccountByUserId(userId);
 
-                if(userDO == null){
+                if (userDO == null) {
                     throw new IllegalArgumentException(String.format("[whileListItem] user id %s not exist", userId));
                 }
 
                 AmazonAdConsumeItemDO oldItem = amazonAdConsumeSettingDOMapper.getSettingItemById(itemId);
 
-                if(oldItem == null){
+                if (oldItem == null) {
                     throw new IllegalArgumentException(String.format("[whileListItem] item id %s not exist", itemId));
                 }
 
@@ -296,13 +286,13 @@ public class AmazonAdServiceImpl implements AmazonAdService {
 
                 UserDO userDO = userDOMapper.getUserAccountByUserId(userId);
 
-                if(userDO == null){
+                if (userDO == null) {
                     throw new IllegalArgumentException(String.format("[blackListItem] user id %s not exist", userId));
                 }
 
                 AmazonAdConsumeItemDO oldItem = amazonAdConsumeSettingDOMapper.getSettingItemById(itemId);
 
-                if(oldItem == null){
+                if (oldItem == null) {
                     throw new IllegalArgumentException(String.format("[blackListItem] item id %s not exist", itemId));
                 }
 
@@ -324,13 +314,13 @@ public class AmazonAdServiceImpl implements AmazonAdService {
 
                 UserDO userDO = userDOMapper.getUserAccountByUserId(userId);
 
-                if(userDO == null){
+                if (userDO == null) {
                     throw new IllegalArgumentException(String.format("[removeSetting] user id %s not exist", userId));
                 }
 
                 AmazonAdConsumeSettingDO oldSetting = amazonAdConsumeSettingDOMapper.getSettingById(settingId);
 
-                if (oldSetting == null){
+                if (oldSetting == null) {
                     throw new IllegalArgumentException(String.format("[removeSetting] setting id %s not exist", settingId));
                 }
 
@@ -352,13 +342,13 @@ public class AmazonAdServiceImpl implements AmazonAdService {
 
                 UserDO userDO = userDOMapper.getUserAccountByUserId(userId);
 
-                if(userDO == null){
+                if (userDO == null) {
                     throw new IllegalArgumentException(String.format("[removeItem] user id %s not exist", userId));
                 }
 
                 AmazonAdConsumeItemDO oldItem = amazonAdConsumeSettingDOMapper.getSettingItemById(itemId);
 
-                if(oldItem == null){
+                if (oldItem == null) {
                     throw new IllegalArgumentException(String.format("[removeItem] item id %s not exist", itemId));
                 }
 
@@ -377,37 +367,119 @@ public class AmazonAdServiceImpl implements AmazonAdService {
      * @param amazonAdDTO
      * @return
      */
-    @Override
+//    @Override
     public boolean consume(AmazonAdConsumeSettingDTO consumeSettingDTO, AmazonAdDTO amazonAdDTO) {
 
-        if (isBlack(amazonAdDTO, consumeSettingDTO) && !isWhite(amazonAdDTO, consumeSettingDTO)){
+        if (isBlack(amazonAdDTO, consumeSettingDTO) && !isWhite(amazonAdDTO, consumeSettingDTO)) {
             return true;
         }
 
         return false;
     }
 
-    @Override
-    public List<AmazonAdConsumeSettingDTO> consume(AmazonAdDTO amazonAdDTO) {
+    /**
+     * @param amazonAdDTO
+     * @param settingDTOS
+     * @return
+     */
+//    @Override
+    public List<AmazonAdConsumeSettingDTO> consume(AmazonAdDTO amazonAdDTO, List<AmazonAdConsumeSettingDTO> settingDTOS) {
 
-        LocalDateTime now = LocalDateTime.now();
-
-        if(this.activeAdConsumeSetting == null || this.updatedAt == null || now.minusMinutes(10l).compareTo(this.updatedAt) > 0){
-            getAllActiveSetting();
+        if (settingDTOS == null) {
+            return new ArrayList<AmazonAdConsumeSettingDTO>();
         }
-
-        List<AmazonAdConsumeSettingDTO> settings = new ArrayList<>(this.activeAdConsumeSetting);
 
         List<AmazonAdConsumeSettingDTO> result = new ArrayList<>();
 
-        for (AmazonAdConsumeSettingDTO adConsumeSettingDTO: settings){
-            if (consume(adConsumeSettingDTO, amazonAdDTO)){
+        for (AmazonAdConsumeSettingDTO adConsumeSettingDTO : settingDTOS) {
+            if (consume(adConsumeSettingDTO, amazonAdDTO)) {
                 result.add(adConsumeSettingDTO);
             }
         }
 
         return result;
     }
+
+    @Override
+    public void insertAdConsumeLog(AmazonAdDTO amazonAdDTO) {
+        if (insertLogQueue == null) {
+            this.insertLogQueue = new LinkedBlockingQueue<>();
+        }
+
+        insertLogQueue.offer(amazonAdDTO);
+
+        if (insertLogQueue.size() >= 20) {
+
+            List<AmazonAdDTO> logDTOList = new ArrayList<>();
+
+            insertLogQueue.drainTo(logDTOList);
+
+            CompletableFuture.runAsync(() -> {
+                try{
+                    insertAdConsumeLogToDB(logDTOList);
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
+            });
+
+        }
+
+    }
+
+    private void insertAdConsumeLogToDB(List<AmazonAdDTO> adConsumeList){
+
+        List<AmazonAdConsumeLogDO> logDOList1 = adConsumeList.stream().map(amazonAdDTO1 -> {
+            AmazonAdConsumeLogDO newLog = new AmazonAdConsumeLogDO();
+
+            newLog.setTitle(amazonAdDTO1.getTitle());
+            newLog.setAsin(amazonAdDTO1.getAsin());
+            newLog.setType(amazonAdDTO1.getType());
+            newLog.setBrand(amazonAdDTO1.getBrand());
+
+            String settingIdsStr = amazonAdDTO1.getSettingIds() == null ?
+                    "" :
+                    amazonAdDTO1.getSettingIds().stream().map(id -> id.toString()).collect(Collectors.joining(","));
+
+            newLog.setSettingIds(settingIdsStr);
+
+            return newLog;
+
+        }).collect(Collectors.toList());
+
+        TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+
+        transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+            @Override
+            protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
+                logDOList1.stream().forEach(l -> {
+                    amazonAdConsumeSettingDOMapper.insertLog(l);
+                });
+            }
+        });
+
+    }
+
+//    @Override
+//    public List<AmazonAdConsumeSettingDTO> consume(AmazonAdDTO amazonAdDTO) {
+//
+//        LocalDateTime now = LocalDateTime.now();
+//
+//        if(this.activeAdConsumeSetting == null || this.updatedAt == null || now.minusMinutes(10l).compareTo(this.updatedAt) > 0){
+//            getAllActiveSetting();
+//        }
+//
+//        List<AmazonAdConsumeSettingDTO> settings = new ArrayList<>(this.activeAdConsumeSetting);
+//
+//        List<AmazonAdConsumeSettingDTO> result = new ArrayList<>();
+//
+//        for (AmazonAdConsumeSettingDTO adConsumeSettingDTO: settings){
+//            if (consume(adConsumeSettingDTO, amazonAdDTO)){
+//                result.add(adConsumeSettingDTO);
+//            }
+//        }
+//
+//        return result;
+//    }
 
     /**
      * 判断是否在黑名单中，在黑名单中进行消耗
@@ -458,19 +530,19 @@ public class AmazonAdServiceImpl implements AmazonAdService {
         return StrUtil.containsAnyIgnoreCase(fullText, containsText);
     }
 
-    private AmazonAdConsumeSettingDTO settingDOToDto(AmazonAdConsumeSettingDO amazonAdConsumeSettingDO){
+    private AmazonAdConsumeSettingDTO settingDOToDto(AmazonAdConsumeSettingDO amazonAdConsumeSettingDO) {
         return modelMapper.map(amazonAdConsumeSettingDO, AmazonAdConsumeSettingDTO.class);
     }
 
-    private AmazonAdConsumeSettingDO settingDtoToDO(AmazonAdConsumeSettingDTO amazonAdConsumeSettingDTO){
+    private AmazonAdConsumeSettingDO settingDtoToDO(AmazonAdConsumeSettingDTO amazonAdConsumeSettingDTO) {
         return modelMapper.map(amazonAdConsumeSettingDTO, AmazonAdConsumeSettingDO.class);
     }
 
-    private AmazonAdConsumeItemDTO itemDOToDto(AmazonAdConsumeItemDO amazonAdConsumeItemDO){
+    private AmazonAdConsumeItemDTO itemDOToDto(AmazonAdConsumeItemDO amazonAdConsumeItemDO) {
         return modelMapper.map(amazonAdConsumeItemDO, AmazonAdConsumeItemDTO.class);
     }
 
-    private AmazonAdConsumeItemDO itemDtoToDO(AmazonAdConsumeItemDTO amazonAdConsumeItemDTO){
+    private AmazonAdConsumeItemDO itemDtoToDO(AmazonAdConsumeItemDTO amazonAdConsumeItemDTO) {
         return modelMapper.map(amazonAdConsumeItemDTO, AmazonAdConsumeItemDO.class);
     }
 }
