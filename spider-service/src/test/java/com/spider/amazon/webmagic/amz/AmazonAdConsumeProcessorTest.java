@@ -2,14 +2,23 @@ package com.spider.amazon.webmagic.amz;
 
 import com.spider.SpiderServiceApplication;
 import com.spider.amazon.config.SpiderConfig;
+import com.spider.amazon.dto.AmazonAdConsumeItemDTO;
+import com.spider.amazon.dto.AmazonAdConsumeSettingDTO;
 import com.spider.amazon.service.AmazonAdService;
+import org.junit.Before;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import us.codecraft.webmagic.Request;
 import us.codecraft.webmagic.Spider;
+
+import java.util.Arrays;
+
+import static javafx.beans.binding.Bindings.when;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes= SpiderServiceApplication.class)

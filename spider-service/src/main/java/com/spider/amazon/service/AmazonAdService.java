@@ -136,7 +136,15 @@ public interface AmazonAdService {
 //     */
 //    List<AmazonAdConsumeSettingDTO> consume(AmazonAdDTO amazonAdDTO);
 
+    /**
+     * Check the amazon ad need consume or not
+     * @param amazonAdDTO
+     * @param settingDTOS
+     * @return
+     */
     List<AmazonAdConsumeSettingDTO> consume(AmazonAdDTO amazonAdDTO, List<AmazonAdConsumeSettingDTO> settingDTOS);
+
+    boolean consume(AmazonAdDTO amazonAdDTO, AmazonAdConsumeSettingDTO setting);
 
     /**
      * Insert log to database

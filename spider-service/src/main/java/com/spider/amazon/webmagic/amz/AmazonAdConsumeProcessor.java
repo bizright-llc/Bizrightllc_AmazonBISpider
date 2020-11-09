@@ -102,6 +102,8 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
 
     private List<AmazonAdConsumeSettingDTO> amazonAdSettings = null;
 
+    private AmazonAdConsumeSettingDTO currentSetting = null;
+
     private Site site = Site
             .me()
             .setRetryTimes(3)
@@ -142,7 +144,11 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
         Map<String, Object> params = new HashMap<>();
 
         // 1.建立WebDriver
-        WebDriver driver = WebDriverUtils.getWebDriverWithProxy(spiderConfig.getChromeDriverPath(), spiderConfig.getDownloadPath(), spiderConfig.getChromeProxyFilepath(), false);
+        // use proxy setting driver
+//        WebDriver driver = WebDriverUtils.getWebDriverWithProxy(spiderConfig.getChromeDriverPath(), spiderConfig.getDownloadPath(), spiderConfig.getChromeProxyFilepath(), false);
+
+        // TODO: Only for testing
+        WebDriver driver = WebDriverUtils.getWebDriver(spiderConfig.getChromeDriverPath(), spiderConfig.getDownloadPath(), false);
 
         try {
 
@@ -153,65 +159,78 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
             driver.get(SpiderUrl.AMAZON_INDEX);
             log.info("Headers=>[{}]", page.getRequest());
 
-            // 2.1 切换定位，现本地抓取IP默认为中国，文案都是中文
-            // use us proxy provider
-//            changeLocation(driver,page);
-
-            // 3.当前搜索框循环输入参数列表
-            // 3.0
-            String searchWords = amazonAdSettings.stream().map(s -> s.getSearchWords()).reduce("", (words, w) -> {
-                if(StringUtils.isNotEmpty(w.trim())){
-                    words = words +"," + w.trim();
-                }
-
-                return words;
-
-            });
-
-            List<String> searchList = Arrays.asList(searchWords.split(",")).stream().filter(w -> StringUtils.isNotEmpty(w.trim())).collect(Collectors.toList());
+//            // 3.当前搜索框循环输入参数列表
+//            // 3.0
+//            String searchWords = amazonAdSettings.stream().map(s -> s.getSearchWords()).reduce("", (words, w) -> {
+//                if(StringUtils.isNotEmpty(w.trim())){
+//                    words = words +"," + w.trim();
+//                }
+//
+//                return words;
+//
+//            });
+//
+//            List<String> searchList = Arrays.asList(searchWords.split(",")).stream().filter(w -> StringUtils.isNotEmpty(w.trim())).collect(Collectors.toList());
 
             // 3.1 定位输入框输入当前循环参数（外层循环）
-            for (String searchWord: searchList) {
-                if (isExistsSearchBox(driver)) {  // 存在搜索框
+            for(AmazonAdConsumeSettingDTO setting: amazonAdSettings){
+                List<String> settingSearchWords = Arrays.stream(setting.getSearchWords().split(",")).filter(w -> StringUtils.isNotEmpty(w.trim())).collect(Collectors.toList());
+
+                for (String searchWord: settingSearchWords) {
+                    if (isExistsSearchBox(driver)) {  // 存在搜索框
 //                    driver.get(SpiderUrl.AMAZON_INDEX);
-                    WebElement searchElement = WebDriverUtils.expWaitForElement(driver, By.xpath(SEARCH_INPUT_ELE), 10);
-                    WebElement searchClickElement = WebDriverUtils.expWaitForElement(driver, By.xpath(SEARCH_CLICK_ELE), 10);
-                    searchElement.clear();
-                    searchElement.sendKeys(searchWord);
-                    searchClickElement.click();
-
-                    // 4.定位Sponsored广告商品
-                    List<AmazonAdDTO> sponsoredProductList = locateSponsoredProduct(driver);
-
-                    // 4.1收集元素xpath，刷新页面，回退页面，元素会失效，需要重新定位
-
-                    // 4.1黑白名单过滤广告商品，过滤后需攻击商品进入消耗列表
-                    // TODO 该部分消耗列表使用schedule，或是直接点击进入待确定
-                    // 循环点击进入商品详情页
-                    for (AmazonAdDTO sponsoredProduct : sponsoredProductList) {
-
-                        WebElement productElement = null;
-                        if (!isSponsoredPro(sponsoredProduct)) {
+                        WebElement searchElement = WebDriverUtils.expWaitForElement(driver, By.xpath(SEARCH_INPUT_ELE), 10);
+                        WebElement searchClickElement = WebDriverUtils.expWaitForElement(driver, By.xpath(SEARCH_CLICK_ELE), 10);
+                        searchElement.clear();
+                        searchElement.sendKeys(searchWord);
+                        boolean searchClicked = WebDriverUtils.isClicked(driver, searchClickElement);
+                        if(searchClicked == false){
+                            log.debug("[process] search button click failed");
                             continue;
                         }
 
-                        // 点击跳转进入商品页
-                        productElement = driver.findElement(By.xpath(INDEX_SPONSORED_REXPATH.replace("{dataIndex}", sponsoredProduct.getIndex())));
-                        logAmazonAdConsume(sponsoredProduct);
-                        int result = redirectProductDetailByXpath(driver, productElement);
-                        if (result != RespResult.SUCC_OOM) {
-                            continue;
-                        }
+                        // 4.定位Sponsored广告商品
+                        List<AmazonAdDTO> sponsoredProductList = locateSponsoredProduct(driver);
+
+                        // 4.1收集元素xpath，刷新页面，回退页面，元素会失效，需要重新定位
+
+                        // 4.1黑白名单过滤广告商品，过滤后需攻击商品进入消耗列表
+                        // TODO 该部分消耗列表使用schedule，或是直接点击进入待确定
+                        // 循环点击进入商品详情页
+                        for (AmazonAdDTO sponsoredProduct : sponsoredProductList) {
+
+                            WebElement productElement = null;
+                            if (!isSponsoredPro(sponsoredProduct, setting)) {
+                                continue;
+                            }
+
+                            // 点击跳转进入商品页
+                            productElement = WebDriverUtils.expWaitForElement(driver, By.xpath(INDEX_SPONSORED_REXPATH.replace("{dataIndex}", sponsoredProduct.getIndex())), 60);
+
+                            // TODO: debug
+                            WebDriverUtils.highlight(driver, productElement);
+
+                            if(ObjectUtil.isNotNull(productElement)){
+                                int result = redirectProductDetailByXpath(driver, productElement, sponsoredProduct, setting);
+                                productElement = null;
+                                WebDriverUtils.randomSleepBetween(3000, 5000);
+                                if (result != RespResult.SUCC_OOM) {
+                                    continue;
+                                }
+                            }else{
+                                log.debug("[process] sponsor product element not found");
+                            }
 
 //                         商品详情页面进行操作
 //                        productDetailProcess(driver);
 
-                        // 商品页面回退
+                            // 商品页面回退
 //                        driver.navigate().back();
-                    }
+                        }
 
-                } else {
-                    break;
+                    } else {
+                        break;
+                    }
                 }
             }
 
@@ -244,55 +263,19 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
     }
 
     /**
-     * Check the black list or white list
-     *
-     * @param amazonAd
-     * @param driver   check the ad product is still exist
-     * @return
-     */
-    private boolean isSponsoredPro(WebDriver driver, AmazonAdDTO amazonAd) {
-
-        String xpath = INDEX_SPONSORED_REXPATH.replace("{dataIndex}", amazonAd.getIndex());
-        WebElement element = null;
-        if (WebDriverUtils.isExistsElementFindByXpath(driver, By.xpath(xpath), 5)) {
-            element = driver.findElement(By.xpath(xpath));
-        }
-
-        // product is not exist
-        if (element == null) {
-            return false;
-        }
-
-        List<AmazonAdConsumeSettingDTO> consumeSettings = amazonAdService.consume(amazonAd, this.amazonAdSettings);
-
-        if(consumeSettings!= null && consumeSettings.size() > 0){
-            List<Long> ids = consumeSettings.stream().map(s -> s.getId()).collect(Collectors.toList());
-            amazonAd.setSettingIds(ids);
-            return true;
-        }
-
-//        if (isBlack(amazonAd) && isNoWhite(amazonAd)) {
-//            return true;
-//        }
-        return false;
-    }
-
-    /**
      * Check the amazon ad need consume or not
      *
      * @param amazonAd
      * @return
      */
-    private boolean isSponsoredPro(AmazonAdDTO amazonAd) {
+    private boolean isSponsoredPro(AmazonAdDTO amazonAd, AmazonAdConsumeSettingDTO setting) {
 
-        List<AmazonAdConsumeSettingDTO> consumeSettings = amazonAdService.consume(amazonAd, this.amazonAdSettings);
+        boolean result = amazonAdService.consume(amazonAd, setting);
 
-        if(consumeSettings!= null && consumeSettings.size() > 0){
-            amazonAd.setSettingIds(consumeSettings.stream().map(s -> s.getId()).collect(Collectors.toList()));
-            return true;
-        }
+        log.debug("[isSponsoredPro] amazon ad {} consume {}", amazonAd, result);
 
-        return false;
+        return result;
+
     }
 
     private void changeLocation(WebDriver driver, Page page) {
@@ -308,13 +291,13 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
         // 2.点击定位切换
         WebElement locationClick = WebDriverUtils.expWaitForElement(driver, By.xpath(LOCATION_CLICK), 10);
         if (ObjectUtil.isNotEmpty(locationClick)) {
-            locationClick.click();
+            WebDriverUtils.isClicked(driver, locationClick);
         }
 
         // 3.查找change按钮
         WebElement changeElement = WebDriverUtils.expWaitForElement(driver, By.xpath(LOCATION_CHANGE_BUTTON), 10);
         if (ObjectUtil.isNotEmpty(changeElement)) { // 包含change按钮，先进行点击change按钮操作
-            changeElement.click();
+            WebDriverUtils.isClicked(driver, changeElement);
         }
 
         // 4.查找定位输入框输入定位代码
@@ -358,7 +341,8 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
         log.info("[isExistsSearchBox] check search box");
         WebElement element = WebDriverUtils.expWaitForElement(driver, By.xpath(SEARCH_INPUT_ELE), 10);
         WebElement clickElement = WebDriverUtils.expWaitForElement(driver, By.xpath(SEARCH_CLICK_ELE), 10);
-        if (ObjectUtil.isEmpty(element) || ObjectUtil.isEmpty(clickElement)) {  // 不存在搜索框
+        // search box not exist
+        if (ObjectUtil.isEmpty(element) || ObjectUtil.isEmpty(clickElement)) {
             return false;
         }
         return true;
@@ -374,7 +358,7 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
         // 返回过滤处理后的商品广告元素
         List<AmazonAdDTO> sposoredProductList = new ArrayList<>();
         // 获取当前搜索页所有搜索产品标签格
-        List<WebElement> productElementList = driver.findElements(By.xpath(SEARCH_RESULT_SPONSORED_ITEMS_XPATH));
+        List<WebElement> productElementList = WebDriverUtils.expWaitForElements(driver, By.xpath(SEARCH_RESULT_SPONSORED_ITEMS_XPATH), 60);
         // 遍历产品元素，黑白名单筛选需要进一步点击的商品
         for (WebElement productElement : productElementList) {
             log.debug("asin=>[{}]", productElement.getAttribute("data-asin"));
@@ -541,17 +525,16 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
      * @param driver
      * @param element
      */
-    private int redirectProductDetailByXpath(WebDriver driver, WebElement element) {
+    private int redirectProductDetailByXpath(WebDriver driver, WebElement element, AmazonAdDTO amazonAdDTO, AmazonAdConsumeSettingDTO setting) {
         try {
-            redirectProductDetail(element);
+//            redirectProductDetail(element);
 
-            clickScrollAndBack(driver, element, () -> {
+            clickAd(driver, element, amazonAdDTO, () -> {
                 try{
-                    productDetailProcess(driver);
-
-                    driver.navigate().back();
+                    productDetailProcess(driver, setting);
                 }catch (Exception e){
-                    driver.navigate().back();
+                    e.printStackTrace();
+                    log.error(e.getMessage());
                 }
             });
 
@@ -590,6 +573,7 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
                 } else {
                     imageEle.click();
                 }
+                WebDriverUtils.randomSleep();
                 return RespResult.SUCC_OOM;
             } else {
                 return RespResult.NO_RECORD;
@@ -605,18 +589,20 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
      *
      * @param driver
      */
-    private void productDetailProcess(WebDriver driver) {
+    private void productDetailProcess(WebDriver driver, AmazonAdConsumeSettingDTO setting) {
+
+        log.debug("[productDetailProcess] process product detail page: {}, ad consume setting: {}", driver.getCurrentUrl(), setting.getId());
 
         // 1.商品详情下方iframe逻辑
-        proDetailIframeProcess(driver);
+        proDetailIframeProcess(driver, setting);
 
         // 2.商品new版本逻辑
 
         // 3.购物车下方iframe逻辑
-        buyBoxIframeProcess(driver);
+        buyBoxIframeProcess(driver, setting);
 
         // 4.Process Brand Relate Ad
-        brandRelateAdProcess(driver);
+        brandRelateAdProcess(driver, setting);
 
         // 5.广告列表框消耗逻辑
 
@@ -624,56 +610,60 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
 
     /**
      * 商品详情下方iframe逻辑
+     * process the iframe under the product detail
      *
      * @param driver
      */
-    private void proDetailIframeProcess(WebDriver driver) {
+    private void proDetailIframeProcess(WebDriver driver, AmazonAdConsumeSettingDTO setting) {
 
-        if (WebDriverUtils.isExistsElementFindByXpath(driver, By.xpath(DETAIL_IFRAME_XPATH), 3)) { // 切换iframe
-            driver.switchTo().frame(driver.findElement(By.xpath(DETAIL_IFRAME_XPATH)));
-        } else {
-            return;
-        }
+        log.debug("[proDetailIframeProcess] process iframe ad under product detail");
 
-        WebElement textElement = null;
-        AmazonAdNodeType amazonAdNodeType = null;
-        AmazonAdDTO amazonAd = null;
-        if (WebDriverUtils.isExistsElementFindByXpath(driver, By.xpath(DETAIL_IFRAME_TEXT_XPATH), 3)) { // Text节点1
-            textElement = driver.findElement(By.xpath(DETAIL_IFRAME_TEXT_XPATH));
-            amazonAdNodeType = AmazonAdNodeType.DETAIL_AD;
-
-            amazonAd = AmazonAdDTO
-                    .builder()
-                    .asin(textElement.getAttribute("asin"))
-                    .title(textElement.getAttribute("title"))
-                    .webElement(textElement)
-                    .type(DETAIL_AD)
-                    .build();
-        }
-
-        if (WebDriverUtils.isExistsElementFindByXpath(driver, By.xpath(DETAIL_IFRAME_TEXT_XPATH2), 3)) { // Text节点2
-            textElement = driver.findElement(By.xpath(DETAIL_IFRAME_TEXT_XPATH2));
-            amazonAdNodeType = DETAIL_AD2;
-
-            amazonAd = AmazonAdDTO
-                    .builder()
-                    .asin(textElement.getAttribute("asin"))
-                    .title(textElement.getAttribute("title"))
-                    .webElement(textElement)
-                    .type(DETAIL_AD2)
-                    .build();
-        }
-
-        if (ObjectUtil.isNotEmpty(amazonAd) && ObjectUtil.isNotEmpty(amazonAd.getWebElement()) && isSponsoredPro(amazonAd)) {
-            log.debug("textElement=>[{}]", textElement.getAttribute("href"));
-//            textElement.click();
-
-            clickAd(driver, amazonAd.getWebElement(), amazonAd);
-//            logAmazonAdConsume(amazonAd);
-//            clickScrollAndBack(driver, amazonAd.getWebElement());
-
-            driver.switchTo().defaultContent();
-        }
+//        if (WebDriverUtils.isExistsElementFindByXpath(driver, By.xpath(DETAIL_IFRAME_XPATH), 3)) { // 切换iframe
+//            driver.switchTo().frame(driver.findElement(By.xpath(DETAIL_IFRAME_XPATH)));
+//        } else {
+//            return;
+//        }
+//
+//        WebElement textElement = null;
+//        AmazonAdNodeType amazonAdNodeType = null;
+//        AmazonAdDTO amazonAd = null;
+//        if (WebDriverUtils.isExistsElementFindByXpath(driver, By.xpath(DETAIL_IFRAME_TEXT_XPATH), 3)) { // Text节点1
+//            textElement = driver.findElement(By.xpath(DETAIL_IFRAME_TEXT_XPATH));
+//            amazonAdNodeType = AmazonAdNodeType.DETAIL_AD;
+//
+//            amazonAd = AmazonAdDTO
+//                    .builder()
+//                    .asin(textElement.getAttribute("asin"))
+//                    .title(textElement.getAttribute("title"))
+//                    .webElement(textElement)
+//                    .type(DETAIL_AD)
+//                    .build();
+//        }
+//
+//        if (WebDriverUtils.isExistsElementFindByXpath(driver, By.xpath(DETAIL_IFRAME_TEXT_XPATH2), 3)) { // Text节点2
+//            textElement = WebDriverUtils.expWaitForElement(driver, By.xpath(DETAIL_IFRAME_TEXT_XPATH2), 60);
+//            log.debug("[proDetailIframeProcess] text element not found");
+//            amazonAdNodeType = DETAIL_AD2;
+//
+//            amazonAd = AmazonAdDTO
+//                    .builder()
+//                    .asin(textElement == null ? "" : textElement.getAttribute("asin"))
+//                    .title(textElement == null ? "" : textElement.getAttribute("title"))
+//                    .webElement(textElement)
+//                    .type(DETAIL_AD2)
+//                    .build();
+//        }
+//
+//        if (ObjectUtil.isNotEmpty(amazonAd) && ObjectUtil.isNotEmpty(amazonAd.getWebElement()) && isSponsoredPro(amazonAd, setting)) {
+//            log.debug("textElement=>[{}]", textElement.getAttribute("href"));
+////            textElement.click();
+//
+//            clickAd(driver, amazonAd.getWebElement(), amazonAd);
+////            logAmazonAdConsume(amazonAd);
+////            clickScrollAndBack(driver, amazonAd.getWebElement());
+//
+//            driver.switchTo().defaultContent();
+//        }
     }
 
 
@@ -687,9 +677,11 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
         if (ObjectUtil.isNotEmpty(driver.findElement(By.xpath(BUYBOX_IFRAME_XPATH)))) {
             driver.switchTo().frame(driver.findElement(By.xpath(BUYBOX_IFRAME_XPATH)));
             if (ObjectUtil.isNotEmpty(driver.findElement(By.xpath(DETAIL_IFRAME_REDIRECT_XPATH)))) {
-                driver.findElement(By.xpath(DETAIL_IFRAME_REDIRECT_XPATH)).click();
+                WebElement iframeEle = driver.findElement(By.xpath(DETAIL_IFRAME_REDIRECT_XPATH));
 
-                // TODO 跳转后随机停留几秒
+                WebDriverUtils.isClicked(driver, iframeEle);
+
+                // random sleep
                 try {
                     WebDriverUtils.randomSleepBetween(5000, 10000);
                 } catch (InterruptedException e) {
@@ -706,27 +698,29 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
         }
     }
 
-    private void buyBoxIframeProcess(WebDriver driver) {
-        if (ObjectUtil.isNotEmpty(driver.findElement(By.xpath(BUYBOX_IFRAME_XPATH)))) {
-            driver.switchTo().frame(driver.findElement(By.xpath(BUYBOX_IFRAME_XPATH)));
-            if (ObjectUtil.isNotEmpty(driver.findElement(By.xpath(DETAIL_IFRAME_REDIRECT_XPATH)))) {
-                WebElement ad = driver.findElement(By.xpath(DETAIL_IFRAME_REDIRECT_XPATH));
-
-                // TODO: check consume or not
-//                clickScrollAndBack(driver, ad);
-
-//                // TODO 跳转后随机停留几秒
-//                try {
-//                    WebDriverUtils.randomSleepBetween(5000, 10000);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
+    private void buyBoxIframeProcess(WebDriver driver, AmazonAdConsumeSettingDTO setting) {
+        WebElement buyboxIframEle = WebDriverUtils.expWaitForElement(driver, By.xpath(BUYBOX_IFRAME_XPATH), 30);
+        if (buyboxIframEle != null) {
+//            driver.switchTo().frame(buyboxIframEle);
+//            WebElement iframeRedirect = WebDriverUtils.expWaitForElement(driver, By.xpath(DETAIL_IFRAME_REDIRECT_XPATH), 60);
+//            if (ObjectUtil.isNotEmpty(iframeRedirect)) {
+//                WebElement ad = WebDriverUtils.expWaitForElement(driver, By.xpath(DETAIL_IFRAME_REDIRECT_XPATH), 30);
 //
-//                driver.navigate().back();
-                driver.switchTo().defaultContent();
-            } else {
-                return;
-            }
+//                // TODO: check consume or not
+////                clickScrollAndBack(driver, ad);
+//
+////                // TODO 跳转后随机停留几秒
+////                try {
+////                    WebDriverUtils.randomSleepBetween(5000, 10000);
+////                } catch (InterruptedException e) {
+////                    e.printStackTrace();
+////                }
+////
+////                driver.navigate().back();
+////                driver.switchTo().defaultContent();
+//            } else {
+//                return;
+//            }
         } else {
             return;
         }
@@ -737,7 +731,7 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
      *
      * @param driver
      */
-    private void brandRelateAdProcess(WebDriver driver){
+    private void brandRelateAdProcess(WebDriver driver, AmazonAdConsumeSettingDTO setting){
         List<WebElement> brandRelateEles = WebDriverUtils.expWaitForElements(driver, By.xpath(DETAIL_BRAND_RELATE_AD_XPATH), 30);
 
         if(brandRelateEles != null && brandRelateEles.size() > 0){
@@ -774,28 +768,18 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
         }
     }
 
-    private void clickAd(WebDriver driver, WebElement element, AmazonAdDTO amazonAd){
-        TransactionTemplate transactionTemplate = new TransactionTemplate();
-
-        transactionTemplate.execute(new TransactionCallbackWithoutResult() {
-            @Override
-            protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
-                logAmazonAdConsume(amazonAd);
-                clickScrollAndBack(driver, element);
-            }
-        });
-    }
-
     private void clickAd(WebDriver driver, WebElement element, AmazonAdDTO amazonAd, Runnable func){
-        TransactionTemplate transactionTemplate = new TransactionTemplate();
 
-        transactionTemplate.execute(new TransactionCallbackWithoutResult() {
-            @Override
-            protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
-                logAmazonAdConsume(amazonAd);
-                clickScrollAndBack(driver, element, func);
-            }
-        });
+        log.debug("[clickAd] {}", amazonAd.toString());
+
+        try{
+            logAmazonAdConsume(amazonAd);
+            WebDriverUtils.randomSleepBetween(5000,8000);
+            clickScrollAndBack(driver, element, func);
+        }catch (Exception ex){
+            ex.printStackTrace();
+            log.error("[clickAd] failed", ex);
+        }
     }
 
     /**
@@ -809,6 +793,8 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
             throw new IllegalArgumentException("Cannot process page");
         }
 
+        String home = driver.getCurrentUrl();
+
         try{
             element.click();
         }catch (Exception ex){
@@ -844,59 +830,76 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
             js.executeScript("window.scrollBy(0,-1000)");
         }
 
-        driver.navigate().back();
+        driver.get(home);
 
     }
 
     /**
      * Click the element on page
      * stay at the page, scroll down and up
+     * Run the function
      * and navigate back
      */
     private void clickScrollAndBack(WebDriver driver, WebElement element, Runnable func){
+
+        log.debug("[clickScrollAndBack] element: {}", element);
 
         if(driver == null || element == null){
             throw new IllegalArgumentException("Cannot process page");
         }
 
+        String home = driver.getCurrentUrl();
+
         try{
-            element.click();
+            boolean clicked = WebDriverUtils.isClicked(driver, element);
+            if (!clicked){
+                return;
+            }
         }catch (Exception ex){
             ex.printStackTrace();
             return;
         }
 
-        try {
-            WebDriverUtils.randomSleepBetween(3000, 5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        try{
+            try {
+                WebDriverUtils.randomSleepBetween(3000, 5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            JavascriptExecutor js = (JavascriptExecutor) driver;
+
+            Random rand = new Random();
+
+            int scrollDownCnt = rand.nextInt(5) + 1;
+
+            int scrollUpCnt = rand.nextInt(scrollDownCnt);
+
+            for (int i=0; i< scrollDownCnt; i++){
+                js.executeScript("window.scrollBy(0,1000)");
+            }
+
+            try {
+                WebDriverUtils.randomSleepBetween(3000, 5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            if(func != null){
+                func.run();
+            }
+
+            for (int i=0; i< scrollUpCnt; i++){
+                js.executeScript("window.scrollBy(0,-1000)");
+            }
+
+//            driver.navigate().back();
+            driver.get(home);
+        }catch (Exception ex){
+            log.error("[clickScrollAndBack] ", ex);
+//            driver.navigate().back();
+            driver.get(home);
         }
-
-        JavascriptExecutor js = (JavascriptExecutor) driver;
-
-        Random rand = new Random();
-
-        int scrollDownCnt = rand.nextInt(5);
-
-        int scrollUpCnt = rand.nextInt(scrollDownCnt);
-
-        for (int i=0; i< scrollDownCnt; i++){
-            js.executeScript("window.scrollBy(0,1000)");
-        }
-
-        try {
-            WebDriverUtils.randomSleepBetween(3000, 5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        func.run();
-
-        for (int i=0; i< scrollUpCnt; i++){
-            js.executeScript("window.scrollBy(0,-1000)");
-        }
-
-        driver.navigate().back();
 
     }
 

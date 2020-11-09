@@ -361,28 +361,11 @@ public class AmazonAdServiceImpl implements AmazonAdService {
     }
 
     /**
-     * Check the amazon add need consume or not
-     *
-     * @param consumeSettingDTO
-     * @param amazonAdDTO
-     * @return
-     */
-//    @Override
-    public boolean consume(AmazonAdConsumeSettingDTO consumeSettingDTO, AmazonAdDTO amazonAdDTO) {
-
-        if (isBlack(amazonAdDTO, consumeSettingDTO) && !isWhite(amazonAdDTO, consumeSettingDTO)) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
      * @param amazonAdDTO
      * @param settingDTOS
      * @return
      */
-//    @Override
+    @Override
     public List<AmazonAdConsumeSettingDTO> consume(AmazonAdDTO amazonAdDTO, List<AmazonAdConsumeSettingDTO> settingDTOS) {
 
         if (settingDTOS == null) {
@@ -392,12 +375,36 @@ public class AmazonAdServiceImpl implements AmazonAdService {
         List<AmazonAdConsumeSettingDTO> result = new ArrayList<>();
 
         for (AmazonAdConsumeSettingDTO adConsumeSettingDTO : settingDTOS) {
-            if (consume(adConsumeSettingDTO, amazonAdDTO)) {
+            if (consume(amazonAdDTO, adConsumeSettingDTO)) {
                 result.add(adConsumeSettingDTO);
             }
         }
 
         return result;
+    }
+
+    /**
+     * Check amazon ad need consume or not
+     * return true means need consume
+     * return false means dont need consume
+     *
+     * @param amazonAdDTO
+     * @param setting
+     * @return
+     */
+    @Override
+    public boolean consume(AmazonAdDTO amazonAdDTO, AmazonAdConsumeSettingDTO setting) {
+
+        if(amazonAdDTO == null || setting == null){
+            return false;
+        }
+
+        if (isBlack(amazonAdDTO, setting) && !isWhite(amazonAdDTO, setting)) {
+            return true;
+        }
+
+        return false;
+
     }
 
     @Override
