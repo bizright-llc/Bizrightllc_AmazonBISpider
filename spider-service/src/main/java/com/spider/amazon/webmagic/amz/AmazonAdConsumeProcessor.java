@@ -52,7 +52,7 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
     public final static String WHITE_LIST = "WHITE_LIST";
     public final static String LOCATION = "10001";
 
-    // Xpath列表
+    // Xpath List
     // location xpath
     public final static String LOCATION_XPATH = "//*[@id='glow-ingress-line2' and contains(text(),'10001')]"; // Location 位置以LA位置为准
     public final static String LOCATION_CLICK = "//DIV[@id='nav-packard-glow-loc-icon']"; // 定位点击
@@ -61,7 +61,7 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
     public final static String LOCATION_INPUT_CHECK = "//*[@id='GLUXZipUpdate-announce']/../input"; // 定位信息确认
     public final static String LOCATION_INPUT_DOWN = "//*[@name='glowDoneButton']"; // 定位信息DOWN
     public final static String LOCATION_INPUT_CONTINUE = "//*[@id='GLUXConfirmClose']"; // 定位信息刷新按钮
-    //主页广告位置
+    // Search Result Sponsored Ad
     public final static String SEARCH_INPUT_ELE = "//*[@id='twotabsearchtextbox']"; // 搜索框输入框
     public final static String SEARCH_CLICK_ELE = "//*[@id='nav-search-submit-text']"; // 搜索框搜索按钮
     public final static String INDEX_SPONSORED_XPATH = "//*[@id='search']//div[contains(@class,'s-search-results')]/div[@data-index!='']"; // 搜索页广告元素xpath
@@ -72,8 +72,9 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
     public final static String INDEX_CHILD_TEXT_XPATH = ".//span[@cel_widget_id='SEARCH_RESULTS-SEARCH_RESULTS']//img"; // 广告元素子节点TEXT，用于筛选是否是黑白名单
     public final static String INDEX_ISSPONSORED_XPATH = ".//span[text()='Sponsored']"; // 广告元素子节点TEXT，用于筛选是否是广告商品
     public final static String REDIRECT_DETAIL_XPATH = ".//span[@cel_widget_id='SEARCH_RESULTS-SEARCH_RESULTS']//img/../../../a[1]"; // 广告元素跳转详情页面链接地址元素
-    public final static String SEARCH_RESULT_ITEMS_IMAGE_XPATH = "//img[contains(@class, 's-image')]";
-    public final static String SEARCH_RESULT_ITEMS_NAME_XPATH = "//h2[contains(@class, 'a-size-mini')]";
+    public final static String SEARCH_RESULT_ITEMS_IMAGE_XPATH = ".//img[contains(@class, 's-image')]";
+    public final static String SEARCH_RESULT_ITEMS_NAME_XPATH = ".//h2[contains(@class, 'a-size-mini')]";
+    public final static String SEARCH_RESULT_NEXT_PAGE_XPATH = "//span[contains(@class, 'PAGINATION')]//li[contains(@class, 'last')]";
     // 详情页广告商品出现位置xpath
     public final static String DETAIL_IFRAME_XPATH = "//*[@id='ape_Detail_hero-quick-promo_Desktop_iframe']"; // 详情下方iframe
     public final static String DETAIL_IFRAME_REDIRECT_XPATH = ".//*[@id='sp_hqp_shared_inner']/div/a"; // 详情下方iframe重定向地址
@@ -189,43 +190,79 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
                             continue;
                         }
 
-                        // 4.定位Sponsored广告商品
-                        List<AmazonAdDTO> sponsoredProductList = locateSponsoredProduct(driver);
+//                        int adIndex = 0;
+//                        while(true){
+//                            String searchResultUrl = driver.getCurrentUrl();
+//
+//                            List<AmazonAdDTO> sponsoredProductList = locateSponsoredProduct(driver);
+//
+//                            if (sponsoredProductList == null || sponsoredProductList.size() == 0 || adIndex >= sponsoredProductList.size()){
+//                                break;
+//                            }
+//
+//                            AmazonAdDTO ad = sponsoredProductList.get(adIndex++);
+//
+//                            WebElement productElement = null;
+//                            // Check ad need click or not
+//                            if (!isSponsoredPro(ad, setting)) {
+//                                continue;
+//                            }
+//
+//                            // Click Ad
+//                            productElement = WebDriverUtils.expWaitForElement(driver, By.xpath(INDEX_SPONSORED_REXPATH.replace("{dataIndex}", ad.getIndex())), 60);
+//
+//                            if(ObjectUtil.isNotNull(productElement)){
+//                                int result = redirectProductDetailByXpath(driver, productElement, ad, setting);
+//                                WebDriverUtils.randomSleepBetween(3000, 5000);
+//                                if (result != RespResult.SUCC_OOM) {
+//                                    continue;
+//                                }
+//                            }else{
+//                                log.debug("[process] sponsor product element not found");
+//                            }
+//
+//                            driver.get(searchResultUrl);
+//                            WebDriverUtils.randomSleepBetween(3000, 5000);
+//                        }
+                        for (int i=0; i< 3; i++){
 
-                        // 4.1收集元素xpath，刷新页面，回退页面，元素会失效，需要重新定位
+                            // Find sponsored items
+                            List<AmazonAdDTO> sponsoredProductList = locateSponsoredProduct(driver);
 
-                        // 4.1黑白名单过滤广告商品，过滤后需攻击商品进入消耗列表
-                        // TODO 该部分消耗列表使用schedule，或是直接点击进入待确定
-                        // 循环点击进入商品详情页
-                        for (AmazonAdDTO sponsoredProduct : sponsoredProductList) {
+                            // 4.1黑白名单过滤广告商品，过滤后需攻击商品进入消耗列表
+                            // TODO 该部分消耗列表使用schedule，或是直接点击进入待确定
+                            // 循环点击进入商品详情页
+                            for (AmazonAdDTO sponsoredProduct : sponsoredProductList) {
 
-                            WebElement productElement = null;
-                            if (!isSponsoredPro(sponsoredProduct, setting)) {
-                                continue;
-                            }
-
-                            // 点击跳转进入商品页
-                            productElement = WebDriverUtils.expWaitForElement(driver, By.xpath(INDEX_SPONSORED_REXPATH.replace("{dataIndex}", sponsoredProduct.getIndex())), 60);
-
-                            // TODO: debug
-                            WebDriverUtils.highlight(driver, productElement);
-
-                            if(ObjectUtil.isNotNull(productElement)){
-                                int result = redirectProductDetailByXpath(driver, productElement, sponsoredProduct, setting);
-                                productElement = null;
-                                WebDriverUtils.randomSleepBetween(3000, 5000);
-                                if (result != RespResult.SUCC_OOM) {
+                                WebElement productElement = null;
+                                if (!isSponsoredPro(sponsoredProduct, setting)) {
                                     continue;
                                 }
-                            }else{
-                                log.debug("[process] sponsor product element not found");
+
+                                // reget product item
+                                productElement = WebDriverUtils.expWaitForElement(driver, By.xpath(INDEX_SPONSORED_REXPATH.replace("{dataIndex}", sponsoredProduct.getIndex())), 60);
+
+                                if(ObjectUtil.isNotNull(productElement)){
+                                    // click item
+                                    int result = redirectProductDetailByXpath(driver, productElement, sponsoredProduct, setting);
+                                    productElement = null;
+                                    WebDriverUtils.randomSleepBetween(3000, 5000);
+                                    if (result != RespResult.SUCC_OOM) {
+                                        continue;
+                                    }
+                                }else{
+                                    log.debug("[process] sponsor product element not found");
+                                }
+
                             }
 
-//                         商品详情页面进行操作
-//                        productDetailProcess(driver);
+                            WebElement nextPageEle = WebDriverUtils.expWaitForElement(driver, By.xpath(SEARCH_RESULT_NEXT_PAGE_XPATH), 30);
 
-                            // 商品页面回退
-//                        driver.navigate().back();
+                            if(nextPageEle != null){
+                                WebDriverUtils.isClicked(driver, nextPageEle);
+                            }else {
+                                break;
+                            }
                         }
 
                     } else {
@@ -520,7 +557,7 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
     }
 
     /**
-     * 跳转商品详情页面
+     * Go to product detail page
      *
      * @param driver
      * @param element
@@ -529,14 +566,50 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
         try {
 //            redirectProductDetail(element);
 
-            clickAd(driver, element, amazonAdDTO, () -> {
-                try{
-                    productDetailProcess(driver, setting);
-                }catch (Exception e){
-                    e.printStackTrace();
-                    log.error(e.getMessage());
+            WebElement imageEle = null;
+            try{
+                imageEle = element.findElement(By.xpath(SEARCH_RESULT_ITEMS_IMAGE_XPATH));
+            }catch (Exception ex){
+                log.debug("[redirectProductDetailByXpath] get sponsored item image failed");
+            }
+            WebElement textEle = null;
+
+            try{
+                textEle = element.findElement(By.xpath(SEARCH_RESULT_ITEMS_NAME_XPATH));
+            }catch (Exception ex){
+                log.debug("[redirectProductDetailByXpath] get sponsored item name failed");
+            }
+
+            if(imageEle == null && textEle == null){
+                clickAd(driver, element, amazonAdDTO, () -> {
+                    try{
+                        productDetailProcess(driver, setting);
+                    }catch (Exception e){
+                        e.printStackTrace();
+                        log.error(e.getMessage());
+                    }
+                });
+            }else{
+                if(imageEle == null){
+                    clickAd(driver, textEle, amazonAdDTO, () -> {
+                        try{
+                            productDetailProcess(driver, setting);
+                        }catch (Exception e){
+                            e.printStackTrace();
+                            log.error(e.getMessage());
+                        }
+                    });
+                }else{
+                    clickAd(driver, imageEle, amazonAdDTO, () -> {
+                        try{
+                            productDetailProcess(driver, setting);
+                        }catch (Exception e){
+                            e.printStackTrace();
+                            log.error(e.getMessage());
+                        }
+                    });
                 }
-            });
+            }
 
             return RespResult.SUCC_OOM;
         } catch (Exception e) {
@@ -773,6 +846,9 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
         log.debug("[clickAd] {}", amazonAd.toString());
 
         try{
+            // TODO: debug
+            WebDriverUtils.highlight(driver, element);
+
             logAmazonAdConsume(amazonAd);
             WebDriverUtils.randomSleepBetween(5000,8000);
             clickScrollAndBack(driver, element, func);
@@ -853,6 +929,7 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
         try{
             boolean clicked = WebDriverUtils.isClicked(driver, element);
             if (!clicked){
+                log.debug("[clickScrollAndBack] click not working");
                 return;
             }
         }catch (Exception ex){
