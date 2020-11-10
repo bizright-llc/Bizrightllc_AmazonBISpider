@@ -395,8 +395,22 @@
             <if test="updatedBy != null">
                 #{updatedBy},
             </if>
-            getdate(),
-            getdate()
+            <choose>
+                <when test="createdAt != null">
+                    #{createdAt},
+                </when>
+                <otherwise>
+                    getdate(),
+                </otherwise>
+            </choose>
+            <choose>
+                <when test="updatedAt != null">
+                    #{updatedAt}
+                </when>
+                <otherwise>
+                    getdate()
+                </otherwise>
+            </choose>
         </trim>
     </insert>
 

@@ -4,6 +4,9 @@
     <resultMap id="BaseResultMap" type="com.spider.amazon.model.AmazonAdConsumeLogDO">
         <id column="Id" jdbcType="INTEGER" property="id"/>
         <result column="SettingId" jdbcType="INTEGER" property="settingId"/>
+        <result column="Title" jdbcType="VARCHAR" property="title"/>
+        <result column="Asin" jdbcType="VARCHAR" property="asin"/>
+        <result column="Brand" jdbcType="VARCHAR" property="brand"/>
         <result column="Type" jdbcType="VARCHAR" property="type"/>
         <result column="CreatedBy" jdbcType="VARCHAR" property="createdBy"/>
         <result column="UpdatedBy" jdbcType="VARCHAR" property="updatedBy"/>
@@ -12,7 +15,7 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        Id, SettingId, Name, Brand, Type, CreatedBy, UpdatedBy, CreatedAt, UpdatedAt
+        Id, SettingId, Title, Brand, Type, CreatedBy, UpdatedBy, CreatedAt, UpdatedAt
     </sql>
 
     <select id="getAll" resultMap="BaseResultMap">
@@ -24,29 +27,74 @@
         select *
         from AmazonAdConsumeLog
         where SettingId = #{settingId}
+        order by CreatedAt desc
     </select>
 
     <insert id="insert" parameterType="com.spider.amazon.model.AmazonAdConsumeLogDO">
         insert into AmazonAdConsumeLog
         <trim prefix="(" suffix=")">
-            SettingId,
+            <if test="settingId != null">
+                SettingId,
+            </if>
             <if test="type != null">
                 Type,
             </if>
-            CreatedBy,
-            UpdatedBy,
+            <if test="title != null">
+                Title,
+            </if>
+            <if test="asin != null">
+                Asin,
+            </if>
+            <if test="brand != null">
+                Brand,
+            </if>
+            <if test="createdBy != null">
+                CreatedBy,
+            </if>
+            <if test="updatedBy != null">
+                UpdatedBy,
+            </if>
             CreatedAt,
             UpdatedAt
         </trim>
         <trim prefix="values (" suffix=")">
-            #{settingId}
-            <if test="type != null">
-                #{type}
+            <if test="settingId != null">
+                #{settingId},
             </if>
-            'system',
-            'system',
-            getdate(),
-            getdate()
+            <if test="type != null">
+                #{type},
+            </if>
+            <if test="title != null">
+                #{title},
+            </if>
+            <if test="asin != null">
+                #{asin},
+            </if>
+            <if test="brand != null">
+                #{brand},
+            </if>
+            <if test="createdBy != null">
+                #{createdBy},
+            </if>
+            <if test="updatedBy != null">
+                #{updatedBy},
+            </if>
+            <choose>
+                <when test="createdAt != null">
+                    #{createdAt},
+                </when>
+                <otherwise>
+                    getdate(),
+                </otherwise>
+            </choose>
+            <choose>
+                <when test="updatedAt != null">
+                    #{updatedAt}
+                </when>
+                <otherwise>
+                    getdate()
+                </otherwise>
+            </choose>
         </trim>
     </insert>
 
