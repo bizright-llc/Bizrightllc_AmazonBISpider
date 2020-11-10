@@ -692,53 +692,7 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
     private void proDetailIframeProcess(WebDriver driver, AmazonAdConsumeSettingDTO setting) {
 
         log.debug("[proDetailIframeProcess] process iframe ad under product detail");
-
-//        if (WebDriverUtils.isExistsElementFindByXpath(driver, By.xpath(DETAIL_IFRAME_XPATH), 3)) { // 切换iframe
-//            driver.switchTo().frame(driver.findElement(By.xpath(DETAIL_IFRAME_XPATH)));
-//        } else {
-//            return;
-//        }
-//
-//        WebElement textElement = null;
-//        AmazonAdNodeType amazonAdNodeType = null;
-//        AmazonAdDTO amazonAd = null;
-//        if (WebDriverUtils.isExistsElementFindByXpath(driver, By.xpath(DETAIL_IFRAME_TEXT_XPATH), 3)) { // Text节点1
-//            textElement = driver.findElement(By.xpath(DETAIL_IFRAME_TEXT_XPATH));
-//            amazonAdNodeType = AmazonAdNodeType.DETAIL_AD;
-//
-//            amazonAd = AmazonAdDTO
-//                    .builder()
-//                    .asin(textElement.getAttribute("asin"))
-//                    .title(textElement.getAttribute("title"))
-//                    .webElement(textElement)
-//                    .type(DETAIL_AD)
-//                    .build();
-//        }
-//
-//        if (WebDriverUtils.isExistsElementFindByXpath(driver, By.xpath(DETAIL_IFRAME_TEXT_XPATH2), 3)) { // Text节点2
-//            textElement = WebDriverUtils.expWaitForElement(driver, By.xpath(DETAIL_IFRAME_TEXT_XPATH2), 60);
-//            log.debug("[proDetailIframeProcess] text element not found");
-//            amazonAdNodeType = DETAIL_AD2;
-//
-//            amazonAd = AmazonAdDTO
-//                    .builder()
-//                    .asin(textElement == null ? "" : textElement.getAttribute("asin"))
-//                    .title(textElement == null ? "" : textElement.getAttribute("title"))
-//                    .webElement(textElement)
-//                    .type(DETAIL_AD2)
-//                    .build();
-//        }
-//
-//        if (ObjectUtil.isNotEmpty(amazonAd) && ObjectUtil.isNotEmpty(amazonAd.getWebElement()) && isSponsoredPro(amazonAd, setting)) {
-//            log.debug("textElement=>[{}]", textElement.getAttribute("href"));
-////            textElement.click();
-//
-//            clickAd(driver, amazonAd.getWebElement(), amazonAd);
-////            logAmazonAdConsume(amazonAd);
-////            clickScrollAndBack(driver, amazonAd.getWebElement());
-//
-//            driver.switchTo().defaultContent();
-//        }
+        
     }
 
 
@@ -776,26 +730,7 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
     private void buyBoxIframeProcess(WebDriver driver, AmazonAdConsumeSettingDTO setting) {
         WebElement buyboxIframEle = WebDriverUtils.expWaitForElement(driver, By.xpath(BUYBOX_IFRAME_XPATH), 30);
         if (buyboxIframEle != null) {
-//            driver.switchTo().frame(buyboxIframEle);
-//            WebElement iframeRedirect = WebDriverUtils.expWaitForElement(driver, By.xpath(DETAIL_IFRAME_REDIRECT_XPATH), 60);
-//            if (ObjectUtil.isNotEmpty(iframeRedirect)) {
-//                WebElement ad = WebDriverUtils.expWaitForElement(driver, By.xpath(DETAIL_IFRAME_REDIRECT_XPATH), 30);
-//
-//                // TODO: check consume or not
-////                clickScrollAndBack(driver, ad);
-//
-////                // TODO 跳转后随机停留几秒
-////                try {
-////                    WebDriverUtils.randomSleepBetween(5000, 10000);
-////                } catch (InterruptedException e) {
-////                    e.printStackTrace();
-////                }
-////
-////                driver.navigate().back();
-////                driver.switchTo().defaultContent();
-//            } else {
-//                return;
-//            }
+
         } else {
             return;
         }
@@ -815,30 +750,6 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
 
                 // TODO: check ad consume or not
 
-//                WebElement titleEle = null;
-//                List<WebElement> findElements = ad.findElements(By.xpath(DETAIL_BRAND_RELATE_AD_TITLE_XPATH));
-//
-//                if (findElements.size() > 0){
-//                    titleEle = findElements.get(0);
-//                }
-//
-//                WebElement shopLinkEle = null;
-//                findElements = ad.findElements(By.xpath(DETAIL_BRAND_RELATE_AD_SHOP_LINK_XPATH));
-//
-//                if (findElements.size() > 0){
-//                    shopLinkEle = findElements.get(0);
-//                }
-//
-//                if(ObjectUtil.isNotEmpty(titleEle) && ObjectUtil.isNotEmpty(shopLinkEle)){
-//                    Random rand = new Random();
-//                    int rInt = rand.nextInt(20);
-//
-//                    if(rInt % 3 == 0){
-//                        clickScrollAndBack(driver, titleEle);
-//                    }else{
-//                        clickScrollAndBack(driver, shopLinkEle);
-//                    }
-//                }
             }
         }
     }
