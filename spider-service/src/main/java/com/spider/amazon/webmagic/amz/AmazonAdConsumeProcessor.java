@@ -239,6 +239,8 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
                                     continue;
                                 }
 
+                                sponsoredProduct.setSettingId(setting.getId());
+
                                 // reget product item
                                 productElement = WebDriverUtils.expWaitForElement(driver, By.xpath(INDEX_SPONSORED_REXPATH.replace("{dataIndex}", sponsoredProduct.getIndex())), 60);
 
@@ -848,10 +850,8 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
         try{
             // TODO: debug
             WebDriverUtils.highlight(driver, element);
-
-            logAmazonAdConsume(amazonAd);
             WebDriverUtils.randomSleepBetween(5000,8000);
-            clickScrollAndBack(driver, element, func);
+            clickScrollAndBack(driver, element, amazonAd, func);
         }catch (Exception ex){
             ex.printStackTrace();
             log.error("[clickAd] failed", ex);
@@ -916,7 +916,7 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
      * Run the function
      * and navigate back
      */
-    private void clickScrollAndBack(WebDriver driver, WebElement element, Runnable func){
+    private void clickScrollAndBack(WebDriver driver, WebElement element, AmazonAdDTO amazonAd, Runnable func){
 
         log.debug("[clickScrollAndBack] element: {}", element);
 
@@ -931,6 +931,8 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
             if (!clicked){
                 log.debug("[clickScrollAndBack] click not working");
                 return;
+            }else{
+                logAmazonAdConsume(amazonAd);
             }
         }catch (Exception ex){
             ex.printStackTrace();
@@ -977,58 +979,6 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
 //            driver.navigate().back();
             driver.get(home);
         }
-
-    }
-
-    /**
-     * Click the element on page
-     * stay at the page, scroll down and up
-     * and navigate back
-     */
-    private void clickScrollAndBack(WebDriver driver, WebElement element, AmazonAdDTO amazonAd, Runnable func){
-
-        if(driver == null || element == null){
-            throw new IllegalArgumentException("Cannot process page");
-        }
-
-        try{
-            element.click();
-        }catch (Exception ex){
-            ex.printStackTrace();
-            return;
-        }
-
-        try {
-            WebDriverUtils.randomSleepBetween(3000, 5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        JavascriptExecutor js = (JavascriptExecutor) driver;
-
-        Random rand = new Random();
-
-        int scrollDownCnt = rand.nextInt(5);
-
-        int scrollUpCnt = rand.nextInt(scrollDownCnt);
-
-        for (int i=0; i< scrollDownCnt; i++){
-            js.executeScript("window.scrollBy(0,1000)");
-        }
-
-        try {
-            WebDriverUtils.randomSleepBetween(3000, 5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        func.run();
-
-        for (int i=0; i< scrollUpCnt; i++){
-            js.executeScript("window.scrollBy(0,-1000)");
-        }
-
-        driver.navigate().back();
 
     }
 

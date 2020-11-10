@@ -37,7 +37,7 @@ public class AmazonAdConsumeLogDO {
      * maybe more than one setting
      * id separate by ','
      */
-    private String settingIds;
+    private String settingId;
 
     private AmazonAdNodeType type;
 
