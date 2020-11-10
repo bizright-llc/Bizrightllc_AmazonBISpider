@@ -128,6 +128,11 @@ public interface AmazonAdConsumeSettingDOMapper {
      */
     void removeItem(@Param("userId") Long userId, @Param("itemId") Long itemId);
 
+    /**
+     * Insert amazon ad consume
+     *
+     * @param record
+     */
     void insertLog(AmazonAdConsumeLogDO record);
 
 }
