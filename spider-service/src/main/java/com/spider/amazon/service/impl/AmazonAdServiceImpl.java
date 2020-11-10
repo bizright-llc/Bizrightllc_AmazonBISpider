@@ -5,6 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import com.spider.amazon.dto.AmazonAdConsumeItemDTO;
 import com.spider.amazon.dto.AmazonAdConsumeSettingDTO;
 import com.spider.amazon.dto.AmazonAdDTO;
+import com.spider.amazon.mapper.AmazonAdConsumeLogDOMapper;
 import com.spider.amazon.mapper.AmazonAdConsumeSettingDOMapper;
 import com.spider.amazon.mapper.UserDOMapper;
 import com.spider.amazon.model.AmazonAdConsumeItemDO;
@@ -38,18 +39,19 @@ public class AmazonAdServiceImpl implements AmazonAdService {
 
     private AmazonAdConsumeSettingDOMapper amazonAdConsumeSettingDOMapper;
 
+    private AmazonAdConsumeLogDOMapper amazonAdConsumeLogDOMapper;
+
     private UserDOMapper userDOMapper;
 
     private ModelMapper modelMapper;
 
-//    private BlockingQueue<AmazonAdDTO> insertLogQueue;
-
     private BlockingQueue<AmazonAdConsumeLogDO> logQueue;
 
     @Autowired
-    public AmazonAdServiceImpl(PlatformTransactionManager transactionManager, AmazonAdConsumeSettingDOMapper amazonAdConsumeSettingDOMapper, UserDOMapper userDOMapper, ModelMapper modelMapper) {
+    public AmazonAdServiceImpl(PlatformTransactionManager transactionManager, AmazonAdConsumeSettingDOMapper amazonAdConsumeSettingDOMapper, AmazonAdConsumeLogDOMapper amazonAdConsumeLogDOMapper, UserDOMapper userDOMapper, ModelMapper modelMapper) {
         this.transactionManager = transactionManager;
         this.amazonAdConsumeSettingDOMapper = amazonAdConsumeSettingDOMapper;
+        this.amazonAdConsumeLogDOMapper = amazonAdConsumeLogDOMapper;
         this.userDOMapper = userDOMapper;
         this.modelMapper = modelMapper;
     }
@@ -455,7 +457,7 @@ public class AmazonAdServiceImpl implements AmazonAdService {
             @Override
             protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
                 adConsumeList.stream().forEach(l -> {
-                    amazonAdConsumeSettingDOMapper.insertLog(l);
+                    amazonAdConsumeLogDOMapper.insert(l);
                 });
             }
         });
