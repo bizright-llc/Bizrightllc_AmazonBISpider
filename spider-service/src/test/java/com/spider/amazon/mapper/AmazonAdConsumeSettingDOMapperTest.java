@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -43,6 +44,8 @@ class AmazonAdConsumeSettingDOMapperTest {
         newLog.setBrand("Test");
         newLog.setSettingId("1");
         newLog.setType(AmazonAdNodeType.SEARCH_RESULT_AD);
+        newLog.setCreatedAt(LocalDateTime.now().minusYears(1));
+        newLog.setUpdatedAt(LocalDateTime.now().minusYears(1));
 
         amazonAdConsumeSettingDOMapper.insertLog(newLog);
     }

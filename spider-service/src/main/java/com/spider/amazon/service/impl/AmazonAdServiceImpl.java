@@ -20,6 +20,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -41,7 +42,9 @@ public class AmazonAdServiceImpl implements AmazonAdService {
 
     private ModelMapper modelMapper;
 
-    private BlockingQueue<AmazonAdDTO> insertLogQueue;
+//    private BlockingQueue<AmazonAdDTO> insertLogQueue;
+
+    private BlockingQueue<AmazonAdConsumeLogDO> logQueue;
 
     @Autowired
     public AmazonAdServiceImpl(PlatformTransactionManager transactionManager, AmazonAdConsumeSettingDOMapper amazonAdConsumeSettingDOMapper, UserDOMapper userDOMapper, ModelMapper modelMapper) {
@@ -409,21 +412,32 @@ public class AmazonAdServiceImpl implements AmazonAdService {
 
     @Override
     public void insertAdConsumeLog(AmazonAdDTO amazonAdDTO) {
-        if (insertLogQueue == null) {
-            this.insertLogQueue = new LinkedBlockingQueue<>();
+        if (logQueue == null) {
+            this.logQueue = new LinkedBlockingQueue<>();
         }
 
-        insertLogQueue.offer(amazonAdDTO);
+        AmazonAdConsumeLogDO newLog = new AmazonAdConsumeLogDO();
+        newLog.setTitle(amazonAdDTO.getTitle());
+        newLog.setAsin(amazonAdDTO.getAsin());
+        newLog.setType(amazonAdDTO.getType());
+        newLog.setBrand(amazonAdDTO.getBrand());
+        newLog.setSettingId(amazonAdDTO.getSettingId().toString());
+        newLog.setCreatedAt(LocalDateTime.now());
+        newLog.setUpdatedAt(LocalDateTime.now());
+        newLog.setCreatedBy("system");
+        newLog.setUpdatedBy("system");
 
-        if (insertLogQueue.size() >= 20) {
+        logQueue.offer(newLog);
 
-            List<AmazonAdDTO> logDTOList = new ArrayList<>();
+        if (logQueue.size() >= 20) {
 
-            insertLogQueue.drainTo(logDTOList);
+            List<AmazonAdConsumeLogDO> logToPersist = new ArrayList<>();
+
+            logQueue.drainTo(logToPersist);
 
             CompletableFuture.runAsync(() -> {
                 try{
-                    insertAdConsumeLogToDB(logDTOList);
+                    insertAdConsumeLogToDB(logToPersist);
                 }catch (Exception ex){
                     ex.printStackTrace();
                 }
@@ -433,55 +447,20 @@ public class AmazonAdServiceImpl implements AmazonAdService {
 
     }
 
-    private void insertAdConsumeLogToDB(List<AmazonAdDTO> adConsumeList){
-
-        List<AmazonAdConsumeLogDO> logDOList1 = adConsumeList.stream().map(amazonAdDTO1 -> {
-            AmazonAdConsumeLogDO newLog = new AmazonAdConsumeLogDO();
-
-            newLog.setTitle(amazonAdDTO1.getTitle());
-            newLog.setAsin(amazonAdDTO1.getAsin());
-            newLog.setType(amazonAdDTO1.getType());
-            newLog.setBrand(amazonAdDTO1.getBrand());
-            newLog.setSettingId(amazonAdDTO1.getSettingId().toString());
-
-            return newLog;
-
-        }).collect(Collectors.toList());
+    private void insertAdConsumeLogToDB(List<AmazonAdConsumeLogDO> adConsumeList){
 
         TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
 
         transactionTemplate.execute(new TransactionCallbackWithoutResult() {
             @Override
             protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
-                logDOList1.stream().forEach(l -> {
+                adConsumeList.stream().forEach(l -> {
                     amazonAdConsumeSettingDOMapper.insertLog(l);
                 });
             }
         });
 
     }
-
-//    @Override
-//    public List<AmazonAdConsumeSettingDTO> consume(AmazonAdDTO amazonAdDTO) {
-//
-//        LocalDateTime now = LocalDateTime.now();
-//
-//        if(this.activeAdConsumeSetting == null || this.updatedAt == null || now.minusMinutes(10l).compareTo(this.updatedAt) > 0){
-//            getAllActiveSetting();
-//        }
-//
-//        List<AmazonAdConsumeSettingDTO> settings = new ArrayList<>(this.activeAdConsumeSetting);
-//
-//        List<AmazonAdConsumeSettingDTO> result = new ArrayList<>();
-//
-//        for (AmazonAdConsumeSettingDTO adConsumeSettingDTO: settings){
-//            if (consume(adConsumeSettingDTO, amazonAdDTO)){
-//                result.add(adConsumeSettingDTO);
-//            }
-//        }
-//
-//        return result;
-//    }
 
     /**
      * 判断是否在黑名单中，在黑名单中进行消耗

@@ -2,6 +2,7 @@ package com.spider.amazon.model;
 
 import com.spider.amazon.cons.AmazonAdNodeType;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,6 +11,7 @@ import java.time.LocalDateTime;
 /**
  * This class is the log for the amazon ad consume schedule log the ad consume
  */
+@Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
