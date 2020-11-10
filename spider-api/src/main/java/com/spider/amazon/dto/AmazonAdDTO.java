@@ -21,7 +21,7 @@ public class AmazonAdDTO {
     private String asin;
     private String index;
 
-    private Long settingId;
+    private List<Long> settingIds;
 
     private String xpath;
     private WebElement webElement;

@@ -349,9 +349,6 @@
     <insert id="insertLog" parameterType="com.spider.amazon.model.AmazonAdConsumeLogDO">
         insert into AmazonAdConsumeLog
         <trim prefix="(" suffix=")">
-            <if test="settingId != null">
-                SettingId,
-            </if>
             <if test="type != null">
                 Type,
             </if>
@@ -374,9 +371,6 @@
             UpdatedAt
         </trim>
         <trim prefix="values (" suffix=")">
-            <if test="settingId != null">
-                #{settingId},
-            </if>
             <if test="type != null">
                 #{type},
             </if>
@@ -384,7 +378,7 @@
                 #{title},
             </if>
             <if test="asin != null">
-                #{asin},
+                Asin,
             </if>
             <if test="brand != null">
                 #{brand},

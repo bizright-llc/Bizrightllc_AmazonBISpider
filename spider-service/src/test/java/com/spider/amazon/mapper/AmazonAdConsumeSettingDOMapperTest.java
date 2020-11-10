@@ -1,8 +1,6 @@
 package com.spider.amazon.mapper;
 
 import com.spider.SpiderServiceApplication;
-import com.spider.amazon.cons.AmazonAdNodeType;
-import com.spider.amazon.model.AmazonAdConsumeLogDO;
 import com.spider.amazon.model.AmazonAdConsumeSettingDO;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
@@ -33,17 +31,5 @@ class AmazonAdConsumeSettingDOMapperTest {
 
         Assert.assertTrue(settings.size() > 0);
 
-    }
-
-    @Test
-    void insertLog() {
-        AmazonAdConsumeLogDO newLog = new AmazonAdConsumeLogDO();
-
-        newLog.setAsin("Test");
-        newLog.setBrand("Test");
-        newLog.setSettingId("1");
-        newLog.setType(AmazonAdNodeType.SEARCH_RESULT_AD);
-
-        amazonAdConsumeSettingDOMapper.insertLog(newLog);
     }
 }

@@ -12,7 +12,7 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        Id, SettingId, Name, Brand, Type, CreatedBy, UpdatedBy, CreatedAt, UpdatedAt
+        Id, SettingId, Type, CreatedBy, UpdatedBy, CreatedAt, UpdatedAt
     </sql>
 
     <select id="getAll" resultMap="BaseResultMap">

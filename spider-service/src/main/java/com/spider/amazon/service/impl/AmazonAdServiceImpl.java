@@ -442,7 +442,12 @@ public class AmazonAdServiceImpl implements AmazonAdService {
             newLog.setAsin(amazonAdDTO1.getAsin());
             newLog.setType(amazonAdDTO1.getType());
             newLog.setBrand(amazonAdDTO1.getBrand());
-            newLog.setSettingId(amazonAdDTO1.getSettingId().toString());
+
+            String settingIdsStr = amazonAdDTO1.getSettingIds() == null ?
+                    "" :
+                    amazonAdDTO1.getSettingIds().stream().map(id -> id.toString()).collect(Collectors.joining(","));
+
+            newLog.setSettingIds(settingIdsStr);
 
             return newLog;
 
