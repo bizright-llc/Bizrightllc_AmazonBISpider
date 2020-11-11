@@ -442,6 +442,10 @@ public class AmazonAdServiceImpl implements AmazonAdService {
     @Override
     public void persistLog() {
 
+        if(logQueue == null){
+            logQueue = new LinkedBlockingQueue<>();
+        }
+
         List<AmazonAdConsumeLogDO> logToPersist = new ArrayList<>();
 
         logQueue.drainTo(logToPersist);

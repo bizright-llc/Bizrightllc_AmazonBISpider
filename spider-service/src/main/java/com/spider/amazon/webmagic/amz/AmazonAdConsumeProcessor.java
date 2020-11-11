@@ -72,6 +72,8 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
     public final static String SEARCH_RESULT_INNER_AD_XPATH2 = "//div[contains(@data-creative-type, 'MultiCardCreativeDesktop')]";
     public final static String SEARCH_RESULT_INNER_AD_INFO_XPATH = ".//a[contains(@aria-label, 'Sponsored ad from')]";
     public final static String SEARCH_RESULT_INNER_AD_ITEMS_XPATH = ".//div[@data-asin]";
+    public final static String SEARCH_RESULT_BRAND_RELATE_AD_XPATH = "//div[contains(@data-creative-type, 'MultiBrandCreativeDesktop')]";
+    public final static String SEARCH_RESULT_BRAND_RELATE_AD_INFO_XPATH = ".//a[contains(@aria-label, 'Sponsored ad from')]";
     public final static String SEARCH_RESULT_ITEMS_IMAGE_XPATH = ".//img[contains(@class, 's-image')]";
     public final static String SEARCH_RESULT_ITEMS_NAME_XPATH = ".//h2[contains(@class, 'a-size-mini')]";
     public final static String SEARCH_RESULT_NEXT_PAGE_XPATH = "//span[contains(@class, 'PAGINATION')]//li[contains(@class, 'last')]";
@@ -146,10 +148,10 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
 
         // 1.建立WebDriver
         // use proxy setting driver
-//        WebDriver driver = WebDriverUtils.getWebDriverWithProxy(spiderConfig.getChromeDriverPath(), spiderConfig.getDownloadPath(), spiderConfig.getChromeProxyFilepath(), false);
+        WebDriver driver = WebDriverUtils.getWebDriverWithProxy(spiderConfig.getChromeDriverPath(), spiderConfig.getDownloadPath(), spiderConfig.getChromeProxyFilepath(), false);
 
-        // TODO: Only for testing
-        WebDriver driver = WebDriverUtils.getWebDriver(spiderConfig.getChromeDriverPath(), spiderConfig.getDownloadPath(), false);
+        // TODO: Only for testing, change proxy driver
+//        WebDriver driver = WebDriverUtils.getWebDriver(spiderConfig.getChromeDriverPath(), spiderConfig.getDownloadPath(), false);
 
         try {
 
@@ -188,6 +190,7 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
                             // Find sponsored items
                             List<AmazonAdDTO> sponsoredProductList = locateSponsoredProduct(driver);
 
+                            // shuffle the ads
                             Collections.shuffle(sponsoredProductList);
 
                             // 4.1黑白名单过滤广告商品，过滤后需攻击商品进入消耗列表
@@ -211,7 +214,7 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
 
                                 if(ObjectUtil.isNotNull(productElement)){
                                     // click item
-                                    int result = redirectProductDetailByXpath(driver, productElement, sponsoredProduct, setting);
+                                    int result = processSponsoredAd(driver, productElement, sponsoredProduct, setting);
                                     WebDriverUtils.randomSleepBetween(3000, 5000);
                                     if (result != RespResult.SUCC_OOM) {
                                         log.debug("[process] Process ad {} failed", sponsoredProduct);
@@ -238,28 +241,23 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
                 }
             }
 
-            amazonAdService.persistLog();
-
-
-            // 5.进入广告商品详情页面后
-            // 广告商品详情页背后面
-
-            // 5.1 定位详情页面广告位置，iframe等
-
-            // 5.2 黑白名单确认是否需要进行点击进入
-            // TODO 点击后回退页面等问题待确定，上下访问页面切换
-
-
             try {
                 sleep(30000);
             } catch (InterruptedException e) {
+                log.debug("[] InterruptedException", e);
                 throw new ServiceException(RespErrorEnum.SPIDER_EXEC.getSubStatusCode(), RespErrorEnum.SPIDER_EXEC.getSubStatusMsg());
             }
         } catch (Exception e) {
-            log.info(e.getMessage());
+            log.debug("[process] process failed", e);
             throw new ServiceException(RespErrorEnum.SPIDER_EXEC.getSubStatusCode(), RespErrorEnum.SPIDER_EXEC.getSubStatusMsg());
         } finally {
             driver.quit();
+        }
+
+        try{
+            amazonAdService.persistLog();
+        }catch (Exception ex){
+            log.debug("[process] Persist ad consume log failed", ex);
         }
 
         if (log.isInfoEnabled()) {
@@ -363,7 +361,7 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
      */
     private List<AmazonAdDTO> locateSponsoredProduct(WebDriver driver) {
         // 返回过滤处理后的商品广告元素
-        List<AmazonAdDTO> sposoredProductList = new ArrayList<>();
+        List<AmazonAdDTO> sponsoredProductList = new ArrayList<>();
         // Get search result items sponsored ad
         List<WebElement> productElementList = WebDriverUtils.expWaitForElements(driver, By.xpath(SEARCH_RESULT_SPONSORED_ITEMS_XPATH), 60);
         // 遍历产品元素，黑白名单筛选需要进一步点击的商品
@@ -395,7 +393,7 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
                     log.info("[locateSponsoredProduct] {} get title failed", StringUtils.isNotEmpty(adAsin) ? adAsin : adIndex, ex);
                 }
 
-                sposoredProductList.add(AmazonAdDTO.builder()
+                sponsoredProductList.add(AmazonAdDTO.builder()
                         .type(SEARCH_RESULT_AD)
                         .asin(productElement.getAttribute("data-asin"))
                         .title(ObjectUtil.isNotEmpty(titleEle) ? titleEle.getText() : "")
@@ -453,15 +451,38 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
                         log.debug("[locateSponsoredProduct] Get inner item asin failed");
                     }
 
-                    sposoredProductList.add(innerItemAd);
+                    sponsoredProductList.add(innerItemAd);
                 }
 
             }catch (Exception ex){
-                log.debug("[] Inner sponsored element no items");
+                log.debug("[locateSponsoredProduct] Inner sponsored element no items");
             }
         }
 
-        return sposoredProductList;
+        // parse brand relate ads
+        List<WebElement> brandRelateAds = WebDriverUtils.expWaitForElements(driver, By.xpath(SEARCH_RESULT_BRAND_RELATE_AD_XPATH), 30);
+
+        for (WebElement adEle: brandRelateAds){
+            AmazonAdDTO ad = new AmazonAdDTO();
+            ad.setType(RELATE_BRAND_AD);
+            ad.setWebElement(adEle);
+
+            String brand = "";
+            try{
+                WebElement infoElement = adEle.findElement(By.xpath(SEARCH_RESULT_BRAND_RELATE_AD_INFO_XPATH));
+
+                String label = infoElement.getAttribute("aria-label");
+                brand = label.substring(label.indexOf("from")+5, label.indexOf("."));
+
+                ad.setBrand(brand);
+            }catch (Exception ex){
+                log.debug("[locateSponsoredProduct] Get brand relate ad brand name failed", ex);
+            }
+
+            sponsoredProductList.add(ad);
+        }
+
+        return sponsoredProductList;
     }
 
     /**
@@ -577,23 +598,35 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
     }
 
     /**
-     * Go to product detail page
+     * Process sponsored ad
      *
      * @param driver
      * @param element
+     * @param amazonAdDTO
+     * @param setting
+     * @return
      */
-    private int redirectProductDetailByXpath(WebDriver driver, WebElement element, AmazonAdDTO amazonAdDTO, AmazonAdConsumeSettingDTO setting) {
+    private int processSponsoredAd(WebDriver driver, WebElement element, AmazonAdDTO amazonAdDTO, AmazonAdConsumeSettingDTO setting) {
 
         if (driver == null || element == null || amazonAdDTO == null || setting == null){
             throw new IllegalArgumentException("Cannot process element cause the arguments have null object");
         }
 
+        if(StringUtils.isEmpty(amazonAdDTO.getTitle()) && StringUtils.isEmpty(amazonAdDTO.getBrand()) && StringUtils.isEmpty(amazonAdDTO.getAsin())){
+            log.debug("[processSponsoredAd] Ad {} have no detail cannot process", amazonAdDTO);
+            return RespResult.NO_RECORD;
+        }
+
         if(amazonAdDTO.getType() == SEARCH_RESULT_AD){
-            // TODO: Test
-            return RespResult.SUCC_OOM;
-            //return clickSearchResultAd(driver, element, amazonAdDTO, setting);
+            // FIXME: Test
+//            return RespResult.SUCC_OOM;
+            return clickSearchResultAd(driver, element, amazonAdDTO, setting);
         }else if (amazonAdDTO.getType() == SEARCH_RESULT_INNER_ITEM_AD){
+            // FIXME: Test
+//            return RespResult.SUCC_OOM;
             return clickInnerItemAd(driver,element,amazonAdDTO,setting);
+        }else if(amazonAdDTO.getType() == RELATE_BRAND_AD){
+            return clickRelateBrandAd(driver,element,amazonAdDTO,setting);
         }else{
             log.debug("[redirectProductDetailByXpath] Ad type {} not support yet.", amazonAdDTO.getType());
             return RespResult.NO_RECORD;
@@ -690,6 +723,30 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
     }
 
     /**
+     * Click relate brand ad
+     *
+     * @param driver
+     * @param element
+     * @param amazonAdDTO
+     * @param setting
+     * @return
+     */
+    public int clickRelateBrandAd(WebDriver driver, WebElement element, AmazonAdDTO amazonAdDTO, AmazonAdConsumeSettingDTO setting){
+        try{
+
+            // Just click the link no further action
+            clickAd(driver, element, amazonAdDTO, () -> {
+                // TODO: implement further action
+            });
+
+            return RespResult.SUCC_OOM;
+        }catch (Exception e){
+            log.error("[clickRelateBrandAd] process inner ad failed", e);
+            return RespResult.FAILD;
+        }
+    }
+
+    /**
      * 跳转商品详情页面
      *
      * @param element
@@ -738,14 +795,17 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
 
         log.debug("[productDetailProcess] process product detail page: {}, ad consume setting: {}", driver.getCurrentUrl(), setting.getId());
 
+        // TODO:
         // 1.商品详情下方iframe逻辑
         proDetailIframeProcess(driver, setting);
 
         // 2.商品new版本逻辑
 
+        // TODO:
         // 3.购物车下方iframe逻辑
         buyBoxIframeProcess(driver, setting);
 
+        // TODO:
         // 4.Process Brand Relate Ad
         brandRelateAdProcess(driver, setting);
 
@@ -1022,7 +1082,6 @@ public class AmazonAdConsumeProcessor implements PageProcessor {
             try{
                 log.info("[logAmazonAdConsume] click ad {}", amazonAd.toString());
 
-                //TODO: log ad consume in database
                 amazonAdService.insertAdConsumeLog(amazonAd);
 
             }catch (Exception ex){
