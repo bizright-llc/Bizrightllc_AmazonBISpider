@@ -1,6 +1,8 @@
 package com.spider.amazon.dto;
 
 import com.spider.amazon.cons.AmazonAdNodeType;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.openqa.selenium.*;
 import lombok.Builder;
 import lombok.Data;
@@ -14,6 +16,8 @@ import java.util.List;
  */
 @Builder(toBuilder = true)
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class AmazonAdDTO {
     private AmazonAdNodeType type;
     private String title;
@@ -32,7 +36,8 @@ public class AmazonAdDTO {
                 "type=" + type +
                 ", title='" + title + '\'' +
                 ", asin='" + asin + '\'' +
-                ", index='" + index + '\'' +
+                ", brand='" + brand + '\'' +
+                ", settingId='" + settingId + '\'' +
                 '}';
     }
 }

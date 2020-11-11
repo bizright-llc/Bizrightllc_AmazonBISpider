@@ -139,8 +139,14 @@ public class WebDriverUtils {
      * @param background
      * @return
      */
-    public static WebDriver getWebDriverWithProxy(String driverPath, String downloadPath, String proxyFile, boolean background){
+    public static WebDriver getWebDriverWithProxy(String driverPath, String downloadPath, String proxyFilepath, boolean background){
         ChromeOptions options = new ChromeOptions();
+
+        File proxyFile = new File(proxyFilepath);
+
+        if(!proxyFile.exists()){
+            throw new IllegalArgumentException(String.format("Proxy filepath %s not exist, cannot create proxy webdriver.", proxyFilepath));
+        }
 
         if(StringUtils.isNotEmpty(downloadPath)){
             HashMap<String, Object> chromePrefs = new HashMap<String, Object>();
@@ -150,7 +156,7 @@ public class WebDriverUtils {
             options.setExperimentalOption("prefs", chromePrefs);
         }
 
-        options.addExtensions(new File(proxyFile));
+        options.addExtensions(new File(proxyFilepath));
 
         if(background){
             // driver work at background
@@ -497,9 +503,11 @@ public class WebDriverUtils {
             WebDriverWait wait = new WebDriverWait(driver, 10);
             wait.until(ExpectedConditions.elementToBeClickable(element));
 
-
+            // move to the element
             Actions builder = new Actions(driver);
             builder.moveToElement(element).build().perform();
+
+            randomSleepBetween(2000, 5000);
 
             String currentUrl = driver.getCurrentUrl();
 

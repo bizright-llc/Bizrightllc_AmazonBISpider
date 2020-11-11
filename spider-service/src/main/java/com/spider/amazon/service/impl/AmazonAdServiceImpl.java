@@ -423,7 +423,7 @@ public class AmazonAdServiceImpl implements AmazonAdService {
         newLog.setAsin(amazonAdDTO.getAsin());
         newLog.setType(amazonAdDTO.getType());
         newLog.setBrand(amazonAdDTO.getBrand());
-        newLog.setSettingId(amazonAdDTO.getSettingId().toString());
+        newLog.setSettingId(amazonAdDTO.getSettingId() == null ? null : amazonAdDTO.getSettingId().toString());
         newLog.setCreatedAt(LocalDateTime.now());
         newLog.setUpdatedAt(LocalDateTime.now());
         newLog.setCreatedBy("system");
@@ -433,19 +433,30 @@ public class AmazonAdServiceImpl implements AmazonAdService {
 
         if (logQueue.size() >= 20) {
 
-            List<AmazonAdConsumeLogDO> logToPersist = new ArrayList<>();
-
-            logQueue.drainTo(logToPersist);
-
-            CompletableFuture.runAsync(() -> {
-                try{
-                    insertAdConsumeLogToDB(logToPersist);
-                }catch (Exception ex){
-                    ex.printStackTrace();
-                }
-            });
+            persistLog();
 
         }
+
+    }
+
+    @Override
+    public void persistLog() {
+
+        if(logQueue == null){
+            logQueue = new LinkedBlockingQueue<>();
+        }
+
+        List<AmazonAdConsumeLogDO> logToPersist = new ArrayList<>();
+
+        logQueue.drainTo(logToPersist);
+
+        CompletableFuture.runAsync(() -> {
+            try{
+                insertAdConsumeLogToDB(logToPersist);
+            }catch (Exception ex){
+                ex.printStackTrace();
+            }
+        });
 
     }
 
@@ -476,7 +487,9 @@ public class AmazonAdServiceImpl implements AmazonAdService {
         for (AmazonAdConsumeItemDTO blackAdProduct : blackList) {
             if (containsInfo(amazonAd.getAsin(), blackAdProduct.getAsin()) ||
                     containsInfo(amazonAd.getTitle(), blackAdProduct.getName()) ||
-                    containsInfo(amazonAd.getTitle(), blackAdProduct.getKeyword())) {
+                    containsInfo(amazonAd.getTitle(), blackAdProduct.getKeyword()) ||
+                    containsInfo(amazonAd.getBrand(), blackAdProduct.getName()) ||
+                    containsInfo(amazonAd.getBrand(), blackAdProduct.getKeyword())) {
                 return true;
             }
         }
@@ -491,7 +504,9 @@ public class AmazonAdServiceImpl implements AmazonAdService {
         for (AmazonAdConsumeItemDTO adSetting : whiteList) {
             if (containsInfo(amazonAd.getAsin(), adSetting.getAsin()) ||
                     containsInfo(amazonAd.getTitle(), adSetting.getName()) ||
-                    containsInfo(amazonAd.getTitle(), adSetting.getKeyword())) {
+                    containsInfo(amazonAd.getTitle(), adSetting.getKeyword())||
+                    containsInfo(amazonAd.getBrand(), adSetting.getName()) ||
+                    containsInfo(amazonAd.getBrand(), adSetting.getKeyword())) {
                 return true;
             }
         }

@@ -19,7 +19,7 @@ class AmazonAdServiceTest {
     private AmazonAdService amazonAdService;
 
     @Test
-    void insertAdConsumeLog() {
+    void insertAdConsumeLog() throws InterruptedException {
 
         for (int i=0; i<101; i++){
             AmazonAdDTO amazonAd = AmazonAdDTO.builder()
@@ -27,8 +27,13 @@ class AmazonAdServiceTest {
                     .type(AmazonAdNodeType.SEARCH_RESULT_AD)
                     .build();
 
+            System.out.println(String.format("Insert log %s", i));
+
             amazonAdService.insertAdConsumeLog(amazonAd);
+
         }
+
+        Thread.sleep(30000);
 
     }
 }

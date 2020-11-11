@@ -153,4 +153,10 @@ public interface AmazonAdService {
      */
     void insertAdConsumeLog(AmazonAdDTO amazonAdDTO);
 
+    /**
+     * Persist all logs haven't persist to database
+     *
+     */
+    void persistLog();
+
 }
