@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 public enum AmazonAdNodeType {
     SEARCH_RESULT_AD("search_result_ad"),
     SEARCH_RESULT_INNER_AD("search_result_inner_ad"),
+    SEARCH_RESULT_INNER_ITEM_AD("search_result_inner_item_ad"),
     DETAIL_AD("detail_ad"),
     DETAIL_AD2("detail_ad2"),
     BUYBOX_AD("buybox_ad"),

@@ -67,6 +67,8 @@ class AmazonAdConsumeSettingDOMapperTest {
                 newLog.setType(AmazonAdNodeType.SEARCH_RESULT_AD);
                 newLog.setCreatedAt(LocalDateTime.now().minusYears(1));
                 newLog.setUpdatedAt(LocalDateTime.now().minusYears(1));
+                newLog.setCreatedBy("test");
+                newLog.setUpdatedBy("test");
 
                 amazonAdConsumeLogDOMapper.insert(newLog);
 
