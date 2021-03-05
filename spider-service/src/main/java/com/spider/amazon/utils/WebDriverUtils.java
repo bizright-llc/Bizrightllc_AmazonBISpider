@@ -15,6 +15,7 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.firefox.FirefoxProfile;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.phantomjs.PhantomJSDriver;
 import org.openqa.selenium.phantomjs.PhantomJSDriverService;
 import org.openqa.selenium.remote.CapabilityType;
@@ -30,6 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 
 import static java.lang.Thread.sleep;
 
@@ -137,8 +139,14 @@ public class WebDriverUtils {
      * @param background
      * @return
      */
-    public static WebDriver getWebDriverWithProxy(String driverPath, String downloadPath, String proxyFile, boolean background){
+    public static WebDriver getWebDriverWithProxy(String driverPath, String downloadPath, String proxyFilepath, boolean background){
         ChromeOptions options = new ChromeOptions();
+
+        File proxyFile = new File(proxyFilepath);
+
+        if(!proxyFile.exists()){
+            throw new IllegalArgumentException(String.format("Proxy filepath %s not exist, cannot create proxy webdriver.", proxyFilepath));
+        }
 
         if(StringUtils.isNotEmpty(downloadPath)){
             HashMap<String, Object> chromePrefs = new HashMap<String, Object>();
@@ -148,7 +156,7 @@ public class WebDriverUtils {
             options.setExperimentalOption("prefs", chromePrefs);
         }
 
-        options.addExtensions(new File(proxyFile));
+        options.addExtensions(new File(proxyFilepath));
 
         if(background){
             // driver work at background
@@ -188,7 +196,7 @@ public class WebDriverUtils {
         }
 
         if(proxy != null && StringUtils.isNotEmpty(proxy.getIp())){
-            options.addArguments(String.format("--proxy-server=%s", proxy));
+            options.addArguments(String.format("--proxy-server=%s:%s", proxy.getIp(), proxy.getPort()));
         }else{
             throw new IllegalArgumentException("proxy cannot be null");
         }
@@ -203,6 +211,61 @@ public class WebDriverUtils {
         RemoteWebDriver driver = new ChromeDriver(options);
 
         return driver;
+    }
+
+    /**
+     * This method help you debug, find the element you are processing
+     *
+     * @param driver
+     * @param element
+     * @throws InterruptedException
+     */
+    public static void highlight(WebDriver driver, WebElement element) throws InterruptedException {
+        JavascriptExecutor executor = (JavascriptExecutor) driver;
+
+        String originStyle = element.getAttribute("style");
+        int count = 0;
+        String[] colors = new String[]{"yellow", "red"};
+
+        String background = "";
+        String border = "";
+        while(count < 5){
+            if(count++ % 2 == 0){
+                background = colors[0];
+                border = colors[1];
+            }else{
+                background = colors[1];
+                border = colors[0];
+            }
+            String style = String.format("background: %s; border: 2px solid %s;", background, border);
+            executor.executeScript("arguments[0].setAttribute('style', arguments[1]);", element, style);
+            Thread.sleep(2000);
+        }
+
+        executor.executeScript("arguments[0].setAttribute('style', arguments[1]);", element, originStyle);
+    }
+
+    /**
+     * Set the browser scale
+     * @param driver
+     * @param zoom
+     */
+    public static void zoomBrowser(WebDriver driver, int zoom){
+
+        if (zoom < 50 || zoom > 150){
+            zoom = 90;
+        }
+
+        try{
+            JavascriptExecutor js = (JavascriptExecutor) driver;
+
+//                Below zoom in code is working for ChromeDriver but not for FirefoxDriver
+            js.executeScript(String.format("document.body.style.zoom='%s%'", zoom));
+
+            randomSleep();
+        }catch (Exception ex){
+            log.debug("[zoomBrowser] {} failed", zoom, ex);
+        }
     }
 
     /**
@@ -314,14 +377,15 @@ public class WebDriverUtils {
     public static WebElement expWaitForElement(WebDriver driver, By locator, int timeout) {
         WebElement element = null;
         try {
-//            System.out.println(timeout + "秒之后出现");
+            log.debug("[expWaitForElement] expect element {} for {} second", locator.toString(), timeout);
             WebDriverWait wait = new WebDriverWait(driver, timeout);
             element = wait.until(ExpectedConditions
                     .visibilityOfElementLocated(locator));
+            log.debug("[expWaitForElement] element {} exist", locator.toString());
 //            System.out.println("元素出现了");
         } catch (Exception e) {
 //            System.out.println("元素不存在");
-            e.printStackTrace();
+            log.debug("[expWaitForElement] element {} not exist", locator.toString());
             return null;
         }
         return element;
@@ -330,16 +394,15 @@ public class WebDriverUtils {
     public static List<WebElement> expWaitForElements(WebDriver driver, By locator, int timeout) {
         WebElement element = null;
         List<WebElement> elements = null;
+        log.debug("[expWaitForElements] expect elements {}", locator.toString());
         try {
-//            System.out.println(timeout + "秒之后出现");
             WebDriverWait wait = new WebDriverWait(driver, timeout);
-            element = wait.until(ExpectedConditions
-                    .visibilityOfElementLocated(locator));
             elements = driver.findElements(locator);
-//            System.out.println("元素出现了");
+            log.debug("[expWaitForElements] elements {} exist, {} elements", locator, elements.size());
         } catch (Exception e) {
 //            System.out.println("元素不存在");
-            e.printStackTrace();
+//            e.printStackTrace();
+            log.debug("[expWaitForElements] elements {} not exist", locator);
             return null;
         }
         return elements;
@@ -374,12 +437,17 @@ public class WebDriverUtils {
      * @return
      */
     public static boolean isExistsElementFindByXpath(WebDriver driver, By locator, int timeout) {
+
+        log.debug("[isExistsElementFindByXpath] check element {} exist or not", locator.toString());
+
         try {
             if (ObjectUtil.isNotEmpty(WebDriverUtils.expWaitForElement(driver, locator, timeout))) {
+                log.debug("[isExistsElementFindByXpath] {} exist", locator.toString());
                 return true;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+//            e.printStackTrace();
+            log.debug("[isExistsElementFindByXpath] {} not found", locator.toString());
             return false;
         }
         return false;
@@ -420,6 +488,48 @@ public class WebDriverUtils {
     public static void elementClick(WebElement element){
         if(element != null && element.isEnabled()){
             element.click();
+        }
+    }
+
+    /**
+     * Click element
+     *
+     * @param driver
+     * @param element
+     * @return
+     */
+    public static boolean isClicked(WebDriver driver, WebElement element){
+        try {
+            WebDriverWait wait = new WebDriverWait(driver, 10);
+            wait.until(ExpectedConditions.elementToBeClickable(element));
+
+            // move to the element
+            Actions builder = new Actions(driver);
+            builder.moveToElement(element).build().perform();
+
+            randomSleepBetween(2000, 5000);
+
+            String currentUrl = driver.getCurrentUrl();
+
+            element.click();
+
+            randomSleepBetween(2000, 5000);
+
+            // click not working
+            if(driver.getCurrentUrl().equals(currentUrl)){
+                JavascriptExecutor executor = (JavascriptExecutor) driver;
+                executor.executeScript("arguments[0].click()", element);
+
+                randomSleepBetween(2000, 5000);
+                if(driver.getCurrentUrl().equals(currentUrl)){
+                    return false;
+                }
+            }
+
+            return true;
+        } catch(Exception e){
+            log.debug("[isClicked] failed", e);
+            return false;
         }
     }
 
