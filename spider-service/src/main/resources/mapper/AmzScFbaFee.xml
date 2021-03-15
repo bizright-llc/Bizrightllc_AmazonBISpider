@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spider.amazon.mapper.AmzScFbaFeeMapper">
+    <sql id="Base_Column_List">
+        *
+    </sql>
+
+    <update id="insert" parameterType="com.spider.amazon.entity.AmzScFbaFee">
+        insert into AmazonSCFbaTransaction ("Filename","DatetimeStr","SettlementId","OrderId","Sku","Description",
+                                            "Quantity","Marketplace","AccountType","Fulfillment","OrderCity","OrderState",
+                                            "OrderPostal","TaxCollectionModel","ProductSalesStr","ProductSalesTaxStr",
+                                            "ShippingCreditsStr","ShippingCreditsTaxStr","GiftWrapCreditsStr","GiftWrapCreditsTaxStr",
+                                            "PromotionalRebatesStr","PromotionalRebatesTaxStr","MarketplaceWithheldTaxStr","SellingFeesStr",
+                                            "FbaFeesStr","OtherTransactionFeesStr","OtherStr","TotalStr","Datetime","ProductSales",
+                                            "ProductSalesTax","ShippingCredits","ShippingCreditsTax","GiftWrapCredits","GiftWrapCreditsTax",
+                                            "PromotionalRebates","PromotionalRebatesTax","MarketplaceWithheldTax","SellingFees","FbaFees",
+                                            "OtherTransactionFees","Other","Total","InsertedAt")
+        values (#{filename},#{datetimeStr},#{settlementId},#{orderId},#{sku},#{description},
+                #{quantity},#{marketplace},#{accountType},#{fulfillment},#{orderCity},#{orderState},
+                #{orderPostal},#{taxCollectionModel},#{productSalesStr},#{productSalesTaxStr},
+                #{shippingCreditsStr},#{shippingCreditsTaxStr},#{giftWrapCreditsStr},#{giftWrapCreditsTaxStr},
+                #{promotionalRebatesStr},#{promotionalRebatesTaxStr},#{marketplaceWithheldTaxStr},
+                #{sellingFeesStr},#{fbaFeesStr},#{otherTransactionFeesStr},#{otherStr},#{totalStr},
+                #{datetime},#{productSales},#{productSalesTax},#{shippingCredits},#{shippingCreditsTax},
+                #{giftWrapCredits},#{giftWrapCreditsTax},#{promotionalRebates},#{promotionalRebatesTax},
+                #{marketplaceWithheldTax},#{sellingFees},#{fbaFees},#{otherTransactionFees},#{other},#{total},getdate())
+    </update>
+
+</mapper>

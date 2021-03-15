@@ -38,6 +38,12 @@ public class SpringBatchCallServiceImpl implements ISpringBatchCallService {
     @Autowired
     private Job importJobForAmzScBuyBox;
 
+    @Autowired
+    private SimpleJobLauncher csvJobLauncherForAmzScFbaFee;
+
+    @Autowired
+    private Job importJobForAmzScFbaFee;
+
     @Override
     public void callVcSalesReportDataDeal() {
         log.info("1.ste39p=>调用 ［结果文件处理］");
@@ -54,6 +60,12 @@ public class SpringBatchCallServiceImpl implements ISpringBatchCallService {
     public void callScBuyBoxReportDataDeal() {
         log.info("1.step52=>调用 ［结果文件处理］");
         runBatch(csvJobLauncherForAmzScBuyBox, importJobForAmzScBuyBox);
+    }
+
+    @Override
+    public void callScFbaFeeReportDataDeal() {
+        log.info("1.step52=>调用 ［结果文件处理］");
+        runBatch(csvJobLauncherForAmzScFbaFee, importJobForAmzScFbaFee);
     }
 
 

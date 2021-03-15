@@ -25,4 +25,6 @@ public interface ISpringBatchCallService {
      * @return
      */
     public void callScBuyBoxReportDataDeal();
+
+    public void callScFbaFeeReportDataDeal();
 }

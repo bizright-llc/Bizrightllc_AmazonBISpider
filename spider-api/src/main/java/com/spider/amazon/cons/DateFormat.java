@@ -8,6 +8,7 @@ public class DateFormat {
     public final static String YEAR_MONTH_DAY = "yyyyMMdd";
     public final static String YEAR_MONTH_DAY_yyyyMMddHHmmss = "yyyy-MM-dd HH:mm:ss";
     public final static String YEAR_MONTH_DAY_yyyyMMddHHmmss1 = "yyyyMMddHHmmss";
+    public final static String FBA_Transaction_DATETIME = "MMM dd, yyyy h:mm:ss a z";
     public final static String YEAR_MONTH_DAY_yyyyMMdd = "yyyyMMdd";
     public final static String YEAR_MONTH_DAY_MMddyyyy = "MM/dd/yyyy";
     public final static String YEAR_MONTH_DAY_MMddyy = "MM-dd-yy";

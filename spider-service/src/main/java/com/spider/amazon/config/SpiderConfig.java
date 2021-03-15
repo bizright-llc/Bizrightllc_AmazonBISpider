@@ -40,6 +40,9 @@ public class SpiderConfig {
     @Value("${spider.download.buybox.path}")
     private String scBuyBoxDownloadPath;
 
+    @Value("${spider.download.fbafee.path}")
+    private String scFbaFeeDownloadPath;
+
     @Value("${spider.download.fbainventory.path}")
     private String scFBAInventoryDownloadPath;
 

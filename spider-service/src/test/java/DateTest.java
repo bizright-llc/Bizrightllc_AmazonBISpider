@@ -1,7 +1,12 @@
+import cn.hutool.core.date.DateUtil;
+import com.spider.amazon.cons.DateFormat;
 import org.junit.jupiter.api.Test;
+
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.WeekFields;
 import java.util.Locale;
 
@@ -23,6 +28,14 @@ public class DateTest {
 
         System.out.println(lastWeek.with(DayOfWeek.MONDAY));
         System.out.println(lastWeek.with(DayOfWeek.SUNDAY));
+    }
+
+    @Test
+    public void testDateTimeFormat(){
+        String dateStr = "Mar 11, 2021 10:59:37 PM PST";
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern(DateFormat.FBA_Transaction_DATETIME);
+        LocalDateTime dateTime =  LocalDateTime.parse(dateStr, fmt);
+        System.out.println(DateUtil.parse(dateStr,DateFormat.FBA_Transaction_DATETIME));
     }
 
 }
